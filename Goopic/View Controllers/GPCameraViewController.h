@@ -34,10 +34,17 @@
     
 //    id _videoBox; // CGRect
     
-    UIImage *_blurImage;
-    UIDeviceOrientation _blurImageOrientation;
+//    UIImage *_blurImage;
+      CGImageRef _cgImage;
+//    UIDeviceOrientation _blurImageOrientation;
+    
     UIDeviceOrientation _deviceOrientation;
+    
+//    NSTimer *_blurTimer;
 }
+
+//@property (nonatomic, strong) UIImage *blurImage;
+//@property (nonatomic) UIDeviceOrientation blurImageOrientation;
 
 // Session management
 
@@ -52,11 +59,11 @@
 
 
 // Video Session
-@property (nonatomic, strong) AVCaptureSession * videoSession;
+//@property (nonatomic, strong) AVCaptureSession * videoSession;
 
-@property (nonatomic, strong) AVCaptureDeviceInput * videoDeviceInput;
+//@property (nonatomic, strong) AVCaptureDeviceInput * videoDeviceInput;
 @property (nonatomic, strong) AVCaptureVideoDataOutput *videoDataOutput;
-@property (nonatomic, strong) dispatch_queue_t videoSessionQueue;
+//@property (nonatomic, strong) dispatch_queue_t videoSessionQueue;
 
 // Process video frames in this queue
 @property (nonatomic, strong) dispatch_queue_t videoDataOutputQueue;
@@ -67,15 +74,14 @@
 @property (nonatomic, readonly, getter = isSessionRunningAndDeviceAuthorized) BOOL sessionRunningAndDeviceAuthorized;
 @property (nonatomic) id runtimeErrorHandlingObserver;
 
-@property (nonatomic) id videoRuntimeErrorHandlingObserver;
+//@property (nonatomic) id videoRuntimeErrorHandlingObserver;
 
 // Interface
 @property (nonatomic, strong) GPCameraView *cameraView;
 
 // Blur
 @property (nonatomic, strong) CALayer *blurLayer;
-//@property (nonatomic, strong) UIImageView *blurView;
-@property (nonatomic, readonly) BOOL hasCameraBlur;
+//@property (nonatomic, readonly) BOOL hasCameraBlur;
 
 // Toolbars
 @property (nonatomic, strong) GPCameraViewTopToolbar *topToolbar;
