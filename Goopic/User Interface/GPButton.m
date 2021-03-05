@@ -64,7 +64,7 @@ static const NSTimeInterval kButtonHighlightTransitionDuration = 0.2f;
     [button setTitleColor:GPBUTTON_COLOR_PRESSED forState:UIControlStateHighlighted];
     [button setTitleColor:GPBUTTON_COLOR_PRESSED forState:UIControlStateDisabled];
     [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
-    button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
+    button.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:kToolbarButtonFontSize];
     button.titleLabel.textAlignment = NSTextAlignmentCenter;
     button.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
     

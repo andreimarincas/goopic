@@ -33,10 +33,10 @@ static const NSTimeInterval kPhotoImgurExpirationInterval = 30 * kDay; // actual
 #define GPCOLOR_TRANSLUCENT_BLACK [GPCOLOR_LIGHT_BLACK colorWithAlphaComponent:0.75]
 #define GPCOLOR_DARK_BLACK        [UIColor blackColor]
 #define GPCOLOR_TRANSLUCENT_DARK  [GPCOLOR_DARK_BLACK colorWithAlphaComponent:0.75]
-#define GPCOLOR_BLUE              [UIColor colorWithRed:75 / 255.0f green:142 / 255.0f blue:250 / 255.0f alpha:1.0f] // (.29, .56, .98)
-#define GPCOLOR_DARK_BLUE         [UIColor colorWithRed:50 / 255.0f green:95 / 255.0f blue:167 / 255.0f alpha:1.0f]
+#define GPCOLOR_BLUE              [UIColor colorWithRed:75 / 255.0f green:142 / 255.0f blue:250 / 255.0f alpha:1.0f] // #4B8EFA
 #define GPCOLOR_BLUE_HIGHLIGHT    [GPCOLOR_BLUE colorWithAlphaComponent:0.35f]
-#define GPCOLOR_ORANGE_SELECTED   [UIColor orangeColor]
+#define GPCOLOR_BLUE_TEXT         [UIColor colorWithRed:36 / 255.0f green:107 / 255.0f blue:209 / 255.0f alpha:1.0f] // #246BD1
+#define GPCOLOR_ORANGE_SELECTED   [UIColor orangeColor] // #FF7F00
 #define GPCOLOR_ORANGE_HIGHLIGHT  [GPCOLOR_ORANGE_SELECTED colorWithAlphaComponent:0.35f]
 #define GPCOLOR_WHITE             [UIColor whiteColor]
 #define GPCOLOR_TRANSLUCENT_WHITE [GPCOLOR_WHITE colorWithAlphaComponent:0.75]
@@ -46,84 +46,20 @@ static const NSTimeInterval kPhotoImgurExpirationInterval = 30 * kDay; // actual
 
 /* THEMES */
 
-//#define BLACK_THEME
-#define WHITE_THEME
+#define BLACK_THEME 0
+#define WHITE_THEME 0
+#define BLUE_THEME  1
 
+#if (BLACK_THEME)
+    #import "black_theme.h"
 
-#ifdef BLACK_THEME
+#elif (WHITE_THEME)
+    #import "white_theme.h"
 
-#define GPBUTTON_COLOR                    GPCOLOR_BLUE
-#define GPBUTTON_COLOR_PRESSED            GPCOLOR_BLUE_HIGHLIGHT
+#elif (BLUE_THEME)
+#import "blue_theme.h"
 
-#define GPTOOLBAR_BACKGROUND_COLOR        GPCOLOR_TRANSLUCENT_BLACK
-#define GPTOOLBAR_TITLE_COLOR             GPCOLOR_WHITE
-#define GPTOOLBAR_LINE_COLOR              GPCOLOR_BLACK
-
-#define GPTOOLBAR_TITLE_FONT              @"HelveticaNeue"
-
-#define STATUS_BAR_STYLE                  UIStatusBarStyleLightContent
-
-#define PHOTOS_TABLE_BACKGROUND_COLOR     GPCOLOR_DARK_BLACK
-#define PHOTOS_TABLE_BORDER_COLOR         GPCOLOR_LIGHT_BLACK
-
-#define PHOTOS_SPACING                    2.0f
-
-#define DATE_COLOR                        GPCOLOR_WHITE
-#define DATE_FONT                         [UIFont fontWithName:@"HelveticaNeue-Light" size:13.0f]
-
-#define PHOTO_VIEW_BACKGROUND_COLOR       GPCOLOR_DARK_BLACK
-#define PHOTO_VIEW_FULLSCREEN_COLOR       GPCOLOR_DARK_BLACK
-
-#define ACTIVITY_VIEW_BACKGROUND_COLOR    GPCOLOR_TRANSLUCENT_DARK
-#define ACTIVITY_VIEW_TEXT_COLOR          GPCOLOR_WHITE
-#define ACTIVITY_VIEW_STYLE               UIActivityIndicatorViewStyleWhite
-
-#define CAMERA_VIEW_BUTTON_COLOR          GPCOLOR_BLUE
-#define CAMERA_VIEW_BUTTON_COLOR_PRESSED  GPCOLOR_BLUE_HIGHLIGHT
-#define CAMERA_VIEW_FLASH_SELECTION_COLOR GPCOLOR_ORANGE_SELECTED
-
-#define CAMERA_VIEW_BACKGROUND_COLOR      GPCOLOR_DARK_BLACK
-#define CAMERA_TOOLBAR_LINE_COLOR         GPCOLOR_DARK_BLACK
-
-#endif // BLACK_THEME
-
-
-#ifdef WHITE_THEME
-
-#define GPBUTTON_COLOR                    GPCOLOR_DARK_BLACK
-#define GPBUTTON_COLOR_PRESSED            [UIColor colorWithWhite:0.65f alpha:1.0f]
-
-#define GPTOOLBAR_BACKGROUND_COLOR        [UIColor colorWithWhite:0.9f alpha:0.85f]
-#define GPTOOLBAR_TITLE_COLOR             GPCOLOR_DARK_BLACK
-#define GPTOOLBAR_LINE_COLOR              [UIColor colorWithWhite:0.3f alpha:1.0f]
-
-#define GPTOOLBAR_TITLE_FONT              @"HelveticaNeue"
-
-#define STATUS_BAR_STYLE                  UIStatusBarStyleDefault
-
-#define PHOTOS_TABLE_BACKGROUND_COLOR     [UIColor whiteColor]
-#define PHOTOS_TABLE_BORDER_COLOR         [UIColor whiteColor]
-
-#define PHOTOS_SPACING                    1.0f
-
-#define DATE_COLOR                        GPCOLOR_RED
-#define DATE_FONT                         [UIFont fontWithName:@"HelveticaNeue" size:13.0f]
-
-#define PHOTO_VIEW_BACKGROUND_COLOR       [UIColor whiteColor]
-#define PHOTO_VIEW_FULLSCREEN_COLOR       [UIColor whiteColor]
-
-#define ACTIVITY_VIEW_BACKGROUND_COLOR    GPCOLOR_TRANSLUCENT_DARK
-#define ACTIVITY_VIEW_TEXT_COLOR          GPCOLOR_WHITE
-#define ACTIVITY_VIEW_STYLE               UIActivityIndicatorViewStyleWhite
-
-#define CAMERA_VIEW_BUTTON_COLOR          GPBUTTON_COLOR
-#define CAMERA_VIEW_BUTTON_COLOR_PRESSED  GPBUTTON_COLOR_PRESSED
-#define CAMERA_VIEW_FLASH_SELECTION_COLOR GPCOLOR_RED
-
-#define CAMERA_VIEW_BACKGROUND_COLOR      [UIColor colorWithWhite:0.88f alpha:1.0f]
-#define CAMERA_TOOLBAR_LINE_COLOR         [UIColor colorWithWhite:0.3f alpha:1.0f]
-
-#endif // WHITE_THEME
+#endif
 
 
 /* Use ToolbarHeight() instead these constants! */

@@ -76,7 +76,7 @@ static const CGFloat kButtonsRotationAnimationDuration = 0.3f;
     [button setTitleColor:CAMERA_VIEW_BUTTON_COLOR forState:UIControlStateNormal];
     [button setTitleColor:CAMERA_VIEW_BUTTON_COLOR_PRESSED forState:UIControlStateHighlighted];
     [button setTitleColor:CAMERA_VIEW_FLASH_SELECTION_COLOR forState:UIControlStateSelected];
-    button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
+    button.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:kFlashButtonsFontSize];
     button.delegate = self;
     button.forceHighlight = YES;
     

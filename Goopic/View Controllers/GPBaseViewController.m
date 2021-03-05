@@ -363,7 +363,7 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
     {
         UILabel *activityLabel = [[UILabel alloc] init];
         activityLabel.userInteractionEnabled = NO;
-        activityLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:16.0f];
+        activityLabel.font = [UIFont fontWithName:@"Helvetica" size:16.0f];
         activityLabel.textColor = ACTIVITY_VIEW_TEXT_COLOR;
         activityLabel.textAlignment = NSTextAlignmentCenter;
         activityLabel.alpha = 0;
