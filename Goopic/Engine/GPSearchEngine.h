@@ -13,6 +13,6 @@
 
 + (GPSearchEngine *)searchEngine;
 
-- (void)searchGoogleForPhoto:(GPPhoto *)photo;
+- (void)searchGoogleForPhoto:(GPPhoto *)photo completion:(CompletionBlock)completion;
 
 @end

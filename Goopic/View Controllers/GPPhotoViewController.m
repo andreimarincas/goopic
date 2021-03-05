@@ -9,6 +9,7 @@
 #import "GPPhotoViewController.h"
 #import "GPCameraViewController.h"
 #import "GPSearchEngine.h"
+#import "GPFadeTransition.h"
 
 @implementation GPPhotoViewController
 
@@ -30,6 +31,11 @@
         {
             self.automaticallyAdjustsScrollViewInsets = NO;
             self.photo = photo;
+            
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(handleAppDidEnterBackground:)
+                                                         name:UIApplicationDidEnterBackgroundNotification
+                                                       object:nil];
         }
         else
         {
@@ -47,6 +53,8 @@
     
     // Dealloc code
     
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
     GPLogOUT();
 }
 
@@ -59,6 +67,7 @@
     // Do any additional setup after loading the view.
     
     self.view.backgroundColor = GPCOLOR_DARK_BLACK;
+    self.edgesForExtendedLayout = UIRectEdgeNone;
     
     GPPhotoViewTopToolbar *topToolbar = [[GPPhotoViewTopToolbar alloc] init];
     topToolbar.delegate = self;
@@ -78,14 +87,12 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
+    GPLogIN();
     [super viewWillAppear:animated];
+    
     [self setNeedsStatusBarAppearanceUpdate];
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    [self updateUI];
+    
+    GPLogOUT();
 }
 
 #pragma mark - User Interface
@@ -125,6 +132,7 @@
 - (void)updateUI
 {
     GPLogIN();
+    [super updateUI];
     
     self.photoScrollView.frame = self.view.bounds;
     [self.photoScrollView setNeedsDisplay];
@@ -146,36 +154,38 @@
     GPLogOUT();
 }
 
-- (void)toggleToolbarsVisibility
+- (void)toggleToolbarsVisibilityAnimated:(BOOL)animated
 {
     GPLogIN();
     
-    BOOL toolbarsAreVisible = (self.topToolbar.alpha > 0);
+    static CGFloat _alpha = 0;
+    CGFloat alpha = _alpha;
     
-    if (!toolbarsAreVisible)
+    if (animated)
     {
-        self.topToolbar.hidden = NO;
-        self.bottomToolbar.hidden = NO;
+        UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState |
+                                         UIViewAnimationOptionCurveEaseInOut;
+        
+        [UIView animateWithDuration:0.2
+                              delay:0
+                            options:options
+                         animations:^{
+                             
+                             self.topToolbar.alpha = alpha;
+                             self.bottomToolbar.alpha = alpha;
+                             
+                         } completion:nil];
+    }
+    else
+    {
+        [UIView performWithoutAnimation:^{
+            
+            self.topToolbar.alpha = alpha;
+            self.bottomToolbar.alpha = alpha;
+        }];
     }
     
-    UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut;
-    
-    [UIView animateWithDuration:0.25
-                          delay:0
-                        options:options
-                     animations:^{
-                         
-                         self.topToolbar.alpha = toolbarsAreVisible ? 0 : 1;
-                         self.bottomToolbar.alpha = toolbarsAreVisible ? 0 : 1;
-                         
-                     } completion:^(BOOL finished) {
-                         
-                         if (toolbarsAreVisible)
-                         {
-                             self.topToolbar.hidden = YES;
-                             self.bottomToolbar.hidden = YES;
-                         }
-                     }];
+    _alpha = 1 - alpha;
     
     GPLogOUT();
 }
@@ -186,7 +196,7 @@
 {
     GPLogIN();
     
-    [self toggleToolbarsVisibility];
+    [self toggleToolbarsVisibilityAnimated:YES];
     
     GPLogOUT();
 }
@@ -222,6 +232,11 @@
     return UIStatusBarStyleLightContent;
 }
 
+- (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
+{
+    return UIStatusBarAnimationSlide;
+}
+
 #pragma mark - Toolbar Delegate
 
 - (void)toolbar:(id)toolbar didSelectButton:(UIButton *)button
@@ -229,16 +244,65 @@
     if (button == self.topToolbar.cameraButton)
     {
         GPCameraViewController *cameraViewController = [[GPCameraViewController alloc] init];
-        [self presentViewController:cameraViewController animated:NO completion:nil];
+        cameraViewController.transitioningDelegate = self;
+        
+        button.enabled = NO;
+        
+        [self presentViewController:cameraViewController animated:YES completion:^{
+            button.enabled = YES;
+        }];
     }
     else if (button == self.topToolbar.photosButton || button == self.topToolbar.disclosureButton)
     {
-        [self dismissViewControllerAnimated:NO completion:nil];
+        button.enabled = NO;
+        
+        [self dismissViewControllerAnimated:YES completion:^{
+            button.enabled = YES;
+        }];
     }
     else if (button == self.bottomToolbar.searchButton)
     {
-        [[GPSearchEngine searchEngine] searchGoogleForPhoto:self.photo];
+        button.enabled = NO;
+        
+        [[GPSearchEngine searchEngine] searchGoogleForPhoto:self.photo completion:^(NSError *error) {
+            
+//            button.enabled = YES;
+            
+            // TODO: Handle erorr ?
+        }];
     }
+}
+
+#pragma mark - Transitioning Delegate
+
+- (id <UIViewControllerAnimatedTransitioning>)animationControllerForPresentedController:(UIViewController *)presentedController
+                                                                   presentingController:(UIViewController *)presentingController
+                                                                       sourceController:(UIViewController *)source
+{
+    GPLogIN();
+    
+    GPFadeTransition *transition = [[GPFadeTransition alloc] init];
+    
+    GPLogOUT();
+    return transition;
+}
+
+- (id <UIViewControllerAnimatedTransitioning>)animationControllerForDismissedController:(UIViewController *)dismissedController
+{
+    GPLogIN();
+    
+    GPFadeTransition *transition = [[GPFadeTransition alloc] init];
+    transition.reverse = YES;
+    
+    GPLogOUT();
+    return transition;
+}
+
+#pragma mark - Notifications
+
+- (void)handleAppDidEnterBackground:(NSNotification *)notification
+{
+    self.bottomToolbar.searchButton.enabled = YES;
 }
 
 @end

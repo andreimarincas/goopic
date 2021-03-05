@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "GPPhoto.h"
 #import "GPPhotosTableViewToolbar.h"
+#import "GPBaseViewController.h"
 
 
 #pragma mark - Photo Cell
@@ -23,6 +24,8 @@
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier;
 
 - (void)updateUI;
+
+- (CGRect)frameForPhotoAtIndex:(NSInteger)index;
 
 @end
 
@@ -65,10 +68,11 @@
 
 #pragma mark - Photos Table View Controller
 
-@interface GPPhotosTableViewController : UIViewController <UITableViewDataSource,
-                                                           UITableViewDelegate,
-                                                           UIScrollViewDelegate,
-                                                           GPPhotosTableViewToolbarDelegate>
+@interface GPPhotosTableViewController : GPBaseViewController <UITableViewDataSource,
+                                                               UITableViewDelegate,
+                                                               UIScrollViewDelegate,
+                                                               UIViewControllerTransitioningDelegate,
+                                                               GPPhotosTableViewToolbarDelegate>
 
 @property (nonatomic, strong) GPPhotosTableView *photosTableView;
 
@@ -76,11 +80,14 @@
 
 @property (nonatomic, strong) NSArray *photosSections; // NSArray*'s of GPPhoto*
 
-@property (nonatomic) NSIndexPath *indexPathOfSelectedCell;
+@property (nonatomic) NSInteger selectedIndex;
+@property (nonatomic) NSIndexPath *selectedIndexPath;
 @property (nonatomic, readonly) UITableViewCell *selectedCell;
 
 - (instancetype)init;
 
 - (void)updateUI;
+
+- (CGRect)frameForPhotoAtIndexPath:(NSIndexPath *)indexPath;
 
 @end

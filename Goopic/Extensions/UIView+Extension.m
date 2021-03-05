@@ -23,4 +23,11 @@
     }
 }
 
+- (void)moveToView:(UIView *)view
+{
+    UIView *selfView = self;
+    [selfView removeFromSuperview];
+    [view addSubview:selfView];
+}
+
 @end

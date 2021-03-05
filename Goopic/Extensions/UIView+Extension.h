@@ -11,5 +11,6 @@
 @interface UIView (Extension)
 
 - (void)setSubviewsHidden:(BOOL)hidden;
+- (void)moveToView:(UIView *)view;
 
 @end

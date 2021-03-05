@@ -12,6 +12,8 @@
 #import "GPPhotoViewController.h"
 #import "GPCameraViewController.h"
 #import "GPSearchEngine.h"
+#import "GPFadeTransition.h"
+#import "GPTableToPhotoTransition.h"
 
 static NSString * const kPhotoCellID                    = @"PhotoCell";
 static NSString * const kPhotosHeaderID                 = @"PhotosHeader";
@@ -114,6 +116,20 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     }
     
     [self setNeedsDisplay];
+}
+
+- (CGRect)frameForPhotoAtIndex:(NSInteger)index
+{
+    CGRect photoFrame = CGRectZero;
+    
+    if ((index >= 0) && (index < [_photos count]))
+    {
+        id photoData = _photos[index];
+        UIImageView *thumbnailView = photoData[kThumbnailViewKey];
+        photoFrame = thumbnailView.frame;
+    }
+    
+    return photoFrame;
 }
 
 @end
@@ -354,17 +370,6 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     GPLogOUT();
 }
 
-- (void)viewDidAppear:(BOOL)animated
-{
-    GPLogIN();
-    [super viewDidAppear:animated];
-    
-    [self updateUI];
-    [self.photosTableView reloadData];
-    
-    GPLogOUT();
-}
-
 #pragma mark - Interface Orientation
 
 - (NSUInteger)supportedInterfaceOrientations
@@ -428,6 +433,11 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     return UIStatusBarStyleLightContent;
 }
 
+- (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
+{
+    return UIStatusBarAnimationSlide;
+}
+
 #pragma mark - Reload Photos
 
 - (void)reloadPhotosFromLibrary
@@ -452,7 +462,9 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
             [self createPhotosSections];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self.photosTableView reloadData];
+                
+//                [self.photosTableView reloadData];
+                [self updateUI];
             });
         }
         else if ([[group valueForProperty:ALAssetsGroupPropertyType] intValue] == ALAssetsGroupSavedPhotos)
@@ -511,6 +523,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 - (void)updateUI
 {
     GPLogIN();
+    [super updateUI];
     
     GPLog(@"self view: %@", self.view);
     
@@ -522,6 +535,11 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     [self.photosTableView setNeedsLayout];
     [self.photosTableView setNeedsDisplay];
     GPLog(@"photos table view: %@", self.photosTableView);
+    
+    if (!self.isRotatingInterfaceOrientation)
+    {
+        [self.photosTableView reloadData]; // TODO: Optimize this?
+    }
     
     self.toolbar.frame = CGRectMake(0, 0, self.view.bounds.size.width, ToolbarHeight());
     [self.view bringSubviewToFront:self.toolbar];
@@ -541,12 +559,31 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 
 - (UITableViewCell *)selectedCell
 {
-    if (self.indexPathOfSelectedCell)
+    if (self.selectedIndexPath)
     {
-        return [self.photosTableView cellForRowAtIndexPath:self.indexPathOfSelectedCell];
+        return [self.photosTableView cellForRowAtIndexPath:self.selectedIndexPath];
     }
     
     return nil;
+}
+
+- (CGRect)frameForPhotoAtIndexPath:(NSIndexPath *)indexPath
+{
+    CGRect photoFrame = CGRectZero;
+    
+    if (self.selectedIndexPath)
+    {
+         UITableViewCell *selectedCell = [self.photosTableView cellForRowAtIndexPath:self.selectedIndexPath];
+        
+        if ([selectedCell isKindOfClass:[GPPhotoCell class]])
+        {
+            GPPhotoCell *photoCell = (GPPhotoCell *)selectedCell;
+            photoFrame = [photoCell frameForPhotoAtIndex:self.selectedIndex];
+            photoFrame = [self.view convertRect:photoFrame fromView:photoCell.contentView];
+        }
+    }
+    
+    return photoFrame;
 }
 
 - (void)updateDateTitle
@@ -743,7 +780,8 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         
         if (photoViewController)
         {
-            [self presentViewController:photoViewController animated:NO completion:nil];
+            photoViewController.transitioningDelegate = self;
+            [self presentViewController:photoViewController animated:YES completion:nil];
         }
         else
         {
@@ -774,8 +812,11 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
             
             if (photoViewController)
             {
-                [self presentViewController:photoViewController animated:NO completion:^{
-                    [[GPSearchEngine searchEngine] searchGoogleForPhoto:selectedPhoto];
+                photoViewController.transitioningDelegate = self;
+                
+                [self presentViewController:photoViewController animated:YES completion:^{
+                    
+                    [[GPSearchEngine searchEngine] searchGoogleForPhoto:selectedPhoto completion:nil];
                 }];
             }
             else
@@ -790,14 +831,16 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 - (GPPhoto *)photoAtPoint:(CGPoint)posInTableView
 {
     NSIndexPath *indexPath = [self.photosTableView indexPathForRowAtPoint:posInTableView];
+    self.selectedIndexPath = indexPath;
     
-    if (indexPath.section > 0 && indexPath.section < [self.photosSections count] - 1) // Ignore table view header & footer
+    if ((indexPath.section > 0) && (indexPath.section < [self.photosSections count] - 1)) // Ignore table view header & footer
     {
         GPPhotoCell *photoCell = (GPPhotoCell *)[self.photosTableView cellForRowAtIndexPath:indexPath];
         
         if (photoCell)
         {
             NSInteger index = (posInTableView.x / self.photosTableView.bounds.size.width) * [GPPhotosTableViewController photosCountPerCell];
+            self.selectedIndex = index;
             
             NSArray *photos = [photoCell photos];
             
@@ -838,7 +881,13 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     if (button == toolbar.cameraButton)
     {
         GPCameraViewController *cameraViewController = [[GPCameraViewController alloc] init];
-        [self presentViewController:cameraViewController animated:NO completion:nil];
+        cameraViewController.transitioningDelegate = self;
+        
+        button.enabled = NO;
+        
+        [self presentViewController:cameraViewController animated:YES completion:^{
+            button.enabled = YES;
+        }];
     }
 }
 
@@ -849,6 +898,50 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         [self.photosTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]
                                     atScrollPosition:UITableViewScrollPositionTop animated:YES];
     }
+}
+
+#pragma mark - Transitioning Delegate
+
+- (id <UIViewControllerAnimatedTransitioning>)animationControllerForPresentedController:(UIViewController *)presentedController
+                                                                   presentingController:(UIViewController *)presentingController
+                                                                       sourceController:(UIViewController *)source
+{
+    GPLogIN();
+    
+    GPBaseTransition *transition = nil;
+    
+    if ([presentedController isKindOfClass:[GPPhotoViewController class]])
+    {
+        transition = [[GPTableToPhotoTransition alloc] init];
+    }
+    else if ([presentedController isKindOfClass:[GPCameraViewController class]])
+    {
+        transition = [[GPFadeTransition alloc] init];
+    }
+    
+    GPLogOUT();
+    return transition;
+}
+
+- (id <UIViewControllerAnimatedTransitioning>)animationControllerForDismissedController:(UIViewController *)dismissedController
+{
+    GPLogIN();
+    
+    GPBaseTransition *transition = nil;
+    
+    if ([dismissedController isKindOfClass:[GPPhotoViewController class]])
+    {
+        transition = [[GPTableToPhotoTransition alloc] init];
+    }
+    else if ([dismissedController isKindOfClass:[GPCameraViewController class]])
+    {
+        transition = [[GPFadeTransition alloc] init];
+    }
+    
+    transition.reverse = YES;
+    
+    GPLogOUT();
+    return transition;
 }
 
 @end

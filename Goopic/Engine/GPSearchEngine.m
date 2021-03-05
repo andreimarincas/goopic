@@ -25,7 +25,7 @@
     return engine;
 }
 
-- (void)searchGoogleForPhoto:(GPPhoto *)photo
+- (void)searchGoogleForPhoto:(GPPhoto *)photo completion:(CompletionBlock)completion
 {
     GPLogIN();
     
@@ -43,6 +43,11 @@
         NSString *searchURL =  SEARCH_BY_IMAGE_URL(storePhoto.link);
         GPLog(@"Search URL: %@", searchURL);
         
+        if (completion)
+        {
+            completion(nil);
+        }
+        
         [self openURLInBrowser:[NSURL URLWithString:searchURL]];
         
         GPLogOUT();
@@ -55,6 +60,13 @@
     if (!image)
     {
         GPLogErr(@"Cannot upload image, image is nil.");
+        
+        // TODO: Handle error
+        
+        if (completion)
+        {
+            completion(nil); // TODO: Forward error ?
+        }
         
         GPLogOUT();
         return;
@@ -98,11 +110,23 @@
                            NSString *searchURL =  SEARCH_BY_IMAGE_URL(link);
                            GPLog(@"Search URL: %@", searchURL);
                            
+                           if (completion)
+                           {
+                               completion(nil);
+                           }
+                           
                            [self openURLInBrowser:[NSURL URLWithString:searchURL]];
                        }
                        else
                        {
                            GPLogErr(@"%@ %@", error, [error userInfo]);
+                           
+                           // TODO: Handle error
+                           
+                           if (completion)
+                           {
+                               completion(nil); // TODO: Forward error ?
+                           }
                        }
                    }];
     

@@ -136,7 +136,7 @@
     UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState |
                                      UIViewAnimationOptionCurveEaseOut;
     
-    [UIView animateWithDuration:0.25
+    [UIView animateWithDuration:0.2
                           delay:0
                         options:options
                      animations:^{
@@ -156,7 +156,7 @@
 - (void)setHighlighted:(BOOL)highlighted
 {
     static BOOL wasSelectedWhenHighlighted;
-    BOOL wasHighlighted = self.isHighlighted;
+    BOOL wasHighlighted = [self isHighlighted];
     
     [super setHighlighted:highlighted];
     
@@ -166,7 +166,7 @@
         {
             if (!highlighted)
             {
-                if (self.isSelected == wasSelectedWhenHighlighted)
+                if ([self isSelected] == wasSelectedWhenHighlighted && [self isEnabled])
                 {
                     [self animateFromHighlightToNormal];
                 }
@@ -174,8 +174,12 @@
             else
             {
                 self.alpha = 1;
+                
                 [self.viewForHighlightState removeFromSuperview];
+                self.viewForHighlightState = nil;
+                
                 [self.viewForNormalState removeFromSuperview];
+                self.viewForNormalState = nil;
                 
                 wasSelectedWhenHighlighted = self.isSelected;
             }
@@ -184,9 +188,31 @@
     
     if (self.connectedButton)
     {
-        if (self.connectedButton.isHighlighted != highlighted)
+        if ([self.connectedButton isHighlighted] != highlighted)
         {
             self.connectedButton.highlighted = highlighted;
+        }
+    }
+}
+
+- (void)setEnabled:(BOOL)enabled
+{
+    [super setEnabled:enabled];
+    
+    if (!enabled)
+    {
+        [self.viewForHighlightState removeFromSuperview];
+        self.viewForHighlightState = nil;
+        
+        [self.viewForNormalState removeFromSuperview];
+        self.viewForNormalState = nil;
+    }
+    
+    if (self.connectedButton)
+    {
+        if ([self.connectedButton isEnabled] != enabled)
+        {
+            self.connectedButton.enabled = enabled;
         }
     }
 }

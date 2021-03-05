@@ -16,7 +16,7 @@
 
 static const CGFloat kCameraPreset = 640.0f / 480.0f;
 
-// Contexts
+// Context
 static void * CapturingStillImageContext = &CapturingStillImageContext;
 static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDeviceAuthorizedContext;
 
@@ -120,6 +120,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     [super viewDidLoad];
     
     self.view.backgroundColor = GPCOLOR_DARK_BLACK;
+    self.edgesForExtendedLayout = UIRectEdgeNone;
     
     // Toolbars
     GPCameraViewTopToolbar *topToolbar = [[GPCameraViewTopToolbar alloc] init];
@@ -241,17 +242,10 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 		[self.session startRunning];
 	});
     
-    [self setNeedsStatusBarAppearanceUpdate];
-    
-    GPLogOUT();
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    GPLogIN();
-    [super viewDidAppear:animated];
-    
-    [self updateUI];
+    if (![[UIApplication sharedApplication] isStatusBarHidden])
+    {
+        [self setNeedsStatusBarAppearanceUpdate];
+    }
     
     GPLogOUT();
 }
@@ -317,6 +311,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 - (void)updateUI
 {
     GPLogIN();
+    [super updateUI];
     
     self.cameraView.frame = CGRectMake(0, [self topMargin], [self cameraVisibleSize].width, [self cameraVisibleSize].height);
     [self.cameraView setNeedsDisplay];
@@ -334,28 +329,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     GPLogOUT();
 }
-
-//- (void)setButtonsHitTestEdgeInsets
-//{
-//    CGFloat insetY = 0;
-//    CGFloat insetX = 40;
-//    
-////    if (UIDeviceOrientationIsLandscape(_gpDeviceOrientation))
-////    {
-////        insetY = fmaxf(0, [self bottomMargin] - self.cancelButton.frame.size.width);
-////        self.cancelButton.hitTestEdgeInsets = UIEdgeInsetsMake(insetY / 2, 60, insetY / 2, 60);
-////    }
-////    else
-//    {
-//        insetY = [self bottomMargin] - self.cancelButton.frame.size.height;
-//        self.cancelButton.hitTestEdgeInsets = UIEdgeInsetsMake(insetY / 2, insetX, insetY / 2, insetX);
-//    }
-//    
-//    insetY = [self bottomMargin] - self.takeButton.frame.size.height;
-//    self.takeButton.hitTestEdgeInsets = UIEdgeInsetsMake(insetY / 2, insetX, insetY / 2, insetX);
-//    
-////    self.cancelButton.hitTestEdgeInsets = UIEdgeInsetsMake(50, 50, 50, 50);
-//}
 
 - (CGSize)cameraVisibleSize
 {
@@ -426,6 +399,16 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 - (BOOL)prefersStatusBarHidden
 {
 	return YES;
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle
+{
+    return UIStatusBarStyleDefault;
+}
+
+- (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
+{
+    return UIStatusBarAnimationSlide;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -613,9 +596,24 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogIN();
     GPLog(@"button: %@", button);
     
-    if (button == self.bottomToolbar.cancelButton)
+    if (toolbar == self.topToolbar)
     {
-        [self dismissViewControllerAnimated:NO completion:nil];
+        GPLog(@"flash selection changed");
+    }
+    else // bottom toolbar
+    {
+        if (button == self.bottomToolbar.cancelButton)
+        {
+            button.enabled = NO;
+            
+            [self dismissViewControllerAnimated:YES completion:^{
+                button.enabled = YES;
+            }];
+        }
+        else if (button == self.bottomToolbar.takeButton)
+        {
+            button.enabled = NO;
+        }
     }
     
     GPLogOUT();

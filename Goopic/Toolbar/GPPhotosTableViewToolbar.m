@@ -54,6 +54,7 @@ static const CGFloat kTitleLabelTapPadding = 80.0f;
         [cameraButton setTitle:@"Camera" forState:UIControlStateNormal];
         [cameraButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
         [cameraButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
+        [cameraButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
         [cameraButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         cameraButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
         cameraButton.titleLabel.textAlignment = NSTextAlignmentCenter;

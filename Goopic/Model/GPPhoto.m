@@ -63,9 +63,12 @@
         ALAssetRepresentation *defaultRep = [self.asset defaultRepresentation];
         GPLog(@"asset orientation: %ld", (long int)[defaultRep orientation]);
         
-        UIImage *image = [UIImage imageWithCGImage:[defaultRep fullResolutionImage] // ? fullScreenImage
-                                             scale:[defaultRep scale]
-                                       orientation:(UIImageOrientation)[defaultRep orientation]];
+//        UIImage *image = [UIImage imageWithCGImage:[defaultRep fullResolutionImage]
+//                                             scale:[defaultRep scale]
+//                                       orientation:(UIImageOrientation)[defaultRep orientation]];
+        
+        UIImage *image = [UIImage imageWithCGImage:[defaultRep fullScreenImage]
+                                             scale:[defaultRep scale] orientation:UIImageOrientationUp];
         
         GPLog(@"full resolution image size: %@", NSStringFromCGSize(image.size));
         

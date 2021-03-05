@@ -10,6 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import "GPCameraViewToolbar.h"
+#import "GPBaseViewController.h"
 
 @class GPRootViewController;
 
@@ -27,7 +28,7 @@
 
 #pragma mark - Camera View Controller
 
-@interface GPCameraViewController : UIViewController <GPCameraViewToolbarDelegate>
+@interface GPCameraViewController : GPBaseViewController <GPCameraViewToolbarDelegate>
 {
     UIDeviceOrientation _gpDeviceOrientation;
 }

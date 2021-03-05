@@ -9,6 +9,10 @@
 #import "GPCameraViewToolbar.h"
 
 
+static const CGFloat kFlashIconSize = 20.0f;
+static const CGFloat kFlashMargin = 5.0f;
+static const CGFloat kFlashIconOverlap = 3.0f;
+
 static const CGFloat kFlashButtonsFontSize = 13.0f;
 static const CGFloat kFlashButtonsSpacing = 20.0f;
 
@@ -29,48 +33,56 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
     {
         // Custom initialization
         
-        self.backgroundColor = GPCOLOR_DARK_BLACK;
+        GPButton *flashAutoButton = [[GPButton alloc] init];
+        [flashAutoButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
+        [flashAutoButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
+        [flashAutoButton setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
+        [flashAutoButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        [flashAutoButton setTitle:@"Auto" forState:UIControlStateNormal];
+        flashAutoButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
+        flashAutoButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+        flashAutoButton.forceHighlight = YES;
+        [self addSubview:flashAutoButton];
+        self.flashAutoButton = flashAutoButton;
         
-        UIImage *flashIcon = [UIImage imageNamed:@"flash-icon.png"];
-        UIImageView *flashImageView = [[UIImageView alloc] initWithImage:flashIcon];
-        [self addSubview:flashImageView];
-        self.flashImageView = flashImageView;
+        UIImageView *flashAutoIcon = [[UIImageView alloc] init];
+        flashAutoIcon.image = [UIImage imageNamed:@"flash-icon.png"];
+        [self addSubview:flashAutoIcon];
+        self.flashAutoIcon = flashAutoIcon;
         
-        GPButton *flashAuto = [[GPButton alloc] init];
-        [flashAuto setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [flashAuto setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [flashAuto setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
-        [flashAuto addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        [flashAuto setTitle:@"Auto" forState:UIControlStateNormal];
-        flashAuto.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
-        flashAuto.titleLabel.textAlignment = NSTextAlignmentCenter;
-        flashAuto.forceHighlight = YES;
-        [self addSubview:flashAuto];
-        self.flashAutoButton = flashAuto;
+        GPButton *flashOnButton = [[GPButton alloc] init];
+        [flashOnButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
+        [flashOnButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
+        [flashOnButton setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
+        [flashOnButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        [flashOnButton setTitle:@"On" forState:UIControlStateNormal];
+        flashOnButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
+        flashOnButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+        flashOnButton.forceHighlight = YES;
+        [self addSubview:flashOnButton];
+        self.flashOnButton = flashOnButton;
         
-        GPButton *flashOn = [[GPButton alloc] init];
-        [flashOn setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [flashOn setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [flashOn setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
-        [flashOn addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        [flashOn setTitle:@"On" forState:UIControlStateNormal];
-        flashOn.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
-        flashOn.titleLabel.textAlignment = NSTextAlignmentCenter;
-        flashOn.forceHighlight = YES;
-        [self addSubview:flashOn];
-        self.flashOnButton = flashOn;
+        UIImageView *flashOnIcon = [[UIImageView alloc] init];
+        flashOnIcon.image = [UIImage imageNamed:@"flash-icon.png"];
+        [self addSubview:flashOnIcon];
+        self.flashOnIcon = flashOnIcon;
         
-        GPButton *flashOff = [[GPButton alloc] init];
-        [flashOff setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [flashOff setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [flashOff setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
-        [flashOff addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        [flashOff setTitle:@"Off" forState:UIControlStateNormal];
-        flashOff.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
-        flashOff.titleLabel.textAlignment = NSTextAlignmentCenter;
-        flashOff.forceHighlight = YES;
-        [self addSubview:flashOff];
-        self.flashOffButton = flashOff;
+        GPButton *flashOffButton = [[GPButton alloc] init];
+        [flashOffButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
+        [flashOffButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
+        [flashOffButton setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
+        [flashOffButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        [flashOffButton setTitle:@"Off" forState:UIControlStateNormal];
+        flashOffButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
+        flashOffButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+        flashOffButton.forceHighlight = YES;
+        [self addSubview:flashOffButton];
+        self.flashOffButton = flashOffButton;
+        
+        UIImageView *flashOffIcon = [[UIImageView alloc] init];
+        flashOffIcon.image = [UIImage imageNamed:@"flash-icon.png"];
+        [self addSubview:flashOffIcon];
+        self.flashOffIcon = flashOffIcon;
     }
     
     return self;
@@ -96,34 +108,68 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
 {
     GPLogIN();
     
-    CGSize flashIconSize = self.flashImageView.image.size;
-    self.flashImageView.frame = CGRectMake(10, (self.bounds.size.height - flashIconSize.height) / 2,
-                                           flashIconSize.width, flashIconSize.height);
-    [self.flashImageView setNeedsDisplay];
+    CGFloat x = kFlashMargin;
     
-    CGFloat x = self.flashImageView.frame.origin.x + self.flashImageView.frame.size.width;
+    self.flashAutoIcon.frame = CGRectMake(x, (self.bounds.size.height - kFlashIconSize) / 2, kFlashIconSize, kFlashIconSize);
+    [self.flashAutoIcon setNeedsDisplay];
     
+    x = self.flashAutoIcon.frame.origin.x + kFlashIconSize - kFlashIconOverlap;
+    
+    if (_buttonsRotationAngle != 0) x -= 5;
+    
+    CGAffineTransform t = self.flashAutoButton.transform;
+    self.flashAutoButton.transform = CGAffineTransformIdentity;
     [self.flashAutoButton sizeToFit];
     self.flashAutoButton.frame = CGRectMake(x, (self.bounds.size.height - self.flashAutoButton.frame.size.height) / 2,
                                             self.flashAutoButton.frame.size.width, self.flashAutoButton.frame.size.height);
-    self.flashAutoButton.hitTestEdgeInsets = GPEdgeInsetsMake(kFlashButtonsSpacing / 2);
+    self.flashAutoButton.hitTestEdgeInsets = UIEdgeInsetsMake(kFlashButtonsSpacing / 2, kFlashButtonsSpacing / 2 + kFlashIconSize,
+                                                              kFlashButtonsSpacing / 2, kFlashButtonsSpacing / 2);
+    self.flashAutoButton.transform = t;
     [self.flashAutoButton setNeedsDisplay];
     
     x = x + self.flashAutoButton.frame.size.width + kFlashButtonsSpacing;
     
+    if (_buttonsRotationAngle != 0) x -= 5;
+    
+    self.flashOnIcon.frame = CGRectMake(x, (self.bounds.size.height - kFlashIconSize) / 2, kFlashIconSize, kFlashIconSize);
+    [self.flashOnIcon setNeedsDisplay];
+    
+    x = x + kFlashIconSize - kFlashIconOverlap - 5;
+    
+    t = self.flashOnButton.transform;
+    self.flashOnButton.transform = CGAffineTransformIdentity;
     [self.flashOnButton sizeToFit];
     self.flashOnButton.frame = CGRectMake(x, (self.bounds.size.height - self.flashOnButton.frame.size.height) / 2,
                                           self.flashOnButton.frame.size.width, self.flashOnButton.frame.size.height);
-    self.flashOnButton.hitTestEdgeInsets = GPEdgeInsetsMake(kFlashButtonsSpacing / 2);
+    self.flashOnButton.hitTestEdgeInsets = UIEdgeInsetsMake(kFlashButtonsSpacing / 2, kFlashButtonsSpacing / 2 + kFlashIconSize,
+                                                            kFlashButtonsSpacing / 2, kFlashButtonsSpacing / 2);
+    self.flashOnButton.transform = t;
     [self.flashOnButton setNeedsDisplay];
     
-    x = x + self.flashOnButton.frame.size.width + kFlashButtonsSpacing;
+    x = x + self.flashOnButton.frame.size.width + kFlashButtonsSpacing - 5;
     
+    self.flashOffIcon.frame = CGRectMake(x, (self.bounds.size.height - kFlashIconSize) / 2, kFlashIconSize, kFlashIconSize);
+    [self.flashOffIcon setNeedsDisplay];
+    
+    x = x + kFlashIconSize - kFlashIconOverlap - 5;
+    
+    t = self.flashOffButton.transform;
+    self.flashOffButton.transform = CGAffineTransformIdentity;
     [self.flashOffButton sizeToFit];
     self.flashOffButton.frame = CGRectMake(x, (self.bounds.size.height - self.flashOffButton.frame.size.height) / 2,
                                            self.flashOffButton.frame.size.width, self.flashOffButton.frame.size.height);
-    self.flashOffButton.hitTestEdgeInsets = GPEdgeInsetsMake(kFlashButtonsSpacing / 2);
+    self.flashOffButton.hitTestEdgeInsets = UIEdgeInsetsMake(kFlashButtonsSpacing / 2, kFlashButtonsSpacing / 2 + kFlashIconSize,
+                                                             kFlashButtonsSpacing / 2, kFlashButtonsSpacing / 2);
+    self.flashOffButton.transform = t;
     [self.flashOffButton setNeedsDisplay];
+    
+    [self bringSubviewToFront:self.flashAutoIcon];
+    [self bringSubviewToFront:self.flashOnIcon];
+    [self bringSubviewToFront:self.flashOffIcon];
+    
+    [self bringSubviewToFront:self.flashAutoButton];
+    [self bringSubviewToFront:self.flashOnButton];
+    [self bringSubviewToFront:self.flashOffButton];
     
     [self setNeedsDisplay];
     
@@ -145,24 +191,15 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         
         NSString *flashValue;
         
-        if (button == self.flashAutoButton)
-        {
-            flashValue = kCameraFlashAutoValue;
-        }
-        else if (button == self.flashOnButton)
-        {
-            flashValue = kCameraFlashOnValue;
-        }
-        else if (button == self.flashOffButton)
-        {
-            flashValue = kCameraFlashOffValue;
-        }
+        if (button == self.flashAutoButton) flashValue = kCameraFlashAutoValue;
+        else if (button == self.flashOnButton) flashValue = kCameraFlashOnValue;
+        else if (button == self.flashOffButton) flashValue = kCameraFlashOffValue;
         
         NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
         [userDefaults setValue:flashValue forKey:kCameraFlashKey];
         [userDefaults synchronize];
         
-        // TODO: self.delegate flash selection changed
+        [self.delegate toolbar:self didSelectButton:button];
     }
     
     GPLogOUT();
@@ -172,23 +209,30 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
 {
     GPLogIN();
     
-    CGAffineTransform rotation = CGAffineTransformMakeRotation(angle);
-    
-    Block rotateButtons = ^{
+    if (angle != _buttonsRotationAngle)
+    {
+        _buttonsRotationAngle = angle;
         
-        self.flashAutoButton.transform = rotation;
-        self.flashOnButton.transform = rotation;
-        self.flashOffButton.transform = rotation;
-    };
-    
-    if (animated)
-    {
-        UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut;
-        [UIView animateWithDuration:0.3f delay:0 options:options animations:rotateButtons completion:nil];
-    }
-    else
-    {
-        [UIView performWithoutAnimation:rotateButtons];
+        CGAffineTransform rotation = CGAffineTransformMakeRotation(angle);
+        
+        Block rotateButtons = ^{
+            
+            self.flashAutoButton.transform = rotation;
+            self.flashOnButton.transform = rotation;
+            self.flashOffButton.transform = rotation;
+            
+            [self updateUI];
+        };
+        
+        if (animated)
+        {
+            UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut;
+            [UIView animateWithDuration:0.3f delay:0 options:options animations:rotateButtons completion:nil];
+        }
+        else
+        {
+            [UIView performWithoutAnimation:rotateButtons];
+        }
     }
     
     GPLogOUT();
@@ -215,6 +259,7 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         GPButton *cancelButton = [[GPButton alloc] init];
         [cancelButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
         [cancelButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
+        [cancelButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
         [cancelButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
         cancelButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
@@ -245,6 +290,7 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         GPButton *takeButton = [[GPButton alloc] init];
         [takeButton setImage:[UIImage imageNamed:@"take-button.png"] forState:UIControlStateNormal];
         [takeButton setImage:[UIImage imageNamed:@"take-button-highlight.png"] forState:UIControlStateHighlighted];
+        [takeButton setImage:[UIImage imageNamed:@"take-button-highlight.png"] forState:UIControlStateDisabled];
         [takeButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:takeButton];
         self.takeButton = takeButton;
@@ -252,6 +298,8 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
 //        self.cancelButton.hidden = YES;
         self.retakeButton.hidden = YES;
         self.useButton.hidden = YES;
+        
+        // TODO: states
     }
     
     return self;
@@ -261,23 +309,32 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
 {
     GPLogIN();
     
+    CGAffineTransform t = self.cancelButton.transform;
+    self.cancelButton.transform = CGAffineTransformIdentity;
     [self.cancelButton sizeToFit];
     self.cancelButton.frame = CGRectMake(kToolbarButtonsMargin, (self.bounds.size.height - self.cancelButton.frame.size.height) / 2,
                                          self.cancelButton.frame.size.width, self.cancelButton.frame.size.height);
     self.cancelButton.hitTestEdgeInsets = GPEdgeInsetsMake(kButtonHitTestEdgeInset);
+    self.cancelButton.transform = t;
     [self.cancelButton setNeedsDisplay];
     
+    t = self.retakeButton.transform;
+    self.retakeButton.transform = CGAffineTransformIdentity;
     [self.retakeButton sizeToFit];
     self.retakeButton.frame = CGRectMake(kToolbarButtonsMargin, (self.bounds.size.height - self.retakeButton.frame.size.height) / 2,
                                          self.retakeButton.frame.size.width, self.retakeButton.frame.size.height);
     self.retakeButton.hitTestEdgeInsets = GPEdgeInsetsMake(kButtonHitTestEdgeInset);
+    self.retakeButton.transform = t;
     [self.retakeButton setNeedsDisplay];
     
+    t = self.useButton.transform;
+    self.useButton.transform = CGAffineTransformIdentity;
     [self.useButton sizeToFit];
     self.useButton.frame = CGRectMake(self.bounds.size.width - kToolbarButtonsMargin - self.useButton.frame.size.width,
                                       (self.bounds.size.height - self.useButton.frame.size.height) / 2,
                                       self.useButton.frame.size.width, self.useButton.frame.size.height);
     self.useButton.hitTestEdgeInsets = GPEdgeInsetsMake(kButtonHitTestEdgeInset);
+    self.useButton.transform = t;
     [self.useButton setNeedsDisplay];
     
     self.takeButton.frame = CGRectMake((self.bounds.size.width - kTakeButtonSize) / 2, (self.bounds.size.height - kTakeButtonSize) / 2,
