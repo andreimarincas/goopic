@@ -117,8 +117,6 @@
     
     if (iOS_8_or_higher())
     {
-        [self.view setUserInteractionEnabled:NO applyToSubviews:YES];
-        
         [self.photo checkIfExists:^(BOOL exists) {
             
             if (!exists)
@@ -131,8 +129,6 @@
             else
             {
                 [self.photoView setImage:[self.photo largeImage]];
-                
-                [self.view setUserInteractionEnabled:YES applyToSubviews:YES];
             }
         }];
     }

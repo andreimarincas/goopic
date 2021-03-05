@@ -192,7 +192,7 @@ static NSString * const kOpenInNewTabKey = @"open-in-new-tab"; // bool value
 
 // Macros
 
-#define LOGS_ENABLED              1
+#define LOGS_ENABLED              0
 
 #define CAMERA_BLUR_ENABLED       0
 
