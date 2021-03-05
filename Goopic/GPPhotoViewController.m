@@ -63,7 +63,7 @@
         photoScrollView.showsHorizontalScrollIndicator = NO;
         photoScrollView.showsVerticalScrollIndicator = NO;
         photoScrollView.minimumZoomScale = 1;
-        photoScrollView.maximumZoomScale = 2;
+        photoScrollView.maximumZoomScale = 1;
         [self.view addSubview:photoScrollView];
         _photoScrollView = photoScrollView;
     }

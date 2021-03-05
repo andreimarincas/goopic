@@ -12,8 +12,9 @@
 
 #ifdef __OBJC__
 
-    #import <UIKit/UIKit.h>
     #import <Foundation/Foundation.h>
+    #import <UIKit/UIKit.h>
+    #import <CoreData/CoreData.h>
     #import "GPConstants.h"
     #import "GPLogs.h"
     #import "GPCommon.h"

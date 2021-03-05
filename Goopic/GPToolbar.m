@@ -37,7 +37,7 @@ static const CGFloat        kTitleLabelTapPadding   = 80.0f;
         _leftButtons = [NSMutableArray arrayWithCapacity:kButtonsCapacity / 2];
         _rightButtons = [NSMutableArray arrayWithCapacity:kButtonsCapacity / 2];
         
-        self.backgroundColor = [COLOR_BLACK colorWithAlphaComponent:0.75];
+        self.backgroundColor = [COLOR_BLACK colorWithAlphaComponent:0.8];
         self.style = style;
         
         GPLine *line = [[GPLine alloc] init];
@@ -78,9 +78,7 @@ static const CGFloat        kTitleLabelTapPadding   = 80.0f;
 {
     GPLogIN();
     
-//    CGPoint pos = [tapGr locationInView:self];
-    
-//    if (CGPointInCGRect(pos, CGRectInset(self.titleLabel.frame, -10, -10)))
+    if (tapGr.view == self.titleLabel)
     {
         [self.delegate toolbar:self didTapTitle:self.titleLabel];
     }
@@ -352,7 +350,8 @@ static const CGFloat        kTitleLabelTapPadding   = 80.0f;
     }
     else
     {
-        GPLog(@"button tapped: %lu - %@", (unsigned long)[[self buttons] indexOfObject:button], [button titleForState:UIControlStateNormal]);
+        GPLog(@"button tapped: %lu - %@", (unsigned long)[[self buttons] indexOfObject:button],
+              [button titleForState:UIControlStateNormal]);
     }
     
     [self.delegate toolbar:self didSelectButtonWithType:(GPToolbarButtonType)button.tag];

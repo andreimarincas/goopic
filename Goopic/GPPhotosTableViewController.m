@@ -812,7 +812,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
                 
                 if (firstPhoto)
                 {
-                    newDateTitle = [[firstPhoto.dateTaken dateWithYearMonthAndDayOnly] formattedDateForTitle];
+                    newDateTitle = [[firstPhoto.dateTaken dateWithYearMonthAndDayOnly] dateStringForTitleFormat];
                 }
                 
                 break;

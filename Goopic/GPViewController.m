@@ -7,7 +7,7 @@
 //
 
 #import "GPViewController.h"
-#import "GPImgurUploader.h"
+#import "GPImgurManager.h"
 #import "OpenInChromeController.h"
 
 @implementation GPViewController
@@ -21,23 +21,26 @@
     
     NSString *imageName = @"ReflectionsOfAutumn.jpg";
     
-    [GPImgurUploader uploadImageWithName:imageName
-                      completion:^(NSString *link, NSError *error) {
-                          
-                          if (!error)
-                          {
-                              GPLog(@"Link: %@", link);
-                              
-                              NSString *searchURL =  SEARCH_BY_IMAGE_URL(link);
-                              GPLog(@"Search URL: %@", searchURL);
-                              
-                              [self openURLInBrowser:[NSURL URLWithString:searchURL]];
-                          }
-                          else
-                          {
-                              GPLog(@"Error: %@", [error localizedDescription]);
-                          }
-                      }];
+    GPImgurManager *imgurManager = [GPImgurManager sharedManager];
+    
+    [imgurManager uploadImageWithName:imageName
+                           completion:^(NSString *link, NSString *deleteHash, NSError *error) {
+                               
+                               if (!error)
+                               {
+                                   GPLog(@"Link: %@", link);
+                                   GPLog(@"Delete hash: %@", deleteHash);
+                                   
+                                   NSString *searchURL =  SEARCH_BY_IMAGE_URL(link);
+                                   GPLog(@"Search URL: %@", searchURL);
+                                   
+                                   [self openURLInBrowser:[NSURL URLWithString:searchURL]];
+                               }
+                               else
+                               {
+                                   GPLogErr(@"%@ %@", error, [error userInfo]);
+                               }
+                           }];
 }
 
 - (void)openURLInBrowser:(NSURL *)url

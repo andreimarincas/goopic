@@ -110,6 +110,16 @@
     return nil;
 }
 
+- (NSString *)url
+{
+    if (self.asset)
+    {
+        return [[self.asset valueForProperty:ALAssetPropertyAssetURL] absoluteString];
+    }
+    
+    return @"";
+}
+
 - (NSString *)name
 {
     if (self.asset)
@@ -122,6 +132,28 @@
     }
     
     return @"";
+}
+
+- (NSInteger)width
+{
+    if (self.asset)
+    {
+        CGSize photoSize = [[self.asset defaultRepresentation] dimensions];
+        return (int)photoSize.width;
+    }
+    
+    return 0;
+}
+
+- (NSInteger)height
+{
+    if (self.asset)
+    {
+        CGSize photoSize = [[self.asset defaultRepresentation] dimensions];
+        return (int)photoSize.height;
+    }
+    
+    return 0;
 }
 
 - (NSComparisonResult)compare:(id)photo

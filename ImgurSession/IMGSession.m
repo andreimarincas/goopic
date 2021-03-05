@@ -88,8 +88,8 @@
 /**
  Initialize AFHTTPSessionManger session with hardcoded Imgur base URL and serializer.
  */
-- (instancetype)init{
-    
+- (instancetype)init
+{
     if(self = [self initWithBaseURL:[NSURL URLWithString:IMGBaseURL]]){
         
         _warnRateLimit = 100;

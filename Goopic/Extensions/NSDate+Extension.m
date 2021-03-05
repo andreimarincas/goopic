@@ -25,7 +25,7 @@
     return [calendar dateFromComponents:components];
 }
 
-- (NSString *)formattedDateForTitle
+- (NSString *)dateStringForTitleFormat
 {
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateStyle:NSDateFormatterLongStyle];
@@ -35,6 +35,28 @@
     
     NSString *formattedDateString = [dateFormatter stringFromDate:self];
     return formattedDateString;
+}
+
+- (NSString *)dateStringLongStyle
+{
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateStyle:NSDateFormatterLongStyle];
+    [dateFormatter setTimeStyle:NSDateFormatterLongStyle];
+    [dateFormatter setLocale:[NSLocale currentLocale]];
+    [dateFormatter setTimeZone:[NSTimeZone localTimeZone]];
+    
+    NSString *formattedDateString = [dateFormatter stringFromDate:self];
+    return formattedDateString;
+}
+
+- (BOOL)earlierThan:(NSDate *)date
+{
+    return ([self compare:date] == NSOrderedAscending);
+}
+
+- (BOOL)laterThan:(NSDate *)date
+{
+    return ([self compare:date] == NSOrderedDescending);
 }
 
 @end

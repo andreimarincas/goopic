@@ -13,7 +13,15 @@
 @interface GPAppDelegate : UIResponder <UIApplicationDelegate, IMGSessionDelegate>
 
 @property (nonatomic, strong) UIWindow *window;
+
 @property (nonatomic, strong) IMGSession *imgurSession;
 @property (nonatomic, strong) GPRootViewController *rootViewController;
+
+@property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+@property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
+@property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
+- (void)saveContext;
+- (NSURL *)applicationDocumentsDirectory;
 
 @end

@@ -22,7 +22,12 @@
 
 @property (nonatomic, readonly) NSDate *dateTaken; // TODO: asset's timezone
 
+@property (nonatomic, readonly) NSString *url;
+
 @property (nonatomic, readonly) NSString *name;
+
+@property (nonatomic, readonly) NSInteger width;
+@property (nonatomic, readonly) NSInteger height;
 
 - (NSComparisonResult)compare:(id)photo;
 

@@ -14,6 +14,10 @@
 
 - (NSDate *)dateWithYearMonthAndDayOnly;
 
-- (NSString *)formattedDateForTitle;
+- (NSString *)dateStringForTitleFormat;
+- (NSString *)dateStringLongStyle;
+
+- (BOOL)earlierThan:(NSDate *)date;
+- (BOOL)laterThan:(NSDate *)date;
 
 @end
