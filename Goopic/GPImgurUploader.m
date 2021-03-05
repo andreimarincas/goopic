@@ -15,13 +15,13 @@ static const CGFloat kCompressionQuality = 0.3f;
 
 + (void)uploadImage:(NSString *)jpgImageName completion:(UploadCompletion)completion
 {
-    NSLog(@"Uploading image to Imgur: %@", jpgImageName);
+    GPLog(@"Uploading image to Imgur: %@", jpgImageName);
     
     GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
     IMGSession *imgurSession = [appDelegate imgurSession];
     
     NSString *uploadURL = IMGUR_UPLOAD_URL;
-    NSLog(@"Imgur Upload URL: %@", uploadURL);
+    GPLog(@"Imgur Upload URL: %@", uploadURL);
     
     id params = nil;
     
@@ -39,7 +39,7 @@ static const CGFloat kCompressionQuality = 0.3f;
         }
         else
         {
-            NSLog(@"Error: No image data to upload.");
+            GPLog(@"Error: No image data to upload.");
         }
     };
     
@@ -47,7 +47,7 @@ static const CGFloat kCompressionQuality = 0.3f;
      
              success:^(NSURLSessionDataTask *task, id responseObject) {
                  
-                 NSLog(@"Imgur Response: %@", [responseObject description]);
+                 GPLog(@"Imgur Response: %@", [responseObject description]);
                  
                  NSString *link = responseObject[@"link"];
                  

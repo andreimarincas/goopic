@@ -7,6 +7,7 @@
 //
 
 #import "GPAppDelegate.h"
+#import "GPViewController.h"
 
 @implementation GPAppDelegate
 
@@ -15,13 +16,15 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     
+//    self.window.rootViewController = [[GPViewController alloc] init];
+    
     IMGSession *imgSession = [IMGSession anonymousSessionWithClientID:IMGUR_CLIENT_ID withDelegate:self];
     self.imgurSession = imgSession;
     
     GPRootViewController *rootViewController = [GPRootViewController rootViewController];
     self.window.rootViewController = rootViewController;
     
-    self.window.backgroundColor = [UIColor whiteColor];
+    self.window.backgroundColor = COLOR_BLACK;
     [self.window makeKeyAndVisible];
     
     return YES;
@@ -29,7 +32,7 @@
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
 {
-    NSLog(@"openURL: %@", url);
+    GPLog(@"openURL: %@", url);
     
     return YES;
 }

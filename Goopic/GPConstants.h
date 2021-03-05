@@ -22,14 +22,16 @@
 
 #define GOOPIC_URL_SCHEME           @"goopic://"
 
-#define GP_COLOR_BLUE               [UIColor colorWithRed:75/255.0f green:142/255.0f blue:250/255.0f alpha:1.0f]
-
-
 static NSString * const kSearchByImageURL = @"http://images.google.com/searchbyimage?image_url=%@";
 
 #define SEARCH_BY_IMAGE_URL(aLink)  [NSString stringWithFormat:kSearchByImageURL, aLink]
 
 #define IMGUR_UPLOAD_URL            [NSString stringWithFormat:@"/%@/upload", IMGAPIVersion];
+
+
+#define COLOR_BLUE                  [UIColor colorWithRed:75/255.0f green:142/255.0f blue:250/255.0f alpha:1.0f]
+#define COLOR_DARK_BLUE             [UIColor colorWithRed:50/255.0f green:95/255.0f blue:167/255.0f alpha:1.0f]
+#define COLOR_BLACK                 [UIColor colorWithWhite:0.1f alpha:1.0f]
 
 
 typedef void (^Completion)(void);

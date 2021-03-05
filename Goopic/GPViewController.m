@@ -17,7 +17,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = COLOR_BLACK;
     
     NSString *imageName = @"ReflectionsOfAutumn.jpg";
     
@@ -26,16 +26,16 @@
                           
                           if (!error)
                           {
-                              NSLog(@"Link: %@", link);
+                              GPLog(@"Link: %@", link);
                               
                               NSString *searchURL =  SEARCH_BY_IMAGE_URL(link);
-                              NSLog(@"Search URL: %@", searchURL);
+                              GPLog(@"Search URL: %@", searchURL);
                               
                               [self openURLInBrowser:[NSURL URLWithString:searchURL]];
                           }
                           else
                           {
-                              NSLog(@"Error: %@", [error localizedDescription]);
+                              GPLog(@"Error: %@", [error localizedDescription]);
                           }
                       }];
 }
@@ -55,11 +55,11 @@
                                                                 createNewTab:YES];
         if (success)
         {
-            NSLog(@"Opened URL in Chrome: %@", url);
+            GPLog(@"Opened URL in Chrome: %@", url);
             return;
         }
         
-        NSLog(@"Failed to open URL in Chrome: %@", url);
+        GPLog(@"Failed to open URL in Chrome: %@", url);
     }
     
     // Open in Safari (default browser)
@@ -70,7 +70,7 @@
     }
     else
     {
-        NSLog(@"Cannot open URL: %@", url);
+        GPLog(@"Cannot open URL: %@", url);
     }
 }
 

@@ -14,11 +14,13 @@
 
 - (instancetype)init;
 
-@property (nonatomic, copy) NSString *name;
-@property (nonatomic, strong) NSDate *date;
+//@property (nonatomic, copy) NSString *name;
 
 @property (nonatomic, strong) ALAsset *asset;
 
-- (UIImage *)getImage;
+@property (nonatomic, readonly) UIImage *thumbnailImage;
+@property (nonatomic, readonly) NSDate *dateTaken; // TODO: asset's timezone
+
+- (NSComparisonResult)compare:(id)photo;
 
 @end

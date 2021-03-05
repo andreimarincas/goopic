@@ -16,6 +16,8 @@ static const CGFloat kButtonMinWidth = 40.0f;
 static const CGFloat kButtonMinHeight = 40.0f;
 static const CGFloat kButtonsSpacing = 14.0f;
 
+static const CGFloat kLeftTitleMargin = 5.0f;
+
 @implementation GPToolbar
 
 - (instancetype)initWithStyle:(GPPosition)style
@@ -44,11 +46,25 @@ static const CGFloat kButtonsSpacing = 14.0f;
         
         UILabel *titleLabel = [[UILabel alloc] init];
         titleLabel.textAlignment = NSTextAlignmentCenter;
-        titleLabel.font = [UIFont fontWithName:@"TimesNewRomanPS-BoldMT" size:20.0f];
+        titleLabel.font = [UIFont fontWithName:@"TimesNewRomanPSMT" size:20.0f];
         titleLabel.textColor = [UIColor blackColor];
         titleLabel.backgroundColor = [UIColor clearColor];
         [self addSubview:titleLabel];
         self.titleLabel = titleLabel;
+        
+        UILabel *leftTitleLabel = [[UILabel alloc] init];
+        leftTitleLabel.textAlignment = NSTextAlignmentCenter;
+//        leftTitleLabel.font = [UIFont fontWithName:@"TimesNewRomanPSMT" size:18.0f];
+//        leftTitleLabel.font = [UIFont fontWithName:@"AvenirNextCondensed-UltraLight" size:18.0f];
+//        leftTitleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:12.0f];
+//        leftTitleLabel.font = [UIFont systemFontOfSize:12.5f];
+//        leftTitleLabel.font = [UIFont systemFontOfSize:13.0f];
+        leftTitleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:14.0f];
+        leftTitleLabel.textColor = [UIColor whiteColor];
+//        leftTitleLabel.textColor = [UIColor colorWithWhite:0.9 alpha:1];
+        leftTitleLabel.backgroundColor = [UIColor clearColor];
+        [self addSubview:leftTitleLabel];
+        self.leftTitleLabel = leftTitleLabel;
     }
     
     return self;
@@ -105,7 +121,7 @@ static const CGFloat kButtonsSpacing = 14.0f;
     }
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    [button setTitle:NSStringFromGPToolbarButtonType(buttonType) forState:UIControlStateNormal];
+    [button setTitle:NSStringFromGPToolbarButtonType(buttonType) forState:UIControlStateNormal];    
     [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [button setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.3f] forState:UIControlStateHighlighted];
     [button addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
@@ -170,10 +186,21 @@ static const CGFloat kButtonsSpacing = 14.0f;
     self.line.frame = self.bounds;
     [self.line setNeedsDisplay];
     
-    [self.titleLabel removeFromSuperview];
-    [self addSubview:self.titleLabel];
     [self.titleLabel sizeToFit];
     self.titleLabel.center = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2 + yOffset);
+    
+    [self.leftTitleLabel sizeToFit];
+    
+//    self.leftTitleLabel.frame = CGRectIntegral(CGRectInset(self.leftTitleLabel.frame, -1, -1));
+//    self.leftTitleLabel.frame = CGRectIntegral(self.leftTitleLabel.frame);
+//    self.leftTitleLabel.center = CGPointMake((int)(kLeftTitleMargin + self.leftTitleLabel.frame.size.width / 2 + 1),
+//                                             (int)(self.bounds.size.height / 2 + yOffset + 1));
+    
+    self.leftTitleLabel.center = CGPointMake(kLeftTitleMargin + self.leftTitleLabel.frame.size.width / 2,
+                                             self.bounds.size.height / 2 + yOffset);
+    
+    [self bringSubviewToFront:self.leftTitleLabel];
+    [self bringSubviewToFront:self.titleLabel];
     
     [self setNeedsDisplay];
     
@@ -203,13 +230,93 @@ static const CGFloat kButtonsSpacing = 14.0f;
 
 - (NSString *)title
 {
-    return self.titleLabel.text;
+    return [self.titleLabel.text copy];
 }
 
 - (void)setTitle:(NSString *)title
 {
-    self.titleLabel.text = title;
-    [self updateUI];
+    if (![self.titleLabel.text isEqualToString:title])
+    {
+        self.titleLabel.text = [title copy];
+        [self updateUI];
+    }
+}
+
+- (NSString *)leftTitle
+{
+    return [self.leftTitleLabel.text copy];
+}
+
+- (void)setLeftTitle:(NSString *)leftTitle
+{
+    if (![self.leftTitleLabel.text isEqualToString:leftTitle])
+    {
+        GPLog(@"new left title: %@", leftTitle);
+        self.leftTitleLabel.text = [leftTitle copy];
+        [self updateUI];
+    }
+}
+
+- (void)hideLeftTitle:(BOOL)animated
+{
+    if (animated)
+    {
+        UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState |
+                                         UIViewAnimationCurveEaseInOut;
+        
+        [UIView animateWithDuration:0.3
+                              delay:0
+                            options:options
+                         animations:^{
+                             
+                             self.leftTitleLabel.alpha = 0;
+                             
+                         } completion:^(BOOL finished) {
+                             
+                             self.leftTitleLabel.hidden = YES;
+                         }];
+    }
+    else
+    {
+        [UIView performWithoutAnimation:^{
+            
+            self.leftTitleLabel.alpha = 0;
+            self.leftTitleLabel.hidden = YES;
+        }];
+    }
+    
+}
+
+- (void)hideLeftTitleAnimated
+{
+    [self hideLeftTitle:YES];
+}
+
+- (void)showLeftTitle:(BOOL)animated
+{
+    self.leftTitleLabel.hidden = NO;
+    
+    if (animated)
+    {
+        UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState |
+                                         UIViewAnimationCurveEaseInOut;
+        
+        [UIView animateWithDuration:0.3
+                              delay:0
+                            options:options
+                         animations:^{
+                             
+                             self.leftTitleLabel.alpha = 1;
+                             
+                         } completion:nil];
+    }
+    else
+    {
+        [UIView performWithoutAnimation:^{
+            
+            self.leftTitleLabel.alpha = 1;
+        }];
+    }
 }
 
 @end

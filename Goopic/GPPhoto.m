@@ -33,20 +33,65 @@
     return [self.asset description];
 }
 
-- (UIImage *)getImage
+- (UIImage *)thumbnailImage
 {
-    UIImage *image = nil;
+//    UIImage *image = nil;
+//    
+//    if (self.name)
+//    {
+//        image = [UIImage imageNamed:self.name];
+//    }
+//    else if (self.asset)
+//    {
+//        image = [UIImage imageWithCGImage:[self.asset thumbnail]];
+//    }
+//    
+//    return image;
     
-    if (self.name)
+    if (self.asset)
     {
-        image = [UIImage imageNamed:self.name];
-    }
-    else if (self.asset)
-    {
-        image = [UIImage imageWithCGImage:[self.asset thumbnail]];
+        return [UIImage imageWithCGImage:[self.asset thumbnail]];
     }
     
-    return image;
+    return nil;
+}
+
+- (NSDate *)dateTaken
+{
+    if (self.asset)
+    {
+        return [self.asset valueForProperty:ALAssetPropertyDate];
+    }
+    
+    return nil;
+}
+
+- (NSComparisonResult)compare:(id)photo
+{
+    if ([photo isKindOfClass:[GPPhoto class]])
+    {
+        NSDate *selfDateTaken = self.dateTaken;
+        NSDate *photoDateTaken = [photo dateTaken];
+        
+        if (selfDateTaken && photoDateTaken)
+        {
+            NSComparisonResult dateCompare = [selfDateTaken compare:photoDateTaken];
+            
+            if (dateCompare == NSOrderedAscending)
+            {
+                return NSOrderedDescending;
+            }
+            
+            if (dateCompare == NSOrderedDescending)
+            {
+                return NSOrderedAscending;
+            }
+        }
+        
+        return NSOrderedSame;
+    }
+    
+    return NSOrderedAscending; // default
 }
 
 @end

@@ -68,7 +68,9 @@
 
 #pragma mark - Photos Table View Controller
 
-@interface GPPhotosTableViewController : UIViewController <UITableViewDataSource, UITableViewDelegate>
+@interface GPPhotosTableViewController : UIViewController <UITableViewDataSource,
+                                                           UITableViewDelegate,
+                                                           UIScrollViewDelegate>
 
 @property (nonatomic, strong) GPPhotosTableView *photosTableView;
 

@@ -10,13 +10,14 @@
 #import "GPPhotosTableViewController.h"
 #import "GPToolbar.h"
 #import "GPAssetsManager.h"
+#import "GPRootViewController.h"
 
 static NSString * const kPhotoCellID                    = @"PhotoCell";
 static NSString * const kPhotosHeaderID                 = @"PhotosHeader";
 static NSString * const kPhotosFooterID                 = @"PhotosFooter";
 
 static CGFloat          sThumbnailDimension             = 60.0f;
-static const CGFloat    kPhotosSpacing                  = 0.0f;
+static const CGFloat    kPhotosSpacing                  = 2.0f; // 0.0f;
 
 static const NSInteger  kPhotosCountPerCell_Portrait    = 5;
 static const NSInteger  kPhotosCountPerCell_Landscape   = 8;
@@ -24,10 +25,13 @@ static const NSInteger  kPhotosCountPerCell_Landscape   = 8;
 static NSString * const kPhotoKey                       = @"photo";
 static NSString * const kThumbnailViewKey               = @"thumbnailView";
 
-static const CGFloat    kPhotosHeaderHeight             = 30.0f;
-static const CGFloat    kPhotosFooterHeight             = 10.0f;
+static const CGFloat    kPhotosHeaderHeight             = 0.1; // 30.0f;
+static const CGFloat    kPhotosFooterHeight             = 0.1;
+//static const CGFloat    kPhotosFooterHeight             = 30.0f;
 
 //static const CGFloat    kLineMargin                     = 10.0f;
+
+static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 
 
 #pragma mark -
@@ -43,7 +47,7 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
     {
         // Custom initialization
         
-        self.contentView.backgroundColor = [UIColor whiteColor];
+        self.contentView.backgroundColor = COLOR_BLACK;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
         
         _photos = [NSMutableArray array];
@@ -65,7 +69,7 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
     for (GPPhoto *photo in photos)
     {
         UIImageView *thumbnailView = [[UIImageView alloc] init];
-        thumbnailView.image = [photo getImage];
+        thumbnailView.image = [photo thumbnailImage];
         thumbnailView.userInteractionEnabled = NO;
         [self.contentView addSubview:thumbnailView];
         
@@ -130,7 +134,7 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
     {
         // Custom initialization
         
-        self.contentView.backgroundColor = GP_COLOR_BLUE;
+        self.contentView.backgroundColor = COLOR_BLUE;
         
         UILabel *titleLabel = [[UILabel alloc] init];
         titleLabel.textAlignment = NSTextAlignmentRight;
@@ -228,7 +232,7 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
     if (self)
     {
         // Custom initialization
-        self.contentView.backgroundColor = [UIColor whiteColor];
+        self.contentView.backgroundColor = COLOR_BLACK;
     }
     
     return self;
@@ -263,7 +267,7 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
     {
         // Custom initialization
         
-        self.backgroundColor = [UIColor whiteColor];
+        self.backgroundColor = COLOR_BLACK;
         self.showsHorizontalScrollIndicator = NO;
         self.showsVerticalScrollIndicator = YES;
         self.allowsSelection = YES;
@@ -301,6 +305,9 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
 
 @property (atomic) NSMutableArray *photosFromLibrary;
 
+//@property (atomic) NSDate *lastScrollTime;
+@property (atomic) NSTimer *hideTitleTimer;
+
 @end
 
 @implementation GPPhotosTableViewController
@@ -320,6 +327,7 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
         }
         
         self.reloadFromLibraryInProgress = NO;
+//        self.lastScrollTime = [NSDate dateWithTimeIntervalSinceNow:kTitleVisibilityTimeout];
     }
     
     return self;
@@ -340,7 +348,7 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
 {
     [super viewDidLoad];
     
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = COLOR_BLACK;
     
     GPPhotosTableView *photosTableView = [[GPPhotosTableView alloc] init];
     photosTableView.dataSource = self;
@@ -348,10 +356,10 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
     [self.view addSubview:photosTableView];
     self.photosTableView = photosTableView;
     
-    UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
     activityIndicator.hidesWhenStopped = YES;
     activityIndicator.userInteractionEnabled = YES;
-    activityIndicator.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5];
+    activityIndicator.backgroundColor = [COLOR_BLACK colorWithAlphaComponent:0.5];
     [self.view addSubview:activityIndicator];
     self.activityIndicator = activityIndicator;
     
@@ -464,13 +472,21 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
                                 GPLog(@"file name: %@", [[asset defaultRepresentation] filename]);
                                 GPLog(@"dimensions: %@", NSStringFromCGSize([[asset defaultRepresentation] dimensions]));
                                 GPLog(@"size: %lld", [[asset defaultRepresentation] size]);
+//                                GPLog(@"metadata: %@", [[asset defaultRepresentation] metadata]);
+                                GPLog(@"date taken: %@", [asset valueForProperty:ALAssetPropertyDate]);
                                 GPLog(@"");
                                 
 //                                NSURL *url = (NSURL *) [[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]];
                                 
+//                                id metadata = [asset defaultRepresentation] metadata];
+//                                
+//                                if (metadata)
+//                                {
+//                                    
+//                                }
+                                
                                 GPPhoto *photo = [[GPPhoto alloc] init];
                                 photo.asset = asset;
-                                photo.date = [NSDate date];
                                 [self.photosFromLibrary addObject:photo];
                             }
                         }
@@ -526,12 +542,12 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
     [self.activityIndicator startAnimating];
     
     self.photosTableView.scrollEnabled = NO;
-    [self.photosTableView reloadData]; // see tableViewDidFinishLoading:
+    [self.photosTableView reloadData]; // See tableViewDidFinishLoading:
     
     [self updateUI];
     
 //    GPLog(@"photos from library: %@", [self.photosFromLibrary description]);
-    GPLog(@"photos sections: %@", [self.photosSections description]);
+//    GPLog(@"photos sections: %@", [self.photosSections description]);
     
     GPLogOUT();
 }
@@ -541,7 +557,7 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
     NSMutableArray *photosSections = [NSMutableArray array];
     
     GPPhoto *dummyPhoto = [[GPPhoto alloc] init];
-    [photosSections addObject:@[ dummyPhoto ]]; // table view header
+    [photosSections addObject:@[ dummyPhoto ]]; // Table view header
     
 //    NSDate *now = [NSDate date];
 //    NSInteger photosCountPerCell = [GPPhotosTableViewController photosCountPerCell];
@@ -563,10 +579,87 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
     
     if (self.photosFromLibrary)
     {
-        [photosSections addObject:self.photosFromLibrary];
+        NSMutableArray *sortedPhotosFromLibrary = [NSMutableArray arrayWithArray:self.photosFromLibrary];
+        [sortedPhotosFromLibrary sortUsingSelector:@selector(compare:)];
+        
+//        NSMutableArray *section = [NSMutableArray array];
+//        GPPhoto *prevPhoto = nil;
+//        
+//        for (NSInteger i = 0; i < [sortedPhotosFromLibrary count]; i++)
+//        {
+//            GPPhoto *currPhoto = sortedPhotosFromLibrary[i];
+//            
+//            if (prevPhoto)
+//            {
+//                NSDate *currPhotoDate = [[currPhoto dateTaken] dateWithYearMonthAndDayOnly];
+//                NSDate *prevPhotoDate = [[prevPhoto dateTaken] dateWithYearMonthAndDayOnly];
+//                
+//                if (![currPhotoDate isEqualToDate:prevPhotoDate])
+//                {
+//                    [photosSections addObject:section];
+//                    section = [NSMutableArray array];
+//                }
+//            }
+//            
+//            [section addObject:currPhoto];
+//            prevPhoto = currPhoto;
+//        }
+//        
+//        if ([section count] > 0)
+//        {
+//            [photosSections addObject:section];
+//        }
+        
+        [photosSections addObject:sortedPhotosFromLibrary];
     }
     
+    [photosSections addObject:@[ dummyPhoto ]]; // Table view footer
+    
     self.photosSections = photosSections;
+}
+
+- (void)updateDateTitle
+{
+    NSString *newDateTitle = @"";
+    
+    CGPoint topPointInRootView = CGPointMake(self.rootViewController.view.bounds.size.width / 2, [GPToolbar preferredHeight]);
+    NSArray *visibleRowsIndexPaths = [self.photosTableView indexPathsForVisibleRows];
+    
+    for (NSInteger i = 0; i < [visibleRowsIndexPaths count]; i++)
+    {
+        NSIndexPath *indexPath = visibleRowsIndexPaths[i];
+        
+        if (indexPath.section == 0 || indexPath.section == [self.photosSections count] - 1)
+        {
+            continue; // Skip table view header and footer
+        }
+        
+        GPPhotoCell *photoCell = (GPPhotoCell *)[self.photosTableView cellForRowAtIndexPath:indexPath];
+        
+        if (photoCell)
+        {
+            CGRect cellFrameInRootView = [self.rootViewController.view convertRect:photoCell.frame fromView:photoCell.superview];
+            
+            if (((topPointInRootView.y >= cellFrameInRootView.origin.y) &&
+                 (topPointInRootView.y < cellFrameInRootView.origin.y + cellFrameInRootView.size.height)) ||
+                [[visibleRowsIndexPaths firstObject] section] == 0)
+            {
+                GPPhoto *firstPhoto = (GPPhoto *)[photoCell.photos firstObject];
+                
+                if (firstPhoto)
+                {
+                    newDateTitle = [[firstPhoto.dateTaken dateWithYearMonthAndDayOnly] formattedDateForTitle];
+                }
+                
+                break;
+            }
+        }
+    }
+    
+    if ([newDateTitle length] > 0)
+    {
+        self.rootViewController.topToolbar.leftTitle = newDateTitle;
+    }
 }
 
 #pragma mark - Update Interface
@@ -587,9 +680,10 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
     
     self.photosTableView.frame = self.view.bounds;
     
+    [self updateDateTitle];
+    
     [self.photosTableView setNeedsLayout];
     [self.photosTableView setNeedsDisplay];
-    
     [self.view setNeedsDisplay];
     
     GPLogOUT();
@@ -614,14 +708,11 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    // Return the number of sections.
     return [self.photosSections count];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)sectionIndex
 {
-    // Return the number of rows in the section.
-    
     NSArray *photos = self.photosSections[sectionIndex];
     NSInteger photosCountPerCell = [GPPhotosTableViewController photosCountPerCell];
     
@@ -659,9 +750,14 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section == 0)
+    if (indexPath.section == 0) // Table view header
     {
-        return [GPToolbar preferredHeight]; // table view header
+        return [GPToolbar preferredHeight];
+    }
+    
+    if (indexPath.section == [self.photosSections count] - 1)
+    {
+        return (self.rootViewController.view.bounds.size.height - [GPToolbar preferredHeight] - sThumbnailDimension - kPhotosSpacing);
     }
     
     return sThumbnailDimension + kPhotosSpacing;
@@ -675,7 +771,7 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
     
     if ([cell isKindOfClass:[GPPhotoCell class]])
     {
-        if (indexPath.section > 0) // avoid table view header
+        if (indexPath.section > 0 && indexPath.section < [self.photosSections count] - 1) // Avoid table view header & footer
         {
             GPPhotoCell *photoCell = (GPPhotoCell *)cell;
             GPLog(@"Selected photo cell: %@ at index path: %@", [photoCell description], [indexPath description]);
@@ -697,39 +793,41 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
         headerView = [[GPPhotosHeaderView alloc] initWithReuseIdentifier:kPhotosHeaderID];
     }
     
-    if (section == 0) // table header view
+    if (section == 0 || section == [self.photosSections count] - 1) // Table view header and footer
     {
         headerView.title = @"";
         headerView.alpha = 0;
     }
     else
     {
-        NSArray *photos = self.photosSections[section];
-        GPPhoto *photo = [photos firstObject];
-        
-        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-        [dateFormatter setDateStyle:NSDateFormatterFullStyle];
-        [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
-        [dateFormatter setLocale:[NSLocale currentLocale]];
-        [dateFormatter setTimeZone:[NSTimeZone localTimeZone]];
+//        NSArray *photos = self.photosSections[section];
+//        GPPhoto *photo = [photos firstObject];
+//        
+//        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+//        [dateFormatter setDateStyle:NSDateFormatterFullStyle];
+//        [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
+//        [dateFormatter setLocale:[NSLocale currentLocale]];
+//        [dateFormatter setTimeZone:[NSTimeZone localTimeZone]];
         
         // TODO: Locale change notification handling
         
-        NSString *formattedDateString = [dateFormatter stringFromDate:photo.date];
+//        NSString *formattedDateString = [dateFormatter stringFromDate:photo.date];
         
-        NSLog(@"formattedDateString for locale %@: %@", [[dateFormatter locale] localeIdentifier], formattedDateString);
+//        GPLog(@"formattedDateString for locale %@: %@", [[dateFormatter locale] localeIdentifier], formattedDateString);
         
-        headerView.title = formattedDateString;
+//        headerView.title = formattedDateString;
         
         headerView.alpha = 1;
     }
+    
+    headerView.hidden = YES;
     
     return headerView;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    if (section == 0) // table view header
+    if (section == 0 || section == [self.photosSections count] - 1) // Table view header & footer
     {
         return 0.1f; // hide
     }
@@ -746,7 +844,7 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
         footerView = [[GPPhotosFooterView alloc] initWithReuseIdentifier:kPhotosFooterID];
     }
     
-    if (section == 0) // table view header
+    if (section == 0 || section == [self.photosSections count] - 1) // Table view header & footer
     {
         footerView.alpha = 0;
     }
@@ -756,13 +854,14 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
     }
     
     [footerView updateUI];
+    footerView.hidden = YES;
     
     return footerView;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
 {
-    if (section == 0) // table view header
+    if (section == 0 || section == [self.photosSections count] - 1) // Table view header & footer
     {
         return 0.1f; // hide
     }
@@ -788,6 +887,29 @@ static const CGFloat    kPhotosFooterHeight             = 10.0f;
         [self.activityIndicator stopAnimating];
         self.photosTableView.scrollEnabled = YES;
     }
+    
+    GPLogOUT();
+}
+
+#pragma mark - Scroll View Delegate
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    GPLogIN();
+    
+    [self updateDateTitle];
+    
+    if ([self.rootViewController.topToolbar.leftTitleLabel isHidden])
+    {
+        [self.rootViewController.topToolbar showLeftTitle:YES];
+    }
+    
+    [self.hideTitleTimer invalidate];
+    self.hideTitleTimer = [NSTimer scheduledTimerWithTimeInterval:kTitleVisibilityTimeout
+                                                           target:self.rootViewController.topToolbar
+                                                         selector:@selector(hideLeftTitleAnimated)
+                                                         userInfo:nil
+                                                          repeats:NO];
     
     GPLogOUT();
 }

@@ -30,6 +30,9 @@
 @property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic) NSString *title;
 
+@property (nonatomic, strong) UILabel *leftTitleLabel;
+@property (nonatomic) NSString *leftTitle;
+
 @property (nonatomic, strong) GPLine *line;
 
 @property (nonatomic) GPPosition style; // top or bottom
@@ -42,5 +45,10 @@
 - (void)updateUI;
 
 + (CGFloat)preferredHeight;
+
+- (void)hideLeftTitle:(BOOL)animated;
+- (void)hideLeftTitleAnimated;
+
+- (void)showLeftTitle:(BOOL)animated;
 
 @end

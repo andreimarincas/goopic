@@ -7,6 +7,7 @@
 //
 
 #import "GPRootViewController.h"
+#import "GPAppDelegate.h"
 
 @implementation GPRootViewController
 
@@ -27,16 +28,24 @@
     GPLogIN();
     [super viewDidLoad];
     
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = COLOR_BLACK;
     
     GPToolbar *topToolbar = [[GPToolbar alloc] initWithStyle:GPPositionTop];
-//    topToolbar.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.9];
-    topToolbar.backgroundColor = [GP_COLOR_BLUE colorWithAlphaComponent:0.8];
-    topToolbar.line.lineColor = [UIColor blueColor];
-    [topToolbar addButtonWithType:GPToolbarButtonCamera toLeftOrRight:GPPositionRight];
-    topToolbar.title = @"Photos";
+//    topToolbar.backgroundColor = [COLOR_BLACK colorWithAlphaComponent:0.9];
+//    topToolbar.backgroundColor = [GP_COLOR_BLUE colorWithAlphaComponent:0.8];
+//    topToolbar.line.lineColor = GP_COLOR_DARK_BLUE;
+    
+//    topToolbar.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+//    topToolbar.backgroundColor = [UIColor colorWithWhite:0.05 alpha:0.5];
+    topToolbar.backgroundColor = [COLOR_BLACK colorWithAlphaComponent:0.65];
+    topToolbar.line.lineColor = COLOR_BLACK;
+    
+//    [topToolbar addButtonWithType:GPToolbarButtonCamera toLeftOrRight:GPPositionRight];
+//    topToolbar.title = @"Photos";
     [self.view addSubview:topToolbar];
     self.topToolbar = topToolbar;
+    
+    [topToolbar hideLeftTitle:NO];
     
     GPPhotosTableViewController *photosCtrl = [[GPPhotosTableViewController alloc] init];
     photosCtrl.rootViewController = self;

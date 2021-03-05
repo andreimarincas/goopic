@@ -17,7 +17,8 @@ NSString * NSStringFromGPToolbarButtonType(GPToolbarButtonType buttonType)
     {
         case GPToolbarButtonCamera:
         {
-            buttonTypeStr = @"Camera";
+//            buttonTypeStr = @"Camera";
+            buttonTypeStr = @"CAM";
         }
             break;
             

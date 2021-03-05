@@ -17,5 +17,6 @@
     #import "GPConstants.h"
     #import "GPLogs.h"
     #import "GPCommon.h"
+    #import "NSDate+Extension.h"
 
 #endif
