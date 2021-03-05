@@ -15,7 +15,8 @@
 
 @protocol GPToolbarDelegate <NSObject>
 
-- (void)toolbar:(GPToolbar *)toolbar didSelectButton:(UIButton *)button;
+- (void)toolbar:(GPToolbar *)toolbar didSelectButtonWithType:(GPToolbarButtonType)type;
+- (void)toolbar:(GPToolbar *)toolbar didTapTitle:(UILabel *)titleLabel;
 
 @end
 
@@ -27,28 +28,37 @@
 
 @property (nonatomic, readonly) NSArray *buttons;
 
+@property (nonatomic, strong) UIButton *middleButton;
+
+@property (nonatomic, strong) UIButton *backButton;
+
 @property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic) NSString *title;
 
-@property (nonatomic, strong) UILabel *leftTitleLabel;
-@property (nonatomic) NSString *leftTitle;
+@property (nonatomic, strong) UILabel *dateLabel;
+@property (nonatomic) NSString *date;
 
 @property (nonatomic, strong) GPLine *line;
 
 @property (nonatomic) GPPosition style; // top or bottom
+
+@property (nonatomic, weak) id <GPToolbarDelegate> delegate;
 
 // style: top or bottom
 - (instancetype)initWithStyle:(GPPosition)style;
 
 - (void)addButtonWithType:(GPToolbarButtonType)buttonType toLeftOrRight:(GPPosition)leftOrRight;
 
+- (void)setMiddleButtonType:(GPToolbarButtonType)type;
+- (void)setBackButtonType:(GPToolbarButtonType)type;
+
 - (void)updateUI;
 
-+ (CGFloat)preferredHeight;
+- (CGFloat)preferredHeight;
 
-- (void)hideLeftTitle:(BOOL)animated;
-- (void)hideLeftTitleAnimated;
+- (void)hideDate:(BOOL)animated;
+- (void)hideDateAnimated;
 
-- (void)showLeftTitle:(BOOL)animated;
+- (void)showDate:(BOOL)animated;
 
 @end

@@ -10,6 +10,7 @@
 
 @interface GPImgurUploader : NSObject
 
-+ (void)uploadImage:(NSString *)jpgImageName completion:(UploadCompletion)completion;
++ (void)uploadImage:(UIImage *)image withName:(NSString *)name completion:(UploadCompletion)completion;
++ (void)uploadImageWithName:(NSString *)name completion:(UploadCompletion)completion;
 
 @end

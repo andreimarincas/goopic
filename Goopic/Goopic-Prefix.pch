@@ -18,5 +18,8 @@
     #import "GPLogs.h"
     #import "GPCommon.h"
     #import "NSDate+Extension.h"
+    #import "UIScrollView+Extension.h"
+    #import "UIViewController+Extension.h"
+    #import "UIImage+Extension.h"
 
 #endif

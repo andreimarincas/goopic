@@ -16,16 +16,18 @@ NSString * NSStringFromGPToolbarButtonType(GPToolbarButtonType buttonType)
     switch (buttonType)
     {
         case GPToolbarButtonCamera:
-        {
-//            buttonTypeStr = @"Camera";
             buttonTypeStr = @"CAM";
-        }
             break;
             
-        default:
-        {
-            buttonTypeStr = @"<unknown>";
-        }
+        case GPToolbarButtonSearchGoogleForThisImage:
+            buttonTypeStr = @"Search Google For This Image";
+            break;
+            
+        case GPToolbarButtonBackToPhotos:
+            buttonTypeStr = @"Photos";
+            break;
+            
+        default: buttonTypeStr = @"<unknown-btn>";
             break;
     }
     
@@ -67,4 +69,30 @@ BOOL GPInterfaceOrientationIsPortrait()
 BOOL GPInterfaceOrientationIsLandscape()
 {
     return UIInterfaceOrientationIsLandscape(GPInterfaceOrientation());
+}
+
+BOOL CGPointInCGRect(CGPoint point, CGRect rect)
+{
+    return (point.x >= rect.origin.x) &&
+    (point.x <= rect.origin.x + rect.size.width) &&
+    (point.y >= rect.origin.y) &&
+    (point.y <= rect.origin.y + rect.size.height);
+}
+
+CGFloat ScaleFactorForUploadingImageWithSize(CGSize size)
+{
+    if (size.width * size.height <= kMaxImageUploadSize)
+    {
+        return 1; // no need to scale
+    }
+    
+    CGFloat r = size.width / size.height;
+    CGFloat w = sqrtf(r * kMaxImageUploadSize);
+    
+    return w / size.width;
+}
+
+CGSize CGSizeIntegral(CGSize size)
+{
+    return CGSizeMake((int)size.width, (int)size.height);
 }

@@ -7,13 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7529C94119ADAF6700655FC1 /* GPPhotoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529C94019ADAF6700655FC1 /* GPPhotoViewController.m */; };
+		7529C94C19ADCD2E00655FC1 /* NSDate+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529C94719ADCD2E00655FC1 /* NSDate+Extension.m */; };
+		7529C94D19ADCD2E00655FC1 /* UIScrollView+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529C94919ADCD2E00655FC1 /* UIScrollView+Extension.m */; };
+		7529C94E19ADCD2E00655FC1 /* UIViewController+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529C94B19ADCD2E00655FC1 /* UIViewController+Extension.m */; };
+		7529C95419ADFA5E00655FC1 /* GPResponsiveButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529C95319ADFA5E00655FC1 /* GPResponsiveButton.m */; };
+		7529C95719AE202200655FC1 /* UIImage+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529C95619AE202200655FC1 /* UIImage+Extension.m */; };
+		7529C95A19AE897000655FC1 /* ALAsset+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529C95919AE897000655FC1 /* ALAsset+Extension.m */; };
 		753584BB19AA6E4C002EF04B /* GPRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 753584BA19AA6E4C002EF04B /* GPRootViewController.m */; };
 		753584BF19AA6EE4002EF04B /* GPLogs.m in Sources */ = {isa = PBXBuildFile; fileRef = 753584BE19AA6EE4002EF04B /* GPLogs.m */; };
 		753584C219AA7432002EF04B /* GPToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 753584C119AA7432002EF04B /* GPToolbar.m */; };
 		753584C519AA774B002EF04B /* GPCommon.m in Sources */ = {isa = PBXBuildFile; fileRef = 753584C419AA774B002EF04B /* GPCommon.m */; };
 		753584C819AA9108002EF04B /* GPLine.m in Sources */ = {isa = PBXBuildFile; fileRef = 753584C719AA9108002EF04B /* GPLine.m */; };
 		75B6A81E19ACAE1100D54BB5 /* Launch-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 75B6A81D19ACAE1100D54BB5 /* Launch-568h@2x.png */; };
-		75B6A82119ACB59F00D54BB5 /* NSDate+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 75B6A82019ACB59F00D54BB5 /* NSDate+Extension.m */; };
 		75BBDC6C19AAA4650013AC4A /* GPPhotosTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 75BBDC6B19AAA4650013AC4A /* GPPhotosTableViewController.m */; };
 		75BBDC7019AAA5EE0013AC4A /* GPPhoto.m in Sources */ = {isa = PBXBuildFile; fileRef = 75BBDC6F19AAA5EE0013AC4A /* GPPhoto.m */; };
 		75BBDCA719AAFB4F0013AC4A /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75BBDCA619AAFB4F0013AC4A /* AssetsLibrary.framework */; };
@@ -84,6 +90,20 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7529C93F19ADAF6700655FC1 /* GPPhotoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPPhotoViewController.h; sourceTree = "<group>"; };
+		7529C94019ADAF6700655FC1 /* GPPhotoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPPhotoViewController.m; sourceTree = "<group>"; };
+		7529C94619ADCD2E00655FC1 /* NSDate+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+Extension.h"; sourceTree = "<group>"; };
+		7529C94719ADCD2E00655FC1 /* NSDate+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+Extension.m"; sourceTree = "<group>"; };
+		7529C94819ADCD2E00655FC1 /* UIScrollView+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIScrollView+Extension.h"; sourceTree = "<group>"; };
+		7529C94919ADCD2E00655FC1 /* UIScrollView+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+Extension.m"; sourceTree = "<group>"; };
+		7529C94A19ADCD2E00655FC1 /* UIViewController+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+Extension.h"; sourceTree = "<group>"; };
+		7529C94B19ADCD2E00655FC1 /* UIViewController+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+Extension.m"; sourceTree = "<group>"; };
+		7529C95219ADFA5E00655FC1 /* GPResponsiveButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPResponsiveButton.h; sourceTree = "<group>"; };
+		7529C95319ADFA5E00655FC1 /* GPResponsiveButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPResponsiveButton.m; sourceTree = "<group>"; };
+		7529C95519AE202200655FC1 /* UIImage+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Extension.h"; sourceTree = "<group>"; };
+		7529C95619AE202200655FC1 /* UIImage+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Extension.m"; sourceTree = "<group>"; };
+		7529C95819AE897000655FC1 /* ALAsset+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ALAsset+Extension.h"; sourceTree = "<group>"; };
+		7529C95919AE897000655FC1 /* ALAsset+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ALAsset+Extension.m"; sourceTree = "<group>"; };
 		753584B919AA6E4C002EF04B /* GPRootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPRootViewController.h; sourceTree = "<group>"; };
 		753584BA19AA6E4C002EF04B /* GPRootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPRootViewController.m; sourceTree = "<group>"; };
 		753584BD19AA6EE4002EF04B /* GPLogs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPLogs.h; sourceTree = "<group>"; };
@@ -95,8 +115,6 @@
 		753584C619AA9108002EF04B /* GPLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPLine.h; sourceTree = "<group>"; };
 		753584C719AA9108002EF04B /* GPLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPLine.m; sourceTree = "<group>"; };
 		75B6A81D19ACAE1100D54BB5 /* Launch-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Launch-568h@2x.png"; path = "../Launch-568h@2x.png"; sourceTree = "<group>"; };
-		75B6A81F19ACB59F00D54BB5 /* NSDate+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+Extension.h"; sourceTree = "<group>"; };
-		75B6A82019ACB59F00D54BB5 /* NSDate+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+Extension.m"; sourceTree = "<group>"; };
 		75BBDC6A19AAA4650013AC4A /* GPPhotosTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPPhotosTableViewController.h; sourceTree = "<group>"; };
 		75BBDC6B19AAA4650013AC4A /* GPPhotosTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPPhotosTableViewController.m; sourceTree = "<group>"; };
 		75BBDC6E19AAA5EE0013AC4A /* GPPhoto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPPhoto.h; sourceTree = "<group>"; };
@@ -233,6 +251,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7529C94519ADCD2E00655FC1 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				7529C95819AE897000655FC1 /* ALAsset+Extension.h */,
+				7529C95919AE897000655FC1 /* ALAsset+Extension.m */,
+				7529C94619ADCD2E00655FC1 /* NSDate+Extension.h */,
+				7529C94719ADCD2E00655FC1 /* NSDate+Extension.m */,
+				7529C95519AE202200655FC1 /* UIImage+Extension.h */,
+				7529C95619AE202200655FC1 /* UIImage+Extension.m */,
+				7529C94819ADCD2E00655FC1 /* UIScrollView+Extension.h */,
+				7529C94919ADCD2E00655FC1 /* UIScrollView+Extension.m */,
+				7529C94A19ADCD2E00655FC1 /* UIViewController+Extension.h */,
+				7529C94B19ADCD2E00655FC1 /* UIViewController+Extension.m */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		75D1BEE919A9ED5300FDA569 = {
 			isa = PBXGroup;
 			children = (
@@ -286,16 +321,19 @@
 				753584BE19AA6EE4002EF04B /* GPLogs.m */,
 				75BBDC6E19AAA5EE0013AC4A /* GPPhoto.h */,
 				75BBDC6F19AAA5EE0013AC4A /* GPPhoto.m */,
+				7529C93F19ADAF6700655FC1 /* GPPhotoViewController.h */,
+				7529C94019ADAF6700655FC1 /* GPPhotoViewController.m */,
 				75BBDC6A19AAA4650013AC4A /* GPPhotosTableViewController.h */,
 				75BBDC6B19AAA4650013AC4A /* GPPhotosTableViewController.m */,
+				7529C95219ADFA5E00655FC1 /* GPResponsiveButton.h */,
+				7529C95319ADFA5E00655FC1 /* GPResponsiveButton.m */,
 				753584B919AA6E4C002EF04B /* GPRootViewController.h */,
 				753584BA19AA6E4C002EF04B /* GPRootViewController.m */,
 				753584C019AA7432002EF04B /* GPToolbar.h */,
 				753584C119AA7432002EF04B /* GPToolbar.m */,
 				75D1BF4319A9EFA800FDA569 /* GPViewController.h */,
 				75D1BF4419A9EFA800FDA569 /* GPViewController.m */,
-				75B6A81F19ACB59F00D54BB5 /* NSDate+Extension.h */,
-				75B6A82019ACB59F00D54BB5 /* NSDate+Extension.m */,
+				7529C94519ADCD2E00655FC1 /* Extensions */,
 				75D1BF4619A9F11300FDA569 /* Resources */,
 				75D1BEFC19A9ED5300FDA569 /* Supporting Files */,
 			);
@@ -556,10 +594,12 @@
 				75D1BFAE19AA0C7C00FDA569 /* IMGMemeGen.m in Sources */,
 				75D1BFB319AA266E00FDA569 /* GPImgurUploader.m in Sources */,
 				753584C819AA9108002EF04B /* GPLine.m in Sources */,
+				7529C94E19ADCD2E00655FC1 /* UIViewController+Extension.m in Sources */,
 				75D1BF4019A9EEC600FDA569 /* AFURLRequestSerialization.m in Sources */,
 				75D1BF9819AA0C7C00FDA569 /* IMGAlbum.m in Sources */,
 				75D1BF3F19A9EEC600FDA569 /* AFURLConnectionOperation.m in Sources */,
 				75D1BF3E19A9EEC600FDA569 /* AFSecurityPolicy.m in Sources */,
+				7529C95419ADFA5E00655FC1 /* GPResponsiveButton.m in Sources */,
 				75BBDD6719ABD73F0013AC4A /* GPAssetsManager.m in Sources */,
 				75D1BF9519AA0C7C00FDA569 /* IMGSession.m in Sources */,
 				75D1BF3A19A9EEC600FDA569 /* AFHTTPRequestOperation.m in Sources */,
@@ -568,6 +608,8 @@
 				75D1BFAF19AA0C7C00FDA569 /* IMGNotificationRequest.m in Sources */,
 				75D1BF4219A9EEC600FDA569 /* AFURLSessionManager.m in Sources */,
 				75D1BFB719AA346E00FDA569 /* OpenInChromeController.m in Sources */,
+				7529C95A19AE897000655FC1 /* ALAsset+Extension.m in Sources */,
+				7529C94119ADAF6700655FC1 /* GPPhotoViewController.m in Sources */,
 				75D1BFA119AA0C7C00FDA569 /* IMGMessage.m in Sources */,
 				753584BF19AA6EE4002EF04B /* GPLogs.m in Sources */,
 				75D1BFA719AA0C7C00FDA569 /* IMGAccountRequest.m in Sources */,
@@ -577,7 +619,6 @@
 				75D1BF0619A9ED5300FDA569 /* GPAppDelegate.m in Sources */,
 				75D1BF9E19AA0C7C00FDA569 /* IMGGalleryProfile.m in Sources */,
 				753584C519AA774B002EF04B /* GPCommon.m in Sources */,
-				75B6A82119ACB59F00D54BB5 /* NSDate+Extension.m in Sources */,
 				75D1BFA319AA0C7C00FDA569 /* IMGNotification.m in Sources */,
 				75D1BFAC19AA0C7C00FDA569 /* IMGGalleryRequest.m in Sources */,
 				75BBDC7019AAA5EE0013AC4A /* GPPhoto.m in Sources */,
@@ -592,9 +633,11 @@
 				75D1BFA919AA0C7C00FDA569 /* IMGCommentRequest.m in Sources */,
 				75D1BF9A19AA0C7C00FDA569 /* IMGComment.m in Sources */,
 				75D1BF9419AA0C7C00FDA569 /* IMGResponseSerializer.m in Sources */,
+				7529C94D19ADCD2E00655FC1 /* UIScrollView+Extension.m in Sources */,
 				75D1BF4519A9EFA800FDA569 /* GPViewController.m in Sources */,
 				75BBDC6C19AAA4650013AC4A /* GPPhotosTableViewController.m in Sources */,
 				75D1BFA519AA0C7C00FDA569 /* NSDictionary+IMG.m in Sources */,
+				7529C95719AE202200655FC1 /* UIImage+Extension.m in Sources */,
 				75D1BF9D19AA0C7C00FDA569 /* IMGGalleryImage.m in Sources */,
 				75D1BF3C19A9EEC600FDA569 /* AFHTTPSessionManager.m in Sources */,
 				75D1BFA819AA0C7C00FDA569 /* IMGAlbumRequest.m in Sources */,
@@ -605,6 +648,7 @@
 				75D1BF9719AA0C7C00FDA569 /* IMGAccountSettings.m in Sources */,
 				75D1BF0219A9ED5300FDA569 /* main.m in Sources */,
 				75D1BFA019AA0C7C00FDA569 /* IMGMeme.m in Sources */,
+				7529C94C19ADCD2E00655FC1 /* NSDate+Extension.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

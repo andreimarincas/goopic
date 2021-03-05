@@ -28,7 +28,7 @@
 - (NSString *)formattedDateForTitle
 {
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateStyle:NSDateFormatterFullStyle];
+    [dateFormatter setDateStyle:NSDateFormatterLongStyle];
     [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
     [dateFormatter setLocale:[NSLocale currentLocale]];
     [dateFormatter setTimeZone:[NSTimeZone localTimeZone]];

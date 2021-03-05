@@ -56,6 +56,50 @@
     return nil;
 }
 
+- (UIImage *)fullResolutionImage
+{
+    if (self.asset)
+    {
+        ALAssetRepresentation *defaultRep = [self.asset defaultRepresentation];
+        GPLog(@"asset orientation: %ld", [defaultRep orientation]);
+        
+        UIImage *image = [UIImage imageWithCGImage:[defaultRep fullResolutionImage]
+                                             scale:[defaultRep scale]
+                                       orientation:(UIImageOrientation)[defaultRep orientation]];
+        
+        GPLog(@"full resolution image size: %@", NSStringFromCGSize(image.size));
+        
+        return image;
+    }
+    
+    return nil;
+}
+
+- (UIImage *)imageToUpload
+{
+    if (self.asset)
+    {
+        ALAssetRepresentation *defaultRep = [self.asset defaultRepresentation];
+        GPLog(@"asset orientation: %ld", [defaultRep orientation]);
+        
+        UIImage *image = [UIImage imageWithCGImage:[defaultRep fullScreenImage]
+                                             scale:[defaultRep scale]
+                                       orientation:UIImageOrientationUp];
+        
+        GPLog(@"screen image size: %@", NSStringFromCGSize(image.size));
+        
+        CGFloat scale = ScaleFactorForUploadingImageWithSize(image.size);
+        GPLog(@"scale factor: %f", scale);
+        
+        UIImage *scaledImage = [UIImage imageWithImage:image scale:scale];
+        GPLog(@"scaled image size: %@", NSStringFromCGSize(scaledImage.size));
+        
+        return scaledImage;
+    }
+    
+    return nil;
+}
+
 - (NSDate *)dateTaken
 {
     if (self.asset)
@@ -64,6 +108,20 @@
     }
     
     return nil;
+}
+
+- (NSString *)name
+{
+    if (self.asset)
+    {
+        NSString *fileName = [[self.asset defaultRepresentation] filename];
+        NSString *photoName = [[fileName stringByDeletingPathExtension] lastPathComponent];
+        GPLog(@"photo name: %@", photoName);
+        
+        return photoName;
+    }
+    
+    return @"";
 }
 
 - (NSComparisonResult)compare:(id)photo

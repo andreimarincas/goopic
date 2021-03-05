@@ -32,17 +32,29 @@ static NSString * const kSearchByImageURL = @"http://images.google.com/searchbyi
 #define COLOR_BLUE                  [UIColor colorWithRed:75/255.0f green:142/255.0f blue:250/255.0f alpha:1.0f]
 #define COLOR_DARK_BLUE             [UIColor colorWithRed:50/255.0f green:95/255.0f blue:167/255.0f alpha:1.0f]
 #define COLOR_BLACK                 [UIColor colorWithWhite:0.1f alpha:1.0f]
+#define COLOR_DARK_BLACK            [UIColor blackColor]
 
 
-typedef void (^Completion)(void);
+static const CGFloat kToolbarHeight = 43.6f;
+
+static const CGFloat kMaxImageUploadSize = 40000; // w * h
+static NSString * const kPhotoDefaultNameForUpload = @"Photo";
+
+static NSString * const kPhotosPersistentKey;
+
+
+typedef void (^Block)(void);
 typedef void (^UploadCompletion)(NSString *link, NSError *error);
 
 typedef void (^BodyConstruct)(id <AFMultipartFormData>);
 
 
-typedef enum {
-    GPToolbarButtonCamera
-} GPToolbarButtonType;
+typedef NS_ENUM (NSInteger, GPToolbarButtonType)
+{
+    GPToolbarButtonCamera = 34589,
+    GPToolbarButtonBackToPhotos,
+    GPToolbarButtonSearchGoogleForThisImage,
+};
 
 typedef enum {
     GPPositionLeft,

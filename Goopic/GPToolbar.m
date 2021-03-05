@@ -7,16 +7,22 @@
 //
 
 #import "GPToolbar.h"
+#import "GPResponsiveButton.h"
 
-static const CGFloat kToolbarHeight = 70.0f;
 
-static const NSInteger kButtonsCapacity = 10;
+static const NSInteger      kButtonsCapacity        = 10;
 
-static const CGFloat kButtonMinWidth = 40.0f;
-static const CGFloat kButtonMinHeight = 40.0f;
-static const CGFloat kButtonsSpacing = 14.0f;
+static const CGFloat        kButtonMinWidth         = 40.0f;
+static const CGFloat        kButtonMinHeight        = 40.0f;
+static const CGFloat        kButtonsSpacing         = 14.0f;
 
-static const CGFloat kLeftTitleMargin = 5.0f;
+static const CGFloat        kDateLabelMarginLeft    = 5.0f;
+static const CGFloat        kDateLabelMarginBottom  = 1.0f;
+
+static const NSTimeInterval kDateFadingDuration     = 0.2f;
+
+static const CGFloat        kTitleLabelTapPadding   = 80.0f;
+
 
 @implementation GPToolbar
 
@@ -28,43 +34,32 @@ static const CGFloat kLeftTitleMargin = 5.0f;
     {
         // Custom initialization
         
-        self.userInteractionEnabled = YES;
-        
         _leftButtons = [NSMutableArray arrayWithCapacity:kButtonsCapacity / 2];
         _rightButtons = [NSMutableArray arrayWithCapacity:kButtonsCapacity / 2];
         
-        self.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5f];
-        
+        self.backgroundColor = [COLOR_BLACK colorWithAlphaComponent:0.75];
         self.style = style;
         
         GPLine *line = [[GPLine alloc] init];
         line.lineWidth = 0.25f;
         line.linePosition = (self.style == GPPositionTop) ? LinePositionBottom : LinePositionTop;
         line.lineStyle = LineStyleContinuous;
+        line.lineColor = COLOR_BLACK;
         [self insertSubview:line atIndex:0];
         self.line = line;
         
         UILabel *titleLabel = [[UILabel alloc] init];
         titleLabel.textAlignment = NSTextAlignmentCenter;
-        titleLabel.font = [UIFont fontWithName:@"TimesNewRomanPSMT" size:20.0f];
-        titleLabel.textColor = [UIColor blackColor];
+        titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:18.0f];
+        titleLabel.textColor = [UIColor whiteColor];
         titleLabel.backgroundColor = [UIColor clearColor];
+        titleLabel.hidden = YES;
         [self addSubview:titleLabel];
         self.titleLabel = titleLabel;
         
-        UILabel *leftTitleLabel = [[UILabel alloc] init];
-        leftTitleLabel.textAlignment = NSTextAlignmentCenter;
-//        leftTitleLabel.font = [UIFont fontWithName:@"TimesNewRomanPSMT" size:18.0f];
-//        leftTitleLabel.font = [UIFont fontWithName:@"AvenirNextCondensed-UltraLight" size:18.0f];
-//        leftTitleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:12.0f];
-//        leftTitleLabel.font = [UIFont systemFontOfSize:12.5f];
-//        leftTitleLabel.font = [UIFont systemFontOfSize:13.0f];
-        leftTitleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:14.0f];
-        leftTitleLabel.textColor = [UIColor whiteColor];
-//        leftTitleLabel.textColor = [UIColor colorWithWhite:0.9 alpha:1];
-        leftTitleLabel.backgroundColor = [UIColor clearColor];
-        [self addSubview:leftTitleLabel];
-        self.leftTitleLabel = leftTitleLabel;
+        UITapGestureRecognizer *tapGr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+        [self.titleLabel addGestureRecognizer:tapGr];
+        self.titleLabel.userInteractionEnabled = YES;
     }
     
     return self;
@@ -75,6 +70,20 @@ static const CGFloat kLeftTitleMargin = 5.0f;
     GPLogIN();
     
     // Dealloc code
+    
+    GPLogOUT();
+}
+
+- (void)handleTap:(UITapGestureRecognizer *)tapGr
+{
+    GPLogIN();
+    
+//    CGPoint pos = [tapGr locationInView:self];
+    
+//    if (CGPointInCGRect(pos, CGRectInset(self.titleLabel.frame, -10, -10)))
+    {
+        [self.delegate toolbar:self didTapTitle:self.titleLabel];
+    }
     
     GPLogOUT();
 }
@@ -99,11 +108,23 @@ static const CGFloat kLeftTitleMargin = 5.0f;
         }
     }
     
+    if (_middleButton && (_middleButton.tag == buttonType))
+    {
+        return _middleButton;
+    }
+    
+    if (_backButton && (_backButton.tag == buttonType))
+    {
+        return _backButton;
+    }
+    
     return nil;
 }
 
 - (void)addButtonWithType:(GPToolbarButtonType)buttonType toLeftOrRight:(GPPosition)leftOrRight
 {
+    GPLogIN();
+    
     if ([self buttonsCount] == kButtonsCapacity)
     {
         GPLogErr(@"Cannot add button %@, too many buttons.", NSStringFromGPToolbarButtonType(buttonType));
@@ -121,12 +142,10 @@ static const CGFloat kLeftTitleMargin = 5.0f;
     }
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    [button setTitle:NSStringFromGPToolbarButtonType(buttonType) forState:UIControlStateNormal];    
+    [button setTitle:NSStringFromGPToolbarButtonType(buttonType) forState:UIControlStateNormal];
     [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [button setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.3f] forState:UIControlStateHighlighted];
     [button addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-//    button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:19.0f];
-//    button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:18.0f];
     button.titleLabel.font = [UIFont fontWithName:@"TimesNewRomanPS-BoldMT" size:18.0f];
     button.titleLabel.textAlignment = NSTextAlignmentCenter;
     button.tag = buttonType;
@@ -142,6 +161,82 @@ static const CGFloat kLeftTitleMargin = 5.0f;
     }
     
     [self updateUI];
+    
+    GPLogOUT();
+}
+
+- (UIButton *)middleButton
+{
+    if (!_middleButton)
+    {
+        UIButton *button = [GPResponsiveButton buttonWithType:UIButtonTypeCustom];
+        [button setTitleColor:COLOR_BLUE forState:UIControlStateNormal];
+        [button setTitleColor:[COLOR_BLUE colorWithAlphaComponent:0.3f] forState:UIControlStateHighlighted];
+        [button addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:18.0f];
+        button.titleLabel.textAlignment = NSTextAlignmentCenter;
+        [self addSubview:button];
+        
+        _middleButton = button;
+    }
+    
+    return _middleButton;
+}
+
+- (UIButton *)backButton
+{
+    if (!_backButton)
+    {
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        [button setTitleColor:COLOR_BLUE forState:UIControlStateNormal];
+        [button setTitleColor:[COLOR_BLUE colorWithAlphaComponent:0.3f] forState:UIControlStateHighlighted];
+        [button addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:18.0f];
+        button.titleLabel.textAlignment = NSTextAlignmentCenter;
+        [self addSubview:button];
+        
+        _backButton = button;
+    }
+    
+    return _backButton;
+}
+
+- (void)setMiddleButtonType:(GPToolbarButtonType)buttonType
+{
+    GPLogIN();
+    
+    if ([self buttonWithType:buttonType])
+    {
+        GPLogErr(@"Cannot set middle button type to %@, there already is another button with this type in this toolbar.",
+                 NSStringFromGPToolbarButtonType(buttonType));
+        
+        GPLogOUT();
+        return;
+    }
+    
+    [self.middleButton setTitle:NSStringFromGPToolbarButtonType(buttonType) forState:UIControlStateNormal];
+    self.middleButton.tag = buttonType;
+    
+    GPLogOUT();
+}
+
+- (void)setBackButtonType:(GPToolbarButtonType)buttonType
+{
+    GPLogIN();
+    
+    if ([self buttonWithType:buttonType])
+    {
+        GPLogErr(@"Cannot set back button type to %@, there already is another button with this type in this toolbar.",
+                 NSStringFromGPToolbarButtonType(buttonType));
+        
+        GPLogOUT();
+        return;
+    }
+    
+    [self.backButton setTitle:NSStringFromGPToolbarButtonType(buttonType) forState:UIControlStateNormal];
+    self.backButton.tag = buttonType;
+    
+    GPLogOUT();
 }
 
 - (void)updateUI
@@ -151,7 +246,12 @@ static const CGFloat kLeftTitleMargin = 5.0f;
     GPLog(@"toolbar bounds: %@", NSStringFromCGRect(self.bounds));
     GPLog(@"toolbar frame: %@", NSStringFromCGRect(self.frame));
     
-    CGFloat yOffset = AppIsInFullScreenMode() ? StatusBarHeight() / 2 : 0;
+    CGFloat yOffset = 0;
+    
+    if (self.style == GPPositionTop)
+    {
+        yOffset = AppIsInFullScreenMode() ? StatusBarHeight() : 0;
+    }
     
     for (NSInteger i = 0; i < [_leftButtons count]; i++)
     {
@@ -162,7 +262,7 @@ static const CGFloat kLeftTitleMargin = 5.0f;
                                        fmaxf(button.frame.size.height, kButtonMinHeight));
         
         button.frame = CGRectMake(kButtonsSpacing + i * (buttonSize.width + kButtonsSpacing),
-                                  (self.bounds.size.height - buttonSize.height) / 2 + yOffset,
+                                  yOffset + (self.bounds.size.height - yOffset - buttonSize.height) / 2,
                                   buttonSize.width,
                                   buttonSize.height);
         [button setNeedsDisplay];
@@ -177,43 +277,62 @@ static const CGFloat kLeftTitleMargin = 5.0f;
                                        fmaxf(button.frame.size.height, kButtonMinHeight));
         
         button.frame = CGRectMake(self.bounds.size.width - (i + 1) * (buttonSize.width + kButtonsSpacing),
-                                  (self.bounds.size.height - buttonSize.height) / 2 + yOffset,
+                                  yOffset + (self.bounds.size.height - yOffset + buttonSize.height) / 2,
                                   buttonSize.width,
                                   buttonSize.height);
         [button setNeedsDisplay];
     }
     
-    self.line.frame = self.bounds;
-    [self.line setNeedsDisplay];
+    if (_middleButton)
+    {
+        _middleButton.frame = CGRectMake(0, yOffset, self.bounds.size.width, self.bounds.size.height - yOffset);
+        [self bringSubviewToFront:_middleButton];
+    }
+    
+    if (_backButton)
+    {
+        [_backButton sizeToFit];
+        CGSize buttonSize = CGSizeMake(fmaxf(_backButton.frame.size.width, kButtonMinWidth),
+                                       fmaxf(_backButton.frame.size.height, kButtonMinHeight));
+        _backButton.frame = CGRectMake(kButtonsSpacing, yOffset + (self.bounds.size.height - yOffset - buttonSize.height) / 2,
+                                       buttonSize.width, buttonSize.height);
+        [self bringSubviewToFront:_backButton];
+    }
+    
+    if (_dateLabel)
+    {
+        [_dateLabel sizeToFit];
+        _dateLabel.center = CGPointMake(kDateLabelMarginLeft + _dateLabel.frame.size.width / 2,
+                                        self.bounds.size.height - _dateLabel.frame.size.height / 2 - kDateLabelMarginBottom);
+        [self bringSubviewToFront:_dateLabel];
+    }
     
     [self.titleLabel sizeToFit];
-    self.titleLabel.center = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2 + yOffset);
-    
-    [self.leftTitleLabel sizeToFit];
-    
-//    self.leftTitleLabel.frame = CGRectIntegral(CGRectInset(self.leftTitleLabel.frame, -1, -1));
-//    self.leftTitleLabel.frame = CGRectIntegral(self.leftTitleLabel.frame);
-//    self.leftTitleLabel.center = CGPointMake((int)(kLeftTitleMargin + self.leftTitleLabel.frame.size.width / 2 + 1),
-//                                             (int)(self.bounds.size.height / 2 + yOffset + 1));
-    
-    self.leftTitleLabel.center = CGPointMake(kLeftTitleMargin + self.leftTitleLabel.frame.size.width / 2,
-                                             self.bounds.size.height / 2 + yOffset);
-    
-    [self bringSubviewToFront:self.leftTitleLabel];
+    NSLog(@"title label frame: %@", NSStringFromCGRect(self.titleLabel.frame));
+    self.titleLabel.frame = CGRectMake(0, 0, self.titleLabel.frame.size.width + kTitleLabelTapPadding, self.bounds.size.height - yOffset);
+    NSLog(@"title label frame: %@", NSStringFromCGRect(self.titleLabel.frame));
+    self.titleLabel.center = CGPointMake(self.bounds.size.width / 2, yOffset + (self.bounds.size.height - yOffset) / 2);
+    NSLog(@"title label frame: %@", NSStringFromCGRect(self.titleLabel.frame));
     [self bringSubviewToFront:self.titleLabel];
+    
+    self.titleLabel.hidden = ([self.titleLabel.text length] == 0);
+    
+    self.line.frame = self.bounds;
+    [self.line setNeedsDisplay];
     
     [self setNeedsDisplay];
     
     GPLogOUT();
 }
 
-+ (CGFloat)preferredHeight
+- (CGFloat)preferredHeight
 {
     CGFloat height = kToolbarHeight;
     
-    if (!AppIsInFullScreenMode())
+//    if ((self.style == GPPositionTop) && AppIsInFullScreenMode())
+    if (AppIsInFullScreenMode())
     {
-        height -= StatusBarHeight();
+        height += StatusBarHeight();
     }
     
     return height;
@@ -223,7 +342,20 @@ static const CGFloat kLeftTitleMargin = 5.0f;
 {
     GPLogIN();
     
-    GPLog(@"button tapped: %lu - %@", (unsigned long)[[self buttons] indexOfObject:button], [button titleForState:UIControlStateNormal]);
+    if (button == _middleButton)
+    {
+        GPLog(@"middle button tapped: %@", [button titleForState:UIControlStateNormal]);
+    }
+    else if (button == _backButton)
+    {
+        GPLog(@"back button tapped: %@", [button titleForState:UIControlStateNormal]);
+    }
+    else
+    {
+        GPLog(@"button tapped: %lu - %@", (unsigned long)[[self buttons] indexOfObject:button], [button titleForState:UIControlStateNormal]);
+    }
+    
+    [self.delegate toolbar:self didSelectButtonWithType:(GPToolbarButtonType)button.tag];
     
     GPLogOUT();
 }
@@ -242,71 +374,87 @@ static const CGFloat kLeftTitleMargin = 5.0f;
     }
 }
 
-- (NSString *)leftTitle
+- (UILabel *)dateLabel
 {
-    return [self.leftTitleLabel.text copy];
+    if (!_dateLabel)
+    {
+        UILabel *dateLabel = [[UILabel alloc] init];
+        dateLabel.textAlignment = NSTextAlignmentCenter;
+        dateLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:14.0f];
+        dateLabel.textColor = [UIColor whiteColor];
+        dateLabel.backgroundColor = [UIColor clearColor];
+        [self addSubview:dateLabel];
+        _dateLabel = dateLabel;
+    }
+    
+    return _dateLabel;
 }
 
-- (void)setLeftTitle:(NSString *)leftTitle
+- (NSString *)date
 {
-    if (![self.leftTitleLabel.text isEqualToString:leftTitle])
+    return [self.dateLabel.text copy];
+}
+
+- (void)setDate:(NSString *)leftTitle
+{
+    if (![self.dateLabel.text isEqualToString:leftTitle])
     {
         GPLog(@"new left title: %@", leftTitle);
-        self.leftTitleLabel.text = [leftTitle copy];
+        self.dateLabel.text = [leftTitle copy];
         [self updateUI];
     }
 }
 
-- (void)hideLeftTitle:(BOOL)animated
+- (void)hideDate:(BOOL)animated
 {
     if (animated)
     {
         UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState |
                                          UIViewAnimationCurveEaseInOut;
         
-        [UIView animateWithDuration:0.3
+        [UIView animateWithDuration:kDateFadingDuration
                               delay:0
                             options:options
                          animations:^{
                              
-                             self.leftTitleLabel.alpha = 0;
+                             self.dateLabel.alpha = 0;
                              
                          } completion:^(BOOL finished) {
                              
-                             self.leftTitleLabel.hidden = YES;
+                             self.dateLabel.hidden = YES;
                          }];
     }
     else
     {
         [UIView performWithoutAnimation:^{
             
-            self.leftTitleLabel.alpha = 0;
-            self.leftTitleLabel.hidden = YES;
+            self.dateLabel.alpha = 0;
+            self.dateLabel.hidden = YES;
         }];
     }
     
 }
 
-- (void)hideLeftTitleAnimated
+- (void)hideDateAnimated
 {
-    [self hideLeftTitle:YES];
+    [self hideDate:YES];
 }
 
-- (void)showLeftTitle:(BOOL)animated
+- (void)showDate:(BOOL)animated
 {
-    self.leftTitleLabel.hidden = NO;
+    self.dateLabel.hidden = NO;
     
     if (animated)
     {
         UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState |
                                          UIViewAnimationCurveEaseInOut;
         
-        [UIView animateWithDuration:0.3
+        [UIView animateWithDuration:kDateFadingDuration
                               delay:0
                             options:options
                          animations:^{
                              
-                             self.leftTitleLabel.alpha = 1;
+                             self.dateLabel.alpha = 1;
                              
                          } completion:nil];
     }
@@ -314,7 +462,7 @@ static const CGFloat kLeftTitleMargin = 5.0f;
     {
         [UIView performWithoutAnimation:^{
             
-            self.leftTitleLabel.alpha = 1;
+            self.dateLabel.alpha = 1;
         }];
     }
 }

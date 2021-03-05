@@ -9,15 +9,24 @@
 #import <UIKit/UIKit.h>
 #import "GPToolbar.h"
 #import "GPPhotosTableViewController.h"
+#import "GPPhotoViewController.h"
+#import "GPPhoto.h"
 
-@interface GPRootViewController : UIViewController
+@interface GPRootViewController : UIViewController <GPToolbarDelegate>
 
 @property (nonatomic, strong) GPToolbar *topToolbar;
+@property (nonatomic, strong) GPToolbar *bottomToolbar;
 
 @property (nonatomic, strong) GPPhotosTableViewController *photosTableViewController;
+@property (nonatomic, strong) GPPhotoViewController *photoViewController;
+
+@property (nonatomic, strong) UIViewController *topViewController;
 
 + (instancetype)rootViewController;
 
 - (void)updateUI;
+
+- (void)presentPhotoViewControllerWithPhoto:(GPPhoto *)photo;
+- (void)dismissPhotoViewController;
 
 @end

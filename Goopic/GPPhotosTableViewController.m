@@ -118,6 +118,49 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     [self setNeedsDisplay];
 }
 
+// percent : [-1,1]
+- (void)updatePerspectiveWithPercent:(double)percent
+{
+    for (id photoData in _photos)
+    {
+        UIImageView *thumbnailView = photoData[kThumbnailViewKey];
+        
+        
+//        thumbnailView.layer.anchorPoint = (percent < 0) ? CGPointMake(1, 0.5) : CGPointMake(0, 0.5);
+        
+//        if (percent < 0)
+//        {
+//            thumbnailView.layer.anchorPoint = CGPointMake(1, 0.5);
+//            thumbnailView.layer.position = CGPointMake(sThumbnailDimension, thumbnailView.layer.position.y);
+//        }
+//        else
+//        {
+//            thumbnailView.layer.anchorPoint = CGPointMake(0, 0.5);
+//            thumbnailView.layer.position = CGPointMake(0, thumbnailView.layer.position.y);
+//        }
+        
+//        thumbnailView.layer.anchorPoint = CGPointMake(0, 0);
+//        thumbnailView.layer.position = CGPointMake(0, 0);
+        
+        CGPoint anchor = (percent < 0) ? CGPointMake(1, 0.5) : CGPointMake(0, 0.5);
+        
+        if (!CGPointEqualToPoint(thumbnailView.layer.anchorPoint, anchor))
+        {
+            CGPoint oldAnchor = thumbnailView.layer.anchorPoint;
+            CGPoint oldPos = thumbnailView.layer.position;
+            thumbnailView.layer.anchorPoint = anchor;
+            thumbnailView.layer.position = CGPointMake(oldPos.x + (anchor.x - oldAnchor.x) * thumbnailView.layer.frame.size.width, oldPos.y);
+        }
+        
+        CATransform3D rotation = CATransform3DMakeRotation(percent * M_PI_2, 0, 1, 0);
+        thumbnailView.layer.transform = rotation;
+    }
+    
+    CATransform3D perspective = CATransform3DIdentity;
+    perspective.m34 = 1.0 / -300;
+    self.contentView.layer.sublayerTransform = perspective;
+}
+
 @end
 
 
@@ -270,7 +313,8 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         self.backgroundColor = COLOR_BLACK;
         self.showsHorizontalScrollIndicator = NO;
         self.showsVerticalScrollIndicator = YES;
-        self.allowsSelection = YES;
+//        self.allowsSelection = YES;
+        self.allowsSelection = NO;
         self.allowsMultipleSelection = NO;
         self.separatorStyle = UITableViewCellSeparatorStyleNone;
         self.decelerationRate = UIScrollViewDecelerationRateNormal;
@@ -300,6 +344,9 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 #pragma mark - Photos Table View Controller
 
 @interface GPPhotosTableViewController ()
+//{
+//    CGPoint _initialPanLocation;
+//}
 
 @property (atomic) BOOL reloadFromLibraryInProgress;
 
@@ -311,6 +358,8 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 @end
 
 @implementation GPPhotosTableViewController
+
+@synthesize rootViewController = _rootViewController;
 
 #pragma mark - Init / Dealloc
 
@@ -365,10 +414,14 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     
     [self createPhotosSections];
     [self reloadPhotosFromLibrary];
+    
+    UITapGestureRecognizer *tapGr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    [self.view addGestureRecognizer:tapGr];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
+    GPLogIN();
     [super viewWillAppear:animated];
     
     if (self.indexPathOfSelectedCell)
@@ -376,6 +429,27 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         [self.photosTableView deselectRowAtIndexPath:self.indexPathOfSelectedCell animated:NO];
         self.indexPathOfSelectedCell = nil;
     }
+    
+    if (_needsReloadFromLibrary)
+    {
+        [self reloadPhotosFromLibrary];
+    }
+    else if (_needsReload)
+    {
+        [self reloadPhotosInTableView];
+    }
+    
+    GPLogOUT();
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    GPLogIN();
+    [super viewWillDisappear:animated];
+    
+    // No implementation needed
+    
+    GPLogOUT();
 }
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
@@ -420,10 +494,29 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     
     self.reloadFromLibraryInProgress = YES;
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self updateUI];
-        [self.activityIndicator startAnimating];
-    });
+    _needsReloadFromLibrary = NO;
+    _needsReload = NO; // table view will be reloaded automatically
+    
+    if ([self canReloadPhotosInTableView])
+    {
+        __weak typeof(self) weakSelf = self;
+        
+        Block startInidicatorAnimation = ^{
+            [weakSelf updateUI];
+            [weakSelf.activityIndicator startAnimating];
+        };
+        
+        if (![[NSThread currentThread] isMainThread])
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                startInidicatorAnimation();
+            });
+        }
+        else
+        {
+            startInidicatorAnimation();
+        }
+    }
     
     [self performSelectorInBackground:@selector(doReloadPhotosFromLibrary) withObject:nil];
     
@@ -436,7 +529,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     
     ALAssetsLibrary *library = [GPAssetsManager defaultAssetsLibrary];
     
-    __block Completion updateTableViewCompletion = ^{
+    __block Block updateTableViewCompletion = ^{
         
         [self createPhotosSections];
         self.reloadFromLibraryInProgress = NO;
@@ -539,15 +632,21 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 {
     GPLogIN();
     
+    if (![self canReloadPhotosInTableView])
+    {
+        GPLog(@"Photos table view controller is not visible, photos will be reloaded on viewWillAppear:");
+        _needsReload = YES;
+        return;
+    }
+    
+    _needsReload = NO;
+    
     [self.activityIndicator startAnimating];
     
     self.photosTableView.scrollEnabled = NO;
     [self.photosTableView reloadData]; // See tableViewDidFinishLoading:
     
     [self updateUI];
-    
-//    GPLog(@"photos from library: %@", [self.photosFromLibrary description]);
-//    GPLog(@"photos sections: %@", [self.photosSections description]);
     
     GPLogOUT();
 }
@@ -618,48 +717,27 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     self.photosSections = photosSections;
 }
 
-- (void)updateDateTitle
+- (BOOL)canReloadPhotosInTableView
 {
-    NSString *newDateTitle = @"";
+    return [self isTopViewController] && !self.view.hidden;  //  TODO: and app not in background ?
+}
+
+- (void)setNeedsReload
+{
+    GPLogIN();
     
-    CGPoint topPointInRootView = CGPointMake(self.rootViewController.view.bounds.size.width / 2, [GPToolbar preferredHeight]);
-    NSArray *visibleRowsIndexPaths = [self.photosTableView indexPathsForVisibleRows];
+    [self reloadPhotosInTableView];
     
-    for (NSInteger i = 0; i < [visibleRowsIndexPaths count]; i++)
-    {
-        NSIndexPath *indexPath = visibleRowsIndexPaths[i];
-        
-        if (indexPath.section == 0 || indexPath.section == [self.photosSections count] - 1)
-        {
-            continue; // Skip table view header and footer
-        }
-        
-        GPPhotoCell *photoCell = (GPPhotoCell *)[self.photosTableView cellForRowAtIndexPath:indexPath];
-        
-        if (photoCell)
-        {
-            CGRect cellFrameInRootView = [self.rootViewController.view convertRect:photoCell.frame fromView:photoCell.superview];
-            
-            if (((topPointInRootView.y >= cellFrameInRootView.origin.y) &&
-                 (topPointInRootView.y < cellFrameInRootView.origin.y + cellFrameInRootView.size.height)) ||
-                [[visibleRowsIndexPaths firstObject] section] == 0)
-            {
-                GPPhoto *firstPhoto = (GPPhoto *)[photoCell.photos firstObject];
-                
-                if (firstPhoto)
-                {
-                    newDateTitle = [[firstPhoto.dateTaken dateWithYearMonthAndDayOnly] formattedDateForTitle];
-                }
-                
-                break;
-            }
-        }
-    }
+    GPLogOUT();
+}
+
+- (void)setNeedsReloadFromLibrary
+{
+    GPLogIN();
     
-    if ([newDateTitle length] > 0)
-    {
-        self.rootViewController.topToolbar.leftTitle = newDateTitle;
-    }
+    [self reloadPhotosFromLibrary];
+    
+    GPLogOUT();
 }
 
 #pragma mark - Update Interface
@@ -702,6 +780,104 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     }
     
     return nil;
+}
+
+- (void)updateDateTitle
+{
+    NSString *newDateTitle = @"";
+    
+    CGPoint topPointInRootView = CGPointMake(self.rootViewController.view.bounds.size.width / 2, [self.topToolbar preferredHeight]);
+    NSArray *visibleRowsIndexPaths = [self.photosTableView indexPathsForVisibleRows];
+    
+    for (NSInteger i = 0; i < [visibleRowsIndexPaths count]; i++)
+    {
+        NSIndexPath *indexPath = visibleRowsIndexPaths[i];
+        
+        if (indexPath.section == 0 || indexPath.section == [self.photosSections count] - 1)
+        {
+            continue; // Skip table view header and footer
+        }
+        
+        GPPhotoCell *photoCell = (GPPhotoCell *)[self.photosTableView cellForRowAtIndexPath:indexPath];
+        
+        if (photoCell)
+        {
+            CGRect cellFrameInRootView = [self.rootViewController.view convertRect:photoCell.frame fromView:photoCell.superview];
+            
+            if (((topPointInRootView.y >= cellFrameInRootView.origin.y) &&
+                 (topPointInRootView.y < cellFrameInRootView.origin.y + cellFrameInRootView.size.height)) ||
+                [[visibleRowsIndexPaths firstObject] section] == 0)
+            {
+                GPPhoto *firstPhoto = (GPPhoto *)[photoCell.photos firstObject];
+                
+                if (firstPhoto)
+                {
+                    newDateTitle = [[firstPhoto.dateTaken dateWithYearMonthAndDayOnly] formattedDateForTitle];
+                }
+                
+                break;
+            }
+        }
+    }
+    
+    if ([newDateTitle length] > 0)
+    {
+        self.rootViewController.topToolbar.date = newDateTitle;
+    }
+}
+
+// percent: [0,1]
+- (void)updateCellsPerspectiveWithPercent:(double)percent
+{
+    GPLogIN();
+    
+//    NSArray *visibleIndexPaths = [self.photosTableView indexPathsForVisibleRows];
+//    
+//    for (NSIndexPath *indexPath in visibleIndexPaths)
+//    {
+//        if (indexPath.section > 0 && indexPath.section < [self.photosSections count] - 1) // Ignore table view header & footer
+//        {
+//            GPPhotoCell *photoCell = (GPPhotoCell *)[self.photosTableView cellForRowAtIndexPath:indexPath];
+//            [photoCell updatePerspectiveWithPercent:percent];
+//        }
+//    }
+    
+//    CGPoint anchor = (percent < 0) ? CGPointMake(1, 0.5) : CGPointMake(0, 0.5);
+//    
+//    if (!CGPointEqualToPoint(self.photosTableView.layer.anchorPoint, anchor))
+//    {
+//        CGPoint oldAnchor = self.photosTableView.layer.anchorPoint;
+//        CGPoint oldPos = self.photosTableView.layer.position;
+//        self.photosTableView.layer.anchorPoint = anchor;
+//        self.photosTableView.layer.position = CGPointMake(oldPos.x + (anchor.x - oldAnchor.x) * self.photosTableView.layer.frame.size.width, oldPos.y);
+//    }
+    
+    CGPoint anchor = CGPointMake((percent == 0) ? 0.5 : ((percent > 0) ? 0 : 1), 0.5);
+    self.photosTableView.layer.anchorPoint = anchor;
+    self.photosTableView.layer.position = CGPointMake(anchor.x * self.photosTableView.bounds.size.width,
+                                                      anchor.y * self.photosTableView.bounds.size.height);
+    
+    CATransform3D t = (percent != 0) ? CATransform3DMakeRotation(percent * M_PI_2, 0, 1, 0) : CATransform3DIdentity;
+    self.photosTableView.layer.transform = t;
+    
+    CATransform3D perspective = CATransform3DIdentity;
+    perspective.m34 = (percent != 0) ? 1.0 / -300 : 1;
+    self.photosTableView.layer.superlayer.sublayerTransform = perspective;
+    
+    GPLogOUT();
+}
+
+- (GPToolbar *)topToolbar
+{
+    if (!_topToolbar)
+    {
+        GPToolbar *topToolbar = [[GPToolbar alloc] initWithStyle:GPPositionTop];
+        topToolbar.title = @"Photos";
+        [topToolbar hideDate:NO];
+        _topToolbar = topToolbar;
+    }
+    
+    return _topToolbar;
 }
 
 #pragma mark - Table View Data Source
@@ -752,37 +928,37 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 {
     if (indexPath.section == 0) // Table view header
     {
-        return [GPToolbar preferredHeight];
+        return [self.topToolbar preferredHeight];
     }
     
     if (indexPath.section == [self.photosSections count] - 1)
     {
-        return (self.rootViewController.view.bounds.size.height - [GPToolbar preferredHeight] - sThumbnailDimension - kPhotosSpacing);
+        return (self.rootViewController.view.bounds.size.height - [self.topToolbar preferredHeight] - sThumbnailDimension - kPhotosSpacing);
     }
     
     return sThumbnailDimension + kPhotosSpacing;
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    GPLogIN();
-    
-    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-    
-    if ([cell isKindOfClass:[GPPhotoCell class]])
-    {
-        if (indexPath.section > 0 && indexPath.section < [self.photosSections count] - 1) // Avoid table view header & footer
-        {
-            GPPhotoCell *photoCell = (GPPhotoCell *)cell;
-            GPLog(@"Selected photo cell: %@ at index path: %@", [photoCell description], [indexPath description]);
-            GPLog(@"cell photos: %@", [photoCell.photos description]);
-            
-            self.indexPathOfSelectedCell = indexPath;
-        }
-    }
-    
-    GPLogOUT();
-}
+//- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    GPLogIN();
+//    
+//    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+//    
+//    if ([cell isKindOfClass:[GPPhotoCell class]])
+//    {
+//        if (indexPath.section > 0 && indexPath.section < [self.photosSections count] - 1) // Avoid table view header & footer
+//        {
+//            GPPhotoCell *photoCell = (GPPhotoCell *)cell;
+//            GPLog(@"Selected photo cell: %@ at index path: %@", [photoCell description], [indexPath description]);
+//            GPLog(@"cell photos: %@", [photoCell.photos description]);
+//            
+//            self.indexPathOfSelectedCell = indexPath;
+//        }
+//    }
+//    
+//    GPLogOUT();
+//}
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
@@ -893,25 +1069,92 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 
 #pragma mark - Scroll View Delegate
 
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+    GPLogIN();
+    
+//    GPLog(@"gesture recognizers: %@", scrollView.gestureRecognizers);
+//    
+//    UIPanGestureRecognizer *panGr = [scrollView panGestureRecognizer];
+//    _initialPanLocation = [panGr locationInView:self.view];
+    
+    GPLogOUT();
+}
+
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     GPLogIN();
     
     [self updateDateTitle];
     
-    if ([self.rootViewController.topToolbar.leftTitleLabel isHidden])
+    if ([self.rootViewController.topToolbar.dateLabel isHidden])
     {
-        [self.rootViewController.topToolbar showLeftTitle:YES];
+        [self.rootViewController.topToolbar showDate:YES];
     }
     
     [self.hideTitleTimer invalidate];
     self.hideTitleTimer = [NSTimer scheduledTimerWithTimeInterval:kTitleVisibilityTimeout
                                                            target:self.rootViewController.topToolbar
-                                                         selector:@selector(hideLeftTitleAnimated)
+                                                         selector:@selector(hideDateAnimated)
                                                          userInfo:nil
                                                           repeats:NO];
     
+//    UIPanGestureRecognizer *panGr = [scrollView panGestureRecognizer];
+//    CGPoint panLocation = [panGr locationInView:self.view];
+//    
+//    GPLog(@"panning offset: %@", NSStringFromCGPoint(CGPointMake(panLocation.x - _initialPanLocation.x, panLocation.y - _initialPanLocation.y)));
+//    
+//    CGFloat percent = (panLocation.x - _initialPanLocation.x) / self.view.bounds.size.width;
+//    GPLog(@"percent: %f", percent);
+//    [self updateCellsPerspectiveWithPercent:percent];
+    
     GPLogOUT();
+}
+
+#pragma mark - Gestures handling
+
+- (void)handleTap:(UITapGestureRecognizer *)tapGr
+{
+    GPLogIN();
+    
+    CGPoint pos = [tapGr locationInView:self.view];
+    CGPoint posInTableView = [self.photosTableView convertPoint:pos fromView:self.view];
+    GPLog(@"tap: %@ %@", NSStringFromCGPoint(pos), NSStringFromCGPoint(posInTableView));
+    
+    GPPhoto *selectedPhoto = [self photoAtPoint:posInTableView];
+    
+    if (selectedPhoto)
+    {
+        GPLog(@"Selected photo: %@", [selectedPhoto description]);
+        [self.rootViewController presentPhotoViewControllerWithPhoto:selectedPhoto];
+    }
+    
+    GPLogOUT();
+}
+
+- (GPPhoto *)photoAtPoint:(CGPoint)posInTableView
+{
+    NSIndexPath *indexPath = [self.photosTableView indexPathForRowAtPoint:posInTableView];
+    
+    if (indexPath.section > 0 && indexPath.section < [self.photosSections count] - 1) // Ignore table view header & footer
+    {
+        GPPhotoCell *photoCell = (GPPhotoCell *)[self.photosTableView cellForRowAtIndexPath:indexPath];
+        
+        if (photoCell)
+        {
+            NSInteger index = (posInTableView.x / self.photosTableView.bounds.size.width) * [GPPhotosTableViewController photosCountPerCell];
+            
+            NSArray *photos = [photoCell photos];
+            
+            if ((index >= 0) && (index < [photos count]))
+            {
+                GPPhoto *photo = (GPPhoto *)photos[index];
+                return photo;
+            }
+        }
+    }
+    
+    return nil;
 }
 
 @end

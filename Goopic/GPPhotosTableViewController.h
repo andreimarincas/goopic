@@ -27,6 +27,8 @@
 
 - (void)updateUI;
 
+- (void)updatePerspectiveWithPercent:(double)percent;
+
 @end
 
 
@@ -71,6 +73,12 @@
 @interface GPPhotosTableViewController : UIViewController <UITableViewDataSource,
                                                            UITableViewDelegate,
                                                            UIScrollViewDelegate>
+{
+    GPToolbar *_topToolbar;
+    
+    BOOL _needsReload;
+    BOOL _needsReloadFromLibrary;
+}
 
 @property (nonatomic, strong) GPPhotosTableView *photosTableView;
 
@@ -86,5 +94,8 @@
 - (instancetype)init;
 
 - (void)updateUI;
+
+- (void)setNeedsReload;
+- (void)setNeedsReloadFromLibrary;
 
 @end

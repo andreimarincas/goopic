@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
+
 NSString * NSStringFromGPToolbarButtonType(GPToolbarButtonType buttonType);
 
 BOOL AppIsInFullScreenMode();
@@ -20,3 +21,9 @@ UIInterfaceOrientation GPInterfaceOrientation();
 
 BOOL GPInterfaceOrientationIsPortrait();
 BOOL GPInterfaceOrientationIsLandscape();
+
+BOOL CGPointInCGRect(CGPoint point, CGRect rect);
+
+CGFloat ScaleFactorForUploadingImageWithSize(CGSize size);
+
+CGSize CGSizeIntegral(CGSize size);

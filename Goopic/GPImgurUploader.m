@@ -13,9 +13,10 @@ static const CGFloat kCompressionQuality = 0.3f;
 
 @implementation GPImgurUploader
 
-+ (void)uploadImage:(NSString *)jpgImageName completion:(UploadCompletion)completion
++ (void)uploadImage:(UIImage *)image withName:(NSString *)name completion:(UploadCompletion)completion
 {
-    GPLog(@"Uploading image to Imgur: %@", jpgImageName);
+    GPLogIN();
+    GPLog(@"Uploading image to Imgur: %@ - %@", name, image);
     
     GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
     IMGSession *imgurSession = [appDelegate imgurSession];
@@ -27,14 +28,13 @@ static const CGFloat kCompressionQuality = 0.3f;
     
     BodyConstruct appendImageBlock = ^(id <AFMultipartFormData> formData)
     {
-        UIImage *jpgImage = [UIImage imageNamed:jpgImageName];
-        NSData *imageDataToUpload = UIImageJPEGRepresentation(jpgImage, kCompressionQuality);
+        NSData *imageDataToUpload = UIImageJPEGRepresentation(image, kCompressionQuality);
         
         if (imageDataToUpload)
         {
             [formData appendPartWithFileData:imageDataToUpload
                                         name:MULTIPART_FORM_IMAGE_DATA
-                                    fileName:jpgImageName
+                                    fileName:[name copy]
                                     mimeType:MIME_TYPE_JPEG];
         }
         else
@@ -63,6 +63,15 @@ static const CGFloat kCompressionQuality = 0.3f;
                      completion(@"", error);
                  }
              }];
+}
+
++ (void)uploadImageWithName:(NSString *)name completion:(UploadCompletion)completion
+{
+    GPLogIN();
+    
+    [self uploadImage:[UIImage imageNamed:name] withName:name completion:completion];
+    
+    GPLogOUT();
 }
 
 @end

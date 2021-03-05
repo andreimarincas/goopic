@@ -21,7 +21,7 @@
     
     NSString *imageName = @"ReflectionsOfAutumn.jpg";
     
-    [GPImgurUploader uploadImage:imageName
+    [GPImgurUploader uploadImageWithName:imageName
                       completion:^(NSString *link, NSError *error) {
                           
                           if (!error)
