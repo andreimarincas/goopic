@@ -23,6 +23,8 @@ static const CGFloat kFlashButtonEdgeInset   = 20.0f;
 static const CGFloat kTakeButtonSize         = 50.0f;
 static const CGFloat kButtonHitTestEdgeInset = 40.0f;
 
+//static const CGFloat kMinButtonWidth         = 50.0f;
+
 
 #pragma mark -
 #pragma mark - Camera View Top Toolbar
@@ -40,16 +42,16 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         self.backgroundColor = GPCOLOR_DARK_BLACK;
         
         UIImageView *flashIcon = [[UIImageView alloc] init];
-        flashIcon.image = [UIImage imageNamed:@"flash-icon.png"];
+        flashIcon.image = [UIImage imageNamed:@"flash.png"];
         [self addSubview:flashIcon];
         self.flashIcon = flashIcon;
         
         GPButton *flashAutoButton = [[GPButton alloc] init];
         [flashAutoButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
         [flashAutoButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-//        [flashAutoButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
         [flashAutoButton setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
         [flashAutoButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        flashAutoButton.delegate = self;
         [flashAutoButton setTitle:@"Auto" forState:UIControlStateNormal];
         flashAutoButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
         flashAutoButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
@@ -60,9 +62,9 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         GPButton *flashOnButton = [[GPButton alloc] init];
         [flashOnButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
         [flashOnButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-//        [flashOnButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
         [flashOnButton setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
         [flashOnButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        flashOnButton.delegate = self;
         [flashOnButton setTitle:@"On" forState:UIControlStateNormal];
         flashOnButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
         flashOnButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
@@ -73,9 +75,9 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         GPButton *flashOffButton = [[GPButton alloc] init];
         [flashOffButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
         [flashOffButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-//        [flashOffButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
         [flashOffButton setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
         [flashOffButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        flashOffButton.delegate = self;
         [flashOffButton setTitle:@"Off" forState:UIControlStateNormal];
         flashOffButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
         flashOffButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
@@ -101,6 +103,26 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
     self.flashOffButton.selected = [value isEqualToString:kCameraFlashOffValue];
     
     GPLogOUT();
+}
+
+- (GPButton *)selectedFlashButton
+{
+    if ([self.flashAutoButton isSelected])
+    {
+        return self.flashAutoButton;
+    }
+    
+    if ([self.flashOnButton isSelected])
+    {
+        return self.flashOnButton;
+    }
+    
+    if ([self.flashOffButton isSelected])
+    {
+        return self.flashOffButton;
+    }
+    
+    return nil;
 }
 
 - (void)updateUI
@@ -154,7 +176,7 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
     GPLogIN();
     GPLog(@"%@", button);
     
-    if (!button.isSelected)
+    if (![button isSelected])
     {
         self.flashAutoButton.selected = NO;
         self.flashOnButton.selected = NO;
@@ -172,7 +194,7 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         [userDefaults setValue:flashValue forKey:kCameraFlashKey];
         [userDefaults synchronize];
         
-        [self.delegate toolbar:self didSelectButton:button];
+        [self.delegate toolbar:self didSelectButton:(GPButton *)button];
     }
     
     GPLogOUT();
@@ -207,6 +229,25 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
             [UIView performWithoutAnimation:rotateButtons];
         }
     }
+    
+    GPLogOUT();
+}
+
+#pragma mark - GP Button Delegate
+
+- (void)buttonDidChangedHighlightState:(GPButton *)button
+{
+    GPLogIN();
+    GPLog(@"button: %@, isHighlighted: %@", button, NSStringFromBOOL([button isHighlighted]));
+    
+    NSString *flash = @"flash.png";
+    
+    if ([button isHighlighted])
+    {
+        flash = @"flash-highlight.png";
+    }
+    
+    [self.flashIcon setImage:[UIImage imageNamed:flash]];
     
     GPLogOUT();
 }
@@ -320,7 +361,7 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
     GPLogIN();
     GPLog(@"%@", button);
     
-    [self.delegate toolbar:self didSelectButton:button];
+    [self.delegate toolbar:self didSelectButton:(GPButton *)button];
     
     GPLogOUT();
 }
@@ -331,6 +372,13 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
     
     CGAffineTransform rotation = CGAffineTransformMakeRotation(angle);
     
+    Block rotateButtons = ^{
+        
+        self.cancelButton.transform = rotation;
+        self.retakeButton.transform = rotation;
+        self.useButton.transform = rotation;
+    };
+    
     if (animated)
     {
         UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut;
@@ -338,17 +386,12 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         [UIView animateWithDuration:0.3f
                               delay:0
                             options:options
-                         animations:^{
-                             
-                             self.cancelButton.transform = rotation;
-                             
-                         } completion:nil];
+                         animations:rotateButtons
+                         completion:nil];
     }
     else
     {
-        [UIView performWithoutAnimation:^{
-            self.cancelButton.transform = rotation;
-        }];
+        [UIView performWithoutAnimation:rotateButtons];
     }
     
     GPLogOUT();

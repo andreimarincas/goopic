@@ -14,14 +14,14 @@
 
 @protocol GPCameraViewToolbarDelegate <NSObject>
 
-- (void)toolbar:(id)toolbar didSelectButton:(UIButton *)button;
+- (void)toolbar:(id)toolbar didSelectButton:(GPButton *)button;
 
 @end
 
 
 #pragma mark - Top Toolbar
 
-@interface GPCameraViewTopToolbar : UIView
+@interface GPCameraViewTopToolbar : UIView <GPButtonDelegate>
 {
     CGFloat _buttonsRotationAngle;
 }
@@ -33,6 +33,8 @@
 @property (nonatomic, strong) GPButton *flashAutoButton;
 @property (nonatomic, strong) GPButton *flashOnButton;
 @property (nonatomic, strong) GPButton *flashOffButton;
+
+@property (nonatomic, readonly) GPButton *selectedFlashButton;
 
 - (instancetype)init;
 

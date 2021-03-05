@@ -25,7 +25,7 @@ static const CGFloat kBlurScale         = 1.5f;
 
 #endif
 
-static const CGFloat kFlashBulbAnimationDuration = 0.3f;
+static const CGFloat kFlashBulbAnimationDuration = 0.25f;
 
 // Contexts
 
@@ -82,6 +82,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 @synthesize cameraRunning = _cameraRunning;
 @synthesize capturingStillImage = _capturingStillImage;
+
+@synthesize capturedImage = _capturedImage;
 
 #pragma mark - Utils
 
@@ -148,6 +150,24 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 #endif
 
++ (void)setFlashMode:(AVCaptureFlashMode)flashMode forDevice:(AVCaptureDevice *)device
+{
+	if ([device hasFlash] && [device isFlashModeSupported:flashMode])
+	{
+		NSError *error = nil;
+        
+		if ([device lockForConfiguration:&error])
+		{
+			[device setFlashMode:flashMode];
+			[device unlockForConfiguration];
+		}
+		else
+		{
+			GPLogErr(@"%@ %@", error, [error userInfo]); // TODO: Handle error
+		}
+	}
+}
+
 #pragma mark - Init/Dealloc
 
 - (instancetype)init
@@ -213,9 +233,16 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     NSString *flashValue = [userDefaults stringForKey:kCameraFlashKey];
     [topToolbar selectFlashButtonForValue:flashValue];
     
-    [self updateButtons];
+    [self updateButtonsAnimated:YES];
     
 	[self setupCamera];
+    
+    UIImageView *capturedImageView = [[UIImageView alloc] init];
+    capturedImageView.backgroundColor = [UIColor blackColor];
+    capturedImageView.userInteractionEnabled = NO;
+    capturedImageView.hidden = YES;
+    [self.view addSubview:capturedImageView];
+    self.capturedImageView = capturedImageView;
     
 #if (CAMERA_BLUR_ENABLED)
     
@@ -238,7 +265,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     UIView *flashView = [[UIView alloc] init];
     flashView.userInteractionEnabled = NO;
     flashView.alpha = 0;
-    flashView.backgroundColor = [UIColor whiteColor];
+    flashView.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1];
     [self.view addSubview:self.flashView];
     self.flashView = flashView;
     
@@ -409,6 +436,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
                 
                 // The backing layer for camera view and the view can only be manipulated on main thread.
                 [[self.cameraView.videoLayer connection] setVideoOrientation:(AVCaptureVideoOrientation)[self interfaceOrientation]];
+                
+                [self updateFlash];
 			});
 		}
         
@@ -552,6 +581,18 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     [self.view bringSubviewToFront:self.topToolbar];
     [self.view bringSubviewToFront:self.bottomToolbar];
     
+    // Captured image view
+    self.capturedImageView.frame = self.cameraView.frame;
+    [self.capturedImageView removeFromSuperview];
+    [self.view addSubview:self.capturedImageView];
+    [self.view bringSubviewToFront:self.capturedImageView];
+    
+    [CALayer performWithoutAnimation:^{
+        [self.view.layer bringSublayerToFront:self.capturedImageView.layer];
+    }];
+    
+    [self.capturedImageView setNeedsDisplay];
+    
     // Flash view
     self.flashView.frame = self.cameraView.frame;
     [self.flashView removeFromSuperview];
@@ -567,50 +608,102 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogOUT();
 }
 
-- (void)updateButtons
+- (void)rotateControlsToOrientation:(UIDeviceOrientation)toDeviceOrientation animated:(BOOL)animated
 {
     GPLogIN();
     
-    if (!self.cameraRunning)
+    CGFloat angle = 0;
+    
+    if (toDeviceOrientation == UIDeviceOrientationLandscapeLeft)
     {
-        [self.topToolbar.flashAutoButton setUserInteractionEnabled:NO];
-        [self.topToolbar.flashOnButton setUserInteractionEnabled:NO];
-        [self.topToolbar.flashOffButton setUserInteractionEnabled:NO];
+        angle = M_PI_2;
+    }
+    else if (toDeviceOrientation == UIDeviceOrientationLandscapeRight)
+    {
+        angle = -M_PI_2;
+    }
+    
+    [self.topToolbar setButtonsRotation:angle animated:animated];
+    [self.bottomToolbar setButtonsRotation:angle animated:animated];
+    
+    GPLogOUT();
+}
+
+- (void)updateButtonsAnimated:(BOOL)animated
+{
+    GPLogIN();
+    
+    Block updateButtons = ^{
         
-        self.topToolbar.flashIcon.alpha = 0.35f;
+        if (self.capturedImage)
+        {
+            [self.bottomToolbar.cancelButton setAlpha:0];
+            
+            [self.bottomToolbar.retakeButton setAlpha:1];
+            [self.bottomToolbar.retakeButton setEnabled:YES];
+            
+            [self.bottomToolbar.useButton setAlpha:1];
+            [self.bottomToolbar.useButton setEnabled:YES];
+            
+            [self.bottomToolbar.takeButton setEnabled:NO];
+        }
+        else
+        {
+            [self.bottomToolbar.cancelButton setAlpha:1];
+            [self.bottomToolbar.retakeButton setAlpha:0];
+            [self.bottomToolbar.useButton setAlpha:0];
+            [self.bottomToolbar.takeButton setEnabled:self.cameraRunning];
+        }
+    };
+    
+    if (animated)
+    {
+        UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveLinear;
         
-        [self.bottomToolbar.takeButton setEnabled:NO];
+        [UIView animateWithDuration:0.25
+                              delay:0
+                            options:options
+                         animations:updateButtons
+                         completion:nil];
     }
     else
     {
-        [self.topToolbar.flashAutoButton setUserInteractionEnabled:YES];
-        [self.topToolbar.flashOnButton setUserInteractionEnabled:YES];
-        [self.topToolbar.flashOffButton setUserInteractionEnabled:YES];
-        
-        self.topToolbar.flashIcon.alpha = 1.0f;
-        
-        [self.bottomToolbar.takeButton setEnabled:YES];
-    }
-    
-    if (self.capturedImage)
-    {
-        [self.bottomToolbar.cancelButton setHidden:YES];
-        [self.bottomToolbar.retakeButton setHidden:NO];
-        [self.bottomToolbar.useButton setHidden:NO];
-    }
-    else
-    {
-        [self.bottomToolbar.cancelButton setHidden:NO];
-        [self.bottomToolbar.retakeButton setHidden:YES];
-        [self.bottomToolbar.useButton setHidden:YES];
-    }
-    
-    if (self.isCapturingStillImage)
-    {
-        [self.bottomToolbar.takeButton setEnabled:NO];
+        [UIView performWithoutAnimation:updateButtons];
     }
     
     GPLogOUT();
+}
+
+#pragma mark - Flash
+
+- (void)updateFlash
+{
+    GPLogIN();
+    
+    AVCaptureFlashMode flashMode = [self flashModeForButton:[self.topToolbar selectedFlashButton]];
+    [GPCameraViewController setFlashMode:flashMode forDevice:[self.cameraDeviceInput device]];
+    
+    GPLogOUT();
+}
+
+- (AVCaptureFlashMode)flashModeForButton:(GPButton *)button
+{
+    if (button == self.topToolbar.flashAutoButton)
+    {
+        return AVCaptureFlashModeAuto;
+    }
+    
+    if (button == self.topToolbar.flashOnButton)
+    {
+        return AVCaptureFlashModeOn;
+    }
+    
+    if (button == self.topToolbar.flashOffButton)
+    {
+        return AVCaptureFlashModeOff;
+    }
+    
+    return AVCaptureFlashModeAuto;
 }
 
 #pragma mark - Key-Value Observer
@@ -700,12 +793,12 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 //}
 
 // main action method to take a still image
-- (void)takePicture
+- (void)takePicture:(CaptureImageCompletionBlock)completion
 {
 	// Find out the current orientation and tell the still image output.
 	AVCaptureConnection *stillImageConnection = [self.stillImageOutput connectionWithMediaType:AVMediaTypeVideo];
-	AVCaptureVideoOrientation avCaptureOrientation = [GPCameraViewController avOrientationForDeviceOrientation:_deviceOrientation];
-	[stillImageConnection setVideoOrientation:avCaptureOrientation];
+//	AVCaptureVideoOrientation avCaptureOrientation = [GPCameraViewController avOrientationForDeviceOrientation:_deviceOrientation];
+//	[stillImageConnection setVideoOrientation:avCaptureOrientation];
 	
     // Set the appropriate pixel format / image type output setting
     [self.stillImageOutput setOutputSettings:[NSDictionary dictionaryWithObject:AVVideoCodecJPEG forKey:AVVideoCodecKey]];
@@ -718,13 +811,13 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
                 CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(kCFAllocatorDefault,
                                                                             imageDataSampleBuffer,
                                                                             kCMAttachmentMode_ShouldPropagate);
+                NSData *jpegData = nil;
+                id metadata = nil;
                 
                 if (attachments)
                 {
-                    id nsAttachments = (__bridge id)(attachments);
-                    GPLog(@"attachments: %@", nsAttachments);
-                    
-//                    NSData *jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
+                    metadata = (__bridge id)(attachments);
+                    CFRelease(attachments);
                     
 //                    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
 //                    [library writeImageDataToSavedPhotosAlbum:jpegData
@@ -740,12 +833,18 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 //                                                      GPLogErr(@"%@ %@", error, [error userInfo]);
 //                                                  }
 //                                              }];
-                    CFRelease(attachments);
+                    
                 }
-                else
-                {
-                    GPLogErr(@"No attachments.");
-                }
+                
+                jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                    if (completion)
+                    {
+                        completion(jpegData, metadata);
+                    }
+                });
             }
             else
             {
@@ -753,6 +852,31 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
             }
 		}
 	 ];
+}
+
+- (void)setCapturedImage:(UIImage *)capturedImage
+{
+    GPLogIN();
+    
+    if (_capturedImage != capturedImage)
+    {
+        _capturedImage = capturedImage;
+        
+        if (capturedImage)
+        {
+            [self.capturedImageView setImage:capturedImage];
+            self.capturedImageView.hidden = NO;
+        }
+        else
+        {
+            [self.capturedImageView setImage:nil];
+            self.capturedImageView.hidden = YES;
+        }
+        
+        [self updateUI];
+    }
+    
+    GPLogOUT();
 }
 
 #if (CAMERA_BLUR_ENABLED)
@@ -935,27 +1059,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     }
 }
 
-- (void)rotateControlsToOrientation:(UIDeviceOrientation)toDeviceOrientation animated:(BOOL)animated
-{
-    GPLogIN();
-    
-    CGFloat angle = 0;
-    
-    if (toDeviceOrientation == UIDeviceOrientationLandscapeLeft)
-    {
-        angle = M_PI_2;
-    }
-    else if (toDeviceOrientation == UIDeviceOrientationLandscapeRight)
-    {
-        angle = -M_PI_2;
-    }
-    
-    [self.topToolbar setButtonsRotation:angle animated:animated];
-    [self.bottomToolbar setButtonsRotation:angle animated:animated];
-    
-    GPLogOUT();
-}
-
 #pragma mark - Camera Running
 
 - (void)captureSessionDidStartRunning:(NSNotification *)notification
@@ -1005,7 +1108,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     if (_cameraRunning != cameraRunning)
     {
         _cameraRunning = cameraRunning;
-        [self updateButtons];
+        [self updateButtonsAnimated:YES];
     }
     
     GPLogOUT();
@@ -1021,7 +1124,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
         _capturingStillImage = capturingStillImage;
         
         [self runStillImageCaptureAnimation];
-        [self updateButtons];
+        [self updateButtonsAnimated:YES];
     }
     
     GPLogOUT();
@@ -1163,7 +1266,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 #pragma mark - Toolbar Delegate
 
-- (void)toolbar:(id)toolbar didSelectButton:(UIButton *)button
+- (void)toolbar:(id)toolbar didSelectButton:(GPButton *)button
 {
     GPLogIN();
     GPLog(@"button: %@", button);
@@ -1171,22 +1274,44 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     if (toolbar == self.topToolbar)
     {
         GPLog(@"flash selection changed");
+        
+        [self updateFlash];
     }
     else // bottom toolbar
     {
+        button.enabled = NO;
+        
         if (button == self.bottomToolbar.cancelButton)
         {
-            button.enabled = NO;
-            
             [self dismissViewControllerAnimated:YES completion:^{
                 button.enabled = YES;
             }];
         }
         else if (button == self.bottomToolbar.takeButton)
         {
-            button.enabled = NO;
-            
-            [self takePicture];
+            [self takePicture:^(NSData *jpegData, id metadata) {
+                
+                GPLog(@"jpegData: %@, metadata: %@", jpegData, metadata);
+                
+                if (jpegData && metadata)
+                {
+                    self.capturedImage = [UIImage imageWithData:jpegData];
+                    _capturedImageMetadata = metadata;
+                    
+                    [self updateButtonsAnimated:YES];
+                }
+                else
+                {
+                    GPLogErr(@"Captured image is invalid.");
+                    
+                    // TODO: Handle error
+                }
+            }];
+        }
+        else if (button == self.bottomToolbar.retakeButton)
+        {
+            self.capturedImage = nil;
+            [self updateButtonsAnimated:YES];
         }
     }
     

@@ -166,7 +166,7 @@
         {
             if (!highlighted)
             {
-                if ([self isSelected] == wasSelectedWhenHighlighted && [self isEnabled])
+                if ([self isSelected] == wasSelectedWhenHighlighted && [self isEnabled] && ![self isHidden])
                 {
                     [self animateFromHighlightToNormal];
                 }
@@ -193,6 +193,11 @@
             self.connectedButton.highlighted = highlighted;
         }
     }
+    
+    if (wasHighlighted != [self isHighlighted])
+    {
+        [self.delegate buttonDidChangedHighlightState:self];
+    }
 }
 
 - (void)setUserInteractionEnabled:(BOOL)userInteractionEnabled
@@ -208,6 +213,11 @@
 - (void)updateTitleColor
 {
     GPLogIN();
+    
+    if (self.shouldUpdateTitleColor)
+    {
+        return;
+    }
     
     if ([self isUserInteractionEnabled])
     {

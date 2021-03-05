@@ -81,7 +81,7 @@ typedef void (^CompletionBlock)             (NSError *error);
 typedef void (^UploadCompletionBlock)       (NSString *link, NSString *deleteHash, NSError *error);
 typedef void (^BodyConstructionBlock)       (id <AFMultipartFormData>);
 typedef void (^CaptureStillImageBlock)      (CMSampleBufferRef sampleBuffer, NSError *error);
-typedef void (^CaptureImageCompletionBlock) (UIImage *image);
+typedef void (^CaptureImageCompletionBlock) (NSData *jpegData, id metadata);
 
 
 // Enums

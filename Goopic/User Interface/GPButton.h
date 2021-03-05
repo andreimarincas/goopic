@@ -11,6 +11,12 @@
 
 @class GPButton;
 
+@protocol GPButtonDelegate <NSObject>
+
+- (void)buttonDidChangedHighlightState:(GPButton *)button;
+
+@end
+
 
 @interface GPButtonStateTransitionView : UIView
 
@@ -34,6 +40,9 @@
 @property (nonatomic, weak) GPButton *connectedButton;
 
 @property (nonatomic) BOOL smallButton;
+@property (nonatomic) BOOL shouldUpdateTitleColor;
+
+@property (nonatomic, weak) id <GPButtonDelegate> delegate;
 
 - (instancetype)init;
 

@@ -34,6 +34,9 @@
     
     BOOL _cameraRunning;
     BOOL _capturingStillImage;
+    
+    UIImage *_capturedImage;
+    id _capturedImageMetadata;
 }
 
 // Session management
@@ -43,13 +46,18 @@
 
 @property (nonatomic, strong) AVCaptureDeviceInput * cameraDeviceInput;
 @property (nonatomic, strong) AVCaptureStillImageOutput * stillImageOutput;
-@property (nonatomic, strong) AVCaptureVideoDataOutput *videoDataOutput;
 
 // Communicate with the session and other session objects on this queue
 @property (nonatomic, strong) dispatch_queue_t sessionQueue;
 
+#if (CAMERA_BLUR_ENABLED)
+
+@property (nonatomic, strong) AVCaptureVideoDataOutput *videoDataOutput;
+
 // Process video frames in this queue
 @property (nonatomic, strong) dispatch_queue_t videoDataOutputQueue;
+
+#endif
 
 @property (nonatomic, getter = isCameraRunning) BOOL cameraRunning;
 @property (nonatomic, getter = isCapturingStillImage) BOOL capturingStillImage;
@@ -66,6 +74,7 @@
 @property (nonatomic, strong) UIView *flashView;
 
 @property (nonatomic, strong) UIImage *capturedImage;
+@property (nonatomic, strong) UIImageView *capturedImageView;
 
 // Blur
 @property (nonatomic, strong) CALayer *blurLayer;
