@@ -41,8 +41,6 @@
     
     UIImage *_capturedImage;
     id _imageMetadata;
-    
-    BOOL _canUpdateButtons;
 }
 
 // Session management
@@ -91,8 +89,6 @@
 // Toolbars
 @property (nonatomic, strong) GPCameraViewTopToolbar *topToolbar;
 @property (nonatomic, strong) GPCameraViewBottomToolbar *bottomToolbar;
-
-@property (nonatomic) BOOL canUpdateButtons;
 
 
 // Designated initializer

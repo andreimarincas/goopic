@@ -133,12 +133,6 @@
     
     GPPhotosTableViewController *photosTableViewController = (GPPhotosTableViewController *)[self rootViewController];
     
-    // quicly insert the new photo before reloading all photos from notification
-//    if (![photo isEqualToPhoto:[photosTableViewController.photos firstObject]])
-//    {
-//        [photosTableViewController.photos insertObject:photo atIndex:0];
-//    }
-    
     if ([[cameraViewController presentingViewController] isKindOfClass:[GPPhotoViewController class]])
     {
         GPPhotoViewController *photoViewController = (GPPhotoViewController *)[cameraViewController presentingViewController];
@@ -160,14 +154,20 @@
             
             [photosTableViewController presentViewController:photoViewController animated:YES completion:^{
                 
-                self.cameraViewController = nil;
                 [self.cameraViewSnapshot removeFromSuperview];
+                self.cameraViewSnapshot = nil;
+                
+                self.cameraViewController = nil;
             }];
-            
         }];
     }
     
     GPLogOUT();
+}
+
+- (BOOL)isPresentingPhotoViewControllerFromCameraViewController
+{
+    return (self.cameraViewController != nil);
 }
 
 #pragma mark - Core Data

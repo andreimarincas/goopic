@@ -42,7 +42,7 @@
 
 - (void)selectFlashButtonForValue:(NSString *)value;
 
-- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated withDelay:(NSTimeInterval)delay;
+- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated;
 
 @end
 
@@ -66,6 +66,6 @@
 - (void)updateUI;
 
 // angle: radians
-- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated withDelay:(NSTimeInterval)delay;
+- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated;
 
 @end

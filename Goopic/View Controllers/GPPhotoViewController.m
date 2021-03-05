@@ -84,7 +84,7 @@
     GPLogIN();
     [super viewWillAppear:animated];
     
-    if ([self.photo exists]) // else the view controller will be dismissed
+    if ([self.photo exists]) // otherwise the view controller will be dismissed
     {
         [self.photoView setImage:[self.photo largeImage]];
     }
@@ -110,9 +110,7 @@
 {
     GPLogIN();
     
-    UIImage *image = [self.photo largeImage]; // cached if exists
-    
-    if (!image)
+    if (![self.photo exists]) // image was deleted from camera roll from outside the app
     {
         [self dismissViewControllerAnimated:YES completion:nil];
     }

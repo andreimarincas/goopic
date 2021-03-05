@@ -33,4 +33,6 @@
 
 - (void)dismissCameraViewController:(GPCameraViewController *)cameraViewController withPhoto:(GPPhoto *)photo;
 
+- (BOOL)isPresentingPhotoViewControllerFromCameraViewController;
+
 @end

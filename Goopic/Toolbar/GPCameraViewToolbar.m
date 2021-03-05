@@ -200,7 +200,7 @@ static const CGFloat kButtonsRotationAnimationDuration = 0.3f;
     GPLogOUT();
 }
 
-- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated withDelay:(NSTimeInterval)delay
+- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated
 {
     GPLogIN();
     
@@ -231,7 +231,7 @@ static const CGFloat kButtonsRotationAnimationDuration = 0.3f;
             UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut;
             
             [UIView animateWithDuration:duration
-                                  delay:delay
+                                  delay:0
                                 options:options
                              animations:rotateButtons
                              completion:nil];
@@ -379,7 +379,7 @@ static const CGFloat kButtonsRotationAnimationDuration = 0.3f;
     GPLogOUT();
 }
 
-- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated withDelay:(NSTimeInterval)delay
+- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated
 {
     GPLogIN();
     
@@ -408,7 +408,7 @@ static const CGFloat kButtonsRotationAnimationDuration = 0.3f;
             UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut;
             
             [UIView animateWithDuration:duration
-                                  delay:delay
+                                  delay:0
                                 options:options
                              animations:rotateButtons
                              completion:nil];

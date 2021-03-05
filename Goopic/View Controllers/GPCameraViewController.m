@@ -90,8 +90,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 @synthesize capturedImage = _capturedImage;
 
-@synthesize canUpdateButtons = _canUpdateButtons;
-
 #pragma mark - Utils
 
 + (AVCaptureDevice *)deviceWithMediaType:(NSString *)mediaType preferringPosition:(AVCaptureDevicePosition)position
@@ -250,8 +248,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     if (self)
     {
         // Custom initialization
-        _deviceOrientation = (UIDeviceOrientation)GPInterfaceOrientation();
-        _canUpdateButtons = YES;
+        _deviceOrientation = (UIDeviceOrientation)GPInterfaceOrientation(); // will be portrait, the only allowed interface orientation here
     }
     
     GPLogOUT();
@@ -302,7 +299,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     [self.view addSubview:bottomToolbar];
     self.bottomToolbar = bottomToolbar;
     
-    [self rotateControlsToOrientation:_deviceOrientation animated:NO withDelay:0];
+    [self rotateControlsToOrientation:_deviceOrientation animated:NO];
     
     // Flash
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
@@ -352,17 +349,27 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 - (void)viewWillAppear:(BOOL)animated
 {
     GPLogIN();
+    
+    GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
+    
+    if ([appDelegate isPresentingPhotoViewControllerFromCameraViewController])
+    {
+        GPLog(@"Camera setup not allowed anymore.");
+        GPLogOUT();
+        return;
+    }
+    
     [super viewWillAppear:animated];
     
-    self.cameraOverlay.opacity = 1; // fade to 0 when camera did start
+    self.cameraOverlay.opacity = 1; // fade to 0 on camera did start
     
     [[NSNotificationCenter defaultCenter] addObserver: self
-                                            selector: @selector(deviceOrientationChanged:)
-                                                name: UIDeviceOrientationDidChangeNotification
-                                              object: nil];
-
+                                             selector: @selector(deviceOrientationChanged:)
+                                                 name: UIDeviceOrientationDidChangeNotification
+                                               object: nil];
+    
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-
+    
     [[NSNotificationCenter defaultCenter] addObserver: self
                                              selector: @selector(captureSessionDidStartRunning:)
                                                  name: AVCaptureSessionDidStartRunningNotification
@@ -376,24 +383,24 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     // Start the camera session
     dispatch_async(self.sessionQueue, ^{
         
-		[self addObserver: self
+        [self addObserver: self
                forKeyPath: @"sessionRunningAndDeviceAuthorized"
                   options: (NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew)
                   context: SessionRunningAndDeviceAuthorizedContext];
         
-		[self addObserver: self
+        [self addObserver: self
                forKeyPath: @"stillImageOutput.capturingStillImage"
                   options: (NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew)
                   context: CapturingStillImageContext];
         
-		[[NSNotificationCenter defaultCenter] addObserver: self
+        [[NSNotificationCenter defaultCenter] addObserver: self
                                                  selector: @selector(subjectAreaDidChange:)
                                                      name: AVCaptureDeviceSubjectAreaDidChangeNotification
                                                    object: [self.cameraDeviceInput device]];
-		
-		__weak GPCameraViewController *weakSelf = self;
         
-		self.runtimeErrorHandlingObserver =
+        __weak GPCameraViewController *weakSelf = self;
+        
+        self.runtimeErrorHandlingObserver =
         [[NSNotificationCenter defaultCenter] addObserverForName: AVCaptureSessionRuntimeErrorNotification
                                                           object: self.session
                                                            queue: nil
@@ -405,7 +412,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
                                                           [strongSelf.session startRunning];
                                                       }];
         [self.session startRunning];
-	});
+    });
     
     if (![[UIApplication sharedApplication] isStatusBarHidden])
     {
@@ -418,6 +425,16 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 - (void)viewDidDisappear:(BOOL)animated
 {
     GPLogIN();
+    
+    GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
+    
+    if ([appDelegate isPresentingPhotoViewControllerFromCameraViewController])
+    {
+        GPLog(@"Camera setup not allowed anymore.");
+        GPLogOUT();
+        return;
+    }
+    
     [super viewDidDisappear:animated];
     
     [[NSNotificationCenter defaultCenter] removeObserver: self
@@ -469,6 +486,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     // Setup the camera view
     GPCameraView *cameraView = [[GPCameraView alloc] init];
+    cameraView.backgroundColor = [UIColor greenColor];
+    cameraView.layer.backgroundColor = [UIColor blueColor].CGColor;
     [cameraView setSession:session];
     [self.view addSubview:cameraView];
     self.cameraView = cameraView;
@@ -690,7 +709,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogOUT();
 }
 
-- (void)rotateControlsToOrientation:(UIDeviceOrientation)toDeviceOrientation animated:(BOOL)animated withDelay:(NSTimeInterval)delay
+- (void)rotateControlsToOrientation:(UIDeviceOrientation)toDeviceOrientation animated:(BOOL)animated
 {
     GPLogIN();
     
@@ -705,8 +724,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
         angle = -M_PI_2;
     }
     
-    [self.topToolbar setButtonsRotation:angle animated:animated withDelay:delay];
-    [self.bottomToolbar setButtonsRotation:angle animated:animated withDelay:delay];
+    [self.topToolbar setButtonsRotation:angle animated:animated];
+    [self.bottomToolbar setButtonsRotation:angle animated:animated];
     
     GPLogOUT();
 }
@@ -714,17 +733,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 - (void)updateButtonsAnimated:(BOOL)animated
 {
     GPLogIN();
-    
-    if (!self.canUpdateButtons)
-    {
-        GPLogOUT();
-        return;
-    }
-    
-    if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateActive)
-    {
-        animated = NO;
-    }
     
     Block updateButtons = ^{
         
@@ -766,21 +774,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     }
     
     GPLogOUT();
-}
-
-- (void)setCanUpdateButtons:(BOOL)canUpdateButtons
-{
-    if (_canUpdateButtons != canUpdateButtons)
-    {
-        _canUpdateButtons = canUpdateButtons;
-        
-        if (canUpdateButtons)
-        {
-            // Force buttons rotation update because you never know which notification will come first,
-            // appDidBecomeActive (where canUpdateButtons is set to YES) or deviceOrientationChanged
-            [self updateButtonsRotationAnimated:YES withDelay:0.5];
-        }
-    }
 }
 
 #pragma mark - Flash
@@ -919,8 +912,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
                                             
                                             GPPhoto *photo = [[GPPhoto alloc] init];
                                             photo.asset = asset;
-                                            
-                                            self.canUpdateButtons = NO;
                                             
                                             GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
                                             [appDelegate dismissCameraViewController:self withPhoto:photo];
@@ -1074,8 +1065,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogIN();
     [super appWillResignActive];
     
-    self.canUpdateButtons = NO;
-    
 #if (CAMERA_BLUR_ENABLED)
     
     [self.session removeOutput:self.videoDataOutput];
@@ -1119,7 +1108,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogIN();
     [super appDidBecomeActive];
     
-    self.canUpdateButtons = YES;
     [self updateButtonsAnimated:YES];
     
 #if (CAMERA_BLUR_ENABLED)
@@ -1162,14 +1150,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     if ((deviceOrientation != _deviceOrientation) && [self isOrientationSupported:(UIInterfaceOrientation)deviceOrientation])
     {
-        if (self.canUpdateButtons)
-        {
-            [self rotateControlsToOrientation:deviceOrientation animated:animated withDelay:delay];
-            
-            // save the new device orientation only if used, otherwise the conditions
-            // will prevent buttons from being rotated when they actually need to
-            _deviceOrientation = deviceOrientation;
-        }
+        [self rotateControlsToOrientation:deviceOrientation animated:animated];
+        
+        // save the new device orientation only if used, otherwise the conditions
+        // will prevent buttons from being rotated when they actually need to
+        _deviceOrientation = deviceOrientation;
     }
     
     GPLogOUT();
@@ -1399,8 +1384,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
         
         if (button == self.bottomToolbar.cancelButton)
         {
-            self.canUpdateButtons = NO;
-            
             [self dismissViewControllerAnimated:YES completion:^{
                 button.enabled = YES;
             }];

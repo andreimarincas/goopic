@@ -16,6 +16,7 @@
 #import "GPTableToPhotoTransition.h"
 #import "GPCameraViewController.h"
 #import "GPCameraToPhotoTransition.h"
+#import "GPAppDelegate.h"
 
 static NSString * const kPhotoCellID                  = @"PhotoCell";
 static NSString * const kPhotosHeaderID               = @"PhotosHeader";
@@ -898,7 +899,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
             
             if (((topPoint.y >= cellFrameInRootView.origin.y) &&
                  (topPoint.y < cellFrameInRootView.origin.y + cellFrameInRootView.size.height)) ||
-                [[visibleRowsIndexPaths firstObject] section] == 0)
+                [(NSIndexPath *)[visibleRowsIndexPaths firstObject] section] == 0)
             {
                 GPPhoto *firstPhoto = (GPPhoto *)[photoCell.photos firstObject];
                 
@@ -928,6 +929,9 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         
         if (photoViewController.photo && ![photoViewController.photo isEqualToPhoto:self.selectedPhoto])
         {
+            NSIndexPath *selectedIndexPath = [NSIndexPath indexPathForRow:0 inSection:kPhotosSection];
+            NSInteger selectedPhotoIndex = 0;
+            
             NSArray *photos = [self photos];
             
             for (int i = 0; i < [photos count]; i++)
@@ -936,13 +940,18 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
                 
                 if ([photo isEqualToPhoto:photoViewController.photo])
                 {
-                    self.selectedIndexPath = [NSIndexPath indexPathForRow:i / [GPPhotosTableViewController photosCountPerCell] inSection:kPhotosSection];
-                    self.selectedPhotoIndex = i % [GPPhotosTableViewController photosCountPerCell];
+                    selectedIndexPath = [NSIndexPath indexPathForRow:i / [GPPhotosTableViewController photosCountPerCell] inSection:kPhotosSection];
+                    selectedPhotoIndex = i % [GPPhotosTableViewController photosCountPerCell];
                     
-                    [self.photosTableView scrollToRowAtIndexPath:self.selectedIndexPath
-                                                atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
+                    break;
                 }
             }
+            
+            self.selectedIndexPath = selectedIndexPath;
+            self.selectedPhotoIndex = selectedPhotoIndex;
+            
+            [self.photosTableView scrollToRowAtIndexPath:self.selectedIndexPath
+                                        atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
         }
     }
     
@@ -1286,15 +1295,18 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     
     if ([presentedController isKindOfClass:[GPPhotoViewController class]])
     {
-        if (self.selectedIndexPath)
+        GPAppDelegate *appDelegate = (GPAppDelegate *)[UIApplication sharedApplication].delegate;
+        
+        if ([appDelegate isPresentingPhotoViewControllerFromCameraViewController])
         {
-            // The presentedController is a GPPhotoViewController presented from this GPPhotosTableViewController by selecting a GPPhoto
-            transition = [[GPTableToPhotoTransition alloc] init];
+            // Presented from GPAppDelegate with a GPPhoto from GPCameraViewController
+            transition = [[GPCameraToPhotoTransition alloc] init];
         }
         else
         {
-            // The presentedViewController is a GPPhotoViewController presented from GPAppDelegate with a GPPhoto from GPCameraViewController
-            transition = [[GPCameraToPhotoTransition alloc] init];
+            // Presented from this GPPhotosTableViewController by selecting a GPPhoto
+            transition = [[GPTableToPhotoTransition alloc] init];
+            
         }
     }
     else if ([presentedController isKindOfClass:[GPCameraViewController class]])
@@ -1320,7 +1332,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         {
             transition = [[GPTableToPhotoTransition alloc] init];
         }
-        else  // image deleted from camera roll from outside the app
+        else  // Image was deleted from camera roll from outside the app
         {
             transition = [[GPFadeTransition alloc] init];
         }

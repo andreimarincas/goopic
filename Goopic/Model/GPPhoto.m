@@ -205,7 +205,7 @@
 
 - (BOOL)exists
 {
-    return ([self largeImage] != nil);
+    return ([self largeImage] != nil); // large image would have been cached already if exists
 }
 
 @end
