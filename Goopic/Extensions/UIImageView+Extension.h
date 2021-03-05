@@ -14,4 +14,6 @@
 
 - (void)sizeToFitImageSize:(CGSize)imageSize;
 
+- (CGSize)actualImageSizeForOriginalImageSize:(CGSize)imageSize;
+
 @end

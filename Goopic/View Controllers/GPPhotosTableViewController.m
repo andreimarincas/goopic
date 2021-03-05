@@ -15,6 +15,7 @@
 #import "GPFadeTransition.h"
 #import "GPTableToPhotoTransition.h"
 #import "GPCameraViewController.h"
+#import "GPCameraToPhotoTransition.h"
 
 static NSString * const kPhotoCellID                    = @"PhotoCell";
 static NSString * const kPhotosHeaderID                 = @"PhotosHeader";
@@ -50,10 +51,15 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     {
         // Custom initialization
         
-        self.contentView.backgroundColor = GPCOLOR_LIGHT_BLACK;
+        self.contentView.backgroundColor = GPCOLOR_BLACK;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
         
         _photos = [NSMutableArray array];
+        
+        UIView *bgView = [[UIView alloc] init];
+        bgView.backgroundColor = GPCOLOR_LIGHT_BLACK;
+        [self.contentView addSubview:bgView];
+        self.backgroundView = bgView;
     }
     
     return self;
@@ -117,6 +123,13 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         
         [thumbnailView setNeedsDisplay];
     }
+    
+    self.backgroundView.frame = CGRectMake(0, 0,
+                                           kPhotosSpacing + [_photos count] * (sThumbnailDimension + kPhotosSpacing) ,
+                                           self.contentView.bounds.size.height);
+    [self.backgroundView removeFromSuperview];
+    [self.contentView insertSubview:self.backgroundView atIndex:0];
+    [self.backgroundView setNeedsDisplay];
     
     [self setNeedsDisplay];
 }
@@ -870,16 +883,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     
     photoCell.photos = cellPhotos;
     
-    if ((indexPath.section == kPhotosSection) &&
-        ((indexPath.row < [tableView numberOfRowsInSection:indexPath.section] - 1) || ([cellPhotos count] == photosCountPerCell)))
-    {
-        // If last photo cell then make it light black only if is full with photos
-        photoCell.contentView.backgroundColor = GPCOLOR_LIGHT_BLACK;
-    }
-    else
-    {
-        photoCell.contentView.backgroundColor = GPCOLOR_BLACK;
-    }
+    photoCell.backgroundView.backgroundColor = (indexPath.section == kPhotosSection) ? GPCOLOR_LIGHT_BLACK : GPCOLOR_BLACK;
     
     return photoCell;
 }
@@ -1177,7 +1181,16 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     
     if ([presentedController isKindOfClass:[GPPhotoViewController class]])
     {
-        transition = [[GPTableToPhotoTransition alloc] init];
+        if (self.selectedIndexPath)
+        {
+            // The presentedController is a GPPhotoViewController presented from this GPPhotosTableViewController by selecting a GPPhoto
+            transition = [[GPTableToPhotoTransition alloc] init];
+        }
+        else
+        {
+            // The presentedViewController is a GPPhotoViewController presented from GPAppDelegate with a GPPhoto from GPCameraViewController
+            transition = [[GPCameraToPhotoTransition alloc] init];
+        }
     }
     else if ([presentedController isKindOfClass:[GPCameraViewController class]])
     {
@@ -1196,10 +1209,22 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     
     if ([dismissedController isKindOfClass:[GPPhotoViewController class]])
     {
-        transition = [[GPTableToPhotoTransition alloc] init];
+        // TODO: Just create a GPTableToPhotoTransition
+        if (self.selectedIndexPath)
+        {
+            // The dismissedController is a GPPhotoViewController initially presented from this GPPhotosTableViewController by selecting a GPPhoto
+            transition = [[GPTableToPhotoTransition alloc] init];
+        }
+        else
+        {
+            self.selectedIndexPath = [NSIndexPath indexPathForRow:0 inSection:1];
+            self.selectedPhotoIndex = 0;
+            transition = [[GPTableToPhotoTransition alloc] init];
+        }
     }
     else if ([dismissedController isKindOfClass:[GPCameraViewController class]])
     {
+        // GPCameraViewController dismissed by selecting 'Cancel'
         transition = [[GPFadeTransition alloc] init];
     }
     

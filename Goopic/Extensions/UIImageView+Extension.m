@@ -66,4 +66,47 @@
     self.center = center;
 }
 
+- (CGSize)actualImageSizeForOriginalImageSize:(CGSize)imageSize
+{
+    CGSize actualImageSize = CGSizeZero;
+    
+    if ((imageSize.width > 0) && (imageSize.height > 0) && (self.bounds.size.width > 0) && (self.bounds.size.height > 0))
+    {
+        if (self.contentMode == UIViewContentModeScaleToFill)
+        {
+            actualImageSize = self.bounds.size;
+        }
+        else
+        {
+            CGFloat r = imageSize.width / imageSize.height;
+            CGFloat R = self.bounds.size.width / self.bounds.size.height;
+            
+            if (self.contentMode == UIViewContentModeScaleAspectFit)
+            {
+                if (r < R) // portrait
+                {
+                    actualImageSize = CGSizeMake(r * self.bounds.size.height, self.bounds.size.height);
+                }
+                else // r > R (landscape)
+                {
+                    actualImageSize = CGSizeMake(self.bounds.size.width, self.bounds.size.width / r);
+                }
+            }
+            else if (self.contentMode == UIViewContentModeScaleAspectFill)
+            {
+                if (r < R) // portrait
+                {
+                    actualImageSize = CGSizeMake(self.bounds.size.width, self.bounds.size.width / r);
+                }
+                else // r > R (landscape)
+                {
+                    actualImageSize = CGSizeMake(r * self.bounds.size.height, self.bounds.size.height);
+                }
+            }
+        }
+    }
+    
+    return actualImageSize;
+}
+
 @end

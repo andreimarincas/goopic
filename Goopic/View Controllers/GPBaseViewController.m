@@ -173,7 +173,8 @@
     GPLogIN();
     GPLog(@"%@", [self description]);
     
-    // Ensure the updateUI is called because view's bounds may never change
+    // Ensure the updateUI is called because view's bounds may never change.
+    // Also an assurance before any view controller transition.
     [self updateBaseUI];
     
     GPLogOUT();

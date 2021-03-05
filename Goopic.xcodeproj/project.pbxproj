@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		751767DD19BB06B300D561B9 /* CALayer+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 751767DC19BB06B300D561B9 /* CALayer+Extension.m */; };
-		751767DF19BCB5FE00D561B9 /* goopic-icon-120 work6-02-01.png in Resources */ = {isa = PBXBuildFile; fileRef = 751767DE19BCB5FE00D561B9 /* goopic-icon-120 work6-02-01.png */; };
 		7529C94C19ADCD2E00655FC1 /* NSDate+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529C94719ADCD2E00655FC1 /* NSDate+Extension.m */; };
 		7529C95719AE202200655FC1 /* UIImage+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529C95619AE202200655FC1 /* UIImage+Extension.m */; };
 		7529C9E419AF05F300655FC1 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7529C9E319AF05F300655FC1 /* CoreData.framework */; };
@@ -25,7 +24,6 @@
 		7529CA2919B18DD200655FC1 /* GPPhotoViewToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529CA2819B18DD200655FC1 /* GPPhotoViewToolbar.m */; };
 		757BEC2D19B53AB400043028 /* UIImageView+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 757BEC2C19B53AB400043028 /* UIImageView+Extension.m */; };
 		757BEC3019B67D5C00043028 /* NSArray+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 757BEC2F19B67D5C00043028 /* NSArray+Extension.m */; };
-		757BEC3B19B7D27200043028 /* Icon-60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 757BEC3A19B7D27200043028 /* Icon-60@2x.png */; };
 		757F72A219B1FC9000F59B8D /* GPCameraViewToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 757F72A119B1FC9000F59B8D /* GPCameraViewToolbar.m */; };
 		757F72B019B25B5E00F59B8D /* take-button-highlight.png in Resources */ = {isa = PBXBuildFile; fileRef = 757F72AA19B25B5E00F59B8D /* take-button-highlight.png */; };
 		757F72B119B25B5E00F59B8D /* take-button-highlight@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 757F72AB19B25B5E00F59B8D /* take-button-highlight@2x.png */; };
@@ -50,6 +48,8 @@
 		75AE45F819B3AA3A00E419DD /* disclosure-button-highlight.png in Resources */ = {isa = PBXBuildFile; fileRef = 75AE45F619B3AA3A00E419DD /* disclosure-button-highlight.png */; };
 		75AE45F919B3AA3A00E419DD /* disclosure-button-highlight@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 75AE45F719B3AA3A00E419DD /* disclosure-button-highlight@2x.png */; };
 		75BBDCA719AAFB4F0013AC4A /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75BBDCA619AAFB4F0013AC4A /* AssetsLibrary.framework */; };
+		75CE7E5C19BD001A0060FE9C /* Goopic-Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 75CE7E5B19BD001A0060FE9C /* Goopic-Icon.png */; };
+		75CE7E5F19BE1AAD0060FE9C /* GPCameraToPhotoTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = 75CE7E5E19BE1AAD0060FE9C /* GPCameraToPhotoTransition.m */; };
 		75D1BEF619A9ED5300FDA569 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75D1BEF519A9ED5300FDA569 /* Foundation.framework */; };
 		75D1BEF819A9ED5300FDA569 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75D1BEF719A9ED5300FDA569 /* CoreGraphics.framework */; };
 		75D1BEFA19A9ED5300FDA569 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75D1BEF919A9ED5300FDA569 /* UIKit.framework */; };
@@ -120,7 +120,6 @@
 /* Begin PBXFileReference section */
 		751767DB19BB06B300D561B9 /* CALayer+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CALayer+Extension.h"; sourceTree = "<group>"; };
 		751767DC19BB06B300D561B9 /* CALayer+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CALayer+Extension.m"; sourceTree = "<group>"; };
-		751767DE19BCB5FE00D561B9 /* goopic-icon-120 work6-02-01.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "goopic-icon-120 work6-02-01.png"; sourceTree = "<group>"; };
 		7529C94619ADCD2E00655FC1 /* NSDate+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+Extension.h"; sourceTree = "<group>"; };
 		7529C94719ADCD2E00655FC1 /* NSDate+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+Extension.m"; sourceTree = "<group>"; };
 		7529C95519AE202200655FC1 /* UIImage+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Extension.h"; sourceTree = "<group>"; };
@@ -147,7 +146,6 @@
 		757BEC2C19B53AB400043028 /* UIImageView+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImageView+Extension.m"; sourceTree = "<group>"; };
 		757BEC2E19B67D5C00043028 /* NSArray+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+Extension.h"; sourceTree = "<group>"; };
 		757BEC2F19B67D5C00043028 /* NSArray+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Extension.m"; sourceTree = "<group>"; };
-		757BEC3A19B7D27200043028 /* Icon-60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-60@2x.png"; sourceTree = "<group>"; };
 		757F72A019B1FC9000F59B8D /* GPCameraViewToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPCameraViewToolbar.h; sourceTree = "<group>"; };
 		757F72A119B1FC9000F59B8D /* GPCameraViewToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPCameraViewToolbar.m; sourceTree = "<group>"; };
 		757F72AA19B25B5E00F59B8D /* take-button-highlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "take-button-highlight.png"; sourceTree = "<group>"; };
@@ -183,6 +181,9 @@
 		75AE45F619B3AA3A00E419DD /* disclosure-button-highlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "disclosure-button-highlight.png"; sourceTree = "<group>"; };
 		75AE45F719B3AA3A00E419DD /* disclosure-button-highlight@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "disclosure-button-highlight@2x.png"; sourceTree = "<group>"; };
 		75BBDCA619AAFB4F0013AC4A /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
+		75CE7E5B19BD001A0060FE9C /* Goopic-Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Goopic-Icon.png"; sourceTree = "<group>"; };
+		75CE7E5D19BE1AAD0060FE9C /* GPCameraToPhotoTransition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GPCameraToPhotoTransition.h; path = "Goopic/View Controllers/Transitions/GPCameraToPhotoTransition.h"; sourceTree = SOURCE_ROOT; };
+		75CE7E5E19BE1AAD0060FE9C /* GPCameraToPhotoTransition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GPCameraToPhotoTransition.m; path = "Goopic/View Controllers/Transitions/GPCameraToPhotoTransition.m"; sourceTree = SOURCE_ROOT; };
 		75D1BEF219A9ED5300FDA569 /* Goopic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Goopic.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		75D1BEF519A9ED5300FDA569 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		75D1BEF719A9ED5300FDA569 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -392,8 +393,7 @@
 		757BEC3119B7D0C500043028 /* Icons */ = {
 			isa = PBXGroup;
 			children = (
-				757BEC3A19B7D27200043028 /* Icon-60@2x.png */,
-				751767DE19BCB5FE00D561B9 /* goopic-icon-120 work6-02-01.png */,
+				75CE7E5B19BD001A0060FE9C /* Goopic-Icon.png */,
 			);
 			path = Icons;
 			sourceTree = "<group>";
@@ -674,6 +674,8 @@
 			children = (
 				F240EEB719B47E4500A88F94 /* GPBaseTransition.h */,
 				F240EEB819B47E4500A88F94 /* GPBaseTransition.m */,
+				75CE7E5D19BE1AAD0060FE9C /* GPCameraToPhotoTransition.h */,
+				75CE7E5E19BE1AAD0060FE9C /* GPCameraToPhotoTransition.m */,
 				F240EEBA19B47ECA00A88F94 /* GPFadeTransition.h */,
 				F240EEBB19B47ECA00A88F94 /* GPFadeTransition.m */,
 				F240EEBD19B49B3800A88F94 /* GPTableToPhotoTransition.h */,
@@ -767,13 +769,12 @@
 				757F72B019B25B5E00F59B8D /* take-button-highlight.png in Resources */,
 				75A29E6119BCDDAD0044CF31 /* flash@2x.png in Resources */,
 				757F72B319B25B5E00F59B8D /* take-button@2x.png in Resources */,
-				757BEC3B19B7D27200043028 /* Icon-60@2x.png in Resources */,
 				75AE45F819B3AA3A00E419DD /* disclosure-button-highlight.png in Resources */,
 				75AE45F519B3A81100E419DD /* disclosure-button@2x.png in Resources */,
+				75CE7E5C19BD001A0060FE9C /* Goopic-Icon.png in Resources */,
 				757F72B119B25B5E00F59B8D /* take-button-highlight@2x.png in Resources */,
 				75AE45F319B3A1A700E419DD /* disclosure-button.png in Resources */,
 				75A29E5E19BCDDAD0044CF31 /* flash-highlight.png in Resources */,
-				751767DF19BCB5FE00D561B9 /* goopic-icon-120 work6-02-01.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -813,6 +814,7 @@
 				75D1BFA419AA0C7C00FDA569 /* IMGVote.m in Sources */,
 				75D1BFAF19AA0C7C00FDA569 /* IMGNotificationRequest.m in Sources */,
 				F240EEB919B47E4500A88F94 /* GPBaseTransition.m in Sources */,
+				75CE7E5F19BE1AAD0060FE9C /* GPCameraToPhotoTransition.m in Sources */,
 				75D1BF4219A9EEC600FDA569 /* AFURLSessionManager.m in Sources */,
 				75D1BFB719AA346E00FDA569 /* OpenInChromeController.m in Sources */,
 				757F72D219B27E3A00F59B8D /* GPLine.m in Sources */,

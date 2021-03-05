@@ -11,6 +11,11 @@
 #import <ImageIO/ImageIO.h>
 #import <AssertMacros.h>
 #import <AssetsLibrary/AssetsLibrary.h>
+#import "GPAppDelegate.h"
+#import "GPPhotoViewController.h"
+#import "GPPhotosTableViewController.h"
+#import "GPAssetsManager.h"
+
 
 // Constants
 
@@ -104,21 +109,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	return captureDevice;
 }
 
-// utility routing used during image capture to set up capture orientation
-+ (AVCaptureVideoOrientation)avOrientationForDeviceOrientation:(UIDeviceOrientation)deviceOrientation
-{
-	AVCaptureVideoOrientation result = (AVCaptureVideoOrientation)deviceOrientation;
-    
-	if (deviceOrientation == UIDeviceOrientationLandscapeLeft) {
-		result = AVCaptureVideoOrientationLandscapeRight;
-    }
-	else if (deviceOrientation == UIDeviceOrientationLandscapeRight) {
-		result = AVCaptureVideoOrientationLandscapeLeft;
-    }
-    
-	return result;
-}
-
 #if (CAMERA_BLUR_ENABLED)
 
 + (CGImageRef)blurredImage:(CGImageRef)image
@@ -168,6 +158,36 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	}
 }
 
++ (ALAssetOrientation)assetOrientationForDeviceOrientation:(UIDeviceOrientation)orientation
+{
+    switch (orientation)
+    {
+        case UIDeviceOrientationPortrait:
+        case UIDeviceOrientationFaceUp:
+        case UIDeviceOrientationFaceDown:
+        {
+            return ALAssetOrientationRight;
+        }
+            
+        case UIDeviceOrientationLandscapeRight:
+        {
+            return ALAssetOrientationDown;
+        }
+            
+        case UIDeviceOrientationPortraitUpsideDown:
+        {
+            return ALAssetOrientationLeft;
+        }
+            
+        case UIDeviceOrientationLandscapeLeft:
+        case UIDeviceOrientationUnknown:
+        default:
+        {
+            return ALAssetOrientationUp;
+        }
+    }
+}
+
 #pragma mark - Init/Dealloc
 
 - (instancetype)init
@@ -179,6 +199,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     {
         // Custom initialization
         _deviceOrientation = [UIDevice currentDevice].orientation;
+        _canUpdateButtons = YES;
     }
     
     GPLogOUT();
@@ -200,6 +221,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     self.videoDataOutputQueue = nil;
     
 #endif
+    
+    [self.capturedImageView setImage:nil];
+    self.capturedImage = nil;
     
     GPLogOUT();
 }
@@ -226,7 +250,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     [self.view addSubview:bottomToolbar];
     self.bottomToolbar = bottomToolbar;
     
-    [self rotateControlsToOrientation:_deviceOrientation animated:NO];
+    [self rotateControlsToOrientation:[[UIDevice currentDevice] orientation] animated:NO];
     
     // Flash
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
@@ -241,6 +265,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     capturedImageView.backgroundColor = [UIColor blackColor];
     capturedImageView.userInteractionEnabled = NO;
     capturedImageView.hidden = YES;
+    capturedImageView.contentMode = UIViewContentModeScaleAspectFit;
     [self.view addSubview:capturedImageView];
     self.capturedImageView = capturedImageView;
     
@@ -516,6 +541,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 - (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
 {
+    if (self.isBeingDismissed && self.capturedImage)
+    {
+        return UIStatusBarAnimationFade;
+    }
+    
     return UIStatusBarAnimationSlide;
 }
 
@@ -633,6 +663,17 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 {
     GPLogIN();
     
+    if (!_canUpdateButtons)
+    {
+        GPLogOUT();
+        return;
+    }
+    
+    if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateActive)
+    {
+        animated = NO;
+    }
+    
     Block updateButtons = ^{
         
         if (self.capturedImage)
@@ -652,7 +693,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
             [self.bottomToolbar.cancelButton setAlpha:1];
             [self.bottomToolbar.retakeButton setAlpha:0];
             [self.bottomToolbar.useButton setAlpha:0];
-            [self.bottomToolbar.takeButton setEnabled:self.cameraRunning];
+            [self.bottomToolbar.takeButton setEnabled:self.cameraRunning ||
+             [[UIApplication sharedApplication] applicationState] != UIApplicationStateActive];
         }
     };
     
@@ -660,7 +702,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     {
         UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveLinear;
         
-        [UIView animateWithDuration:0.25
+        [UIView animateWithDuration:0.2
                               delay:0
                             options:options
                          animations:updateButtons
@@ -743,65 +785,14 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 #pragma mark - Take Picture
 
-// utility routine used after taking a still image to write the resulting image to the camera roll
-//- (BOOL)writeCGImageToCameraRoll:(CGImageRef)cgImage withMetadata:(NSDictionary *)metadata
-//{
-//	CFMutableDataRef destinationData = CFDataCreateMutable(kCFAllocatorDefault, 0);
-//	CGImageDestinationRef destination = CGImageDestinationCreateWithData(destinationData, 
-//																		 CFSTR("public.jpeg"), 
-//																		 1, 
-//																		 NULL);
-//	BOOL success = (destination != NULL);
-//	require(success, bail);
-//    {
-//	const float JPEGCompQuality = 0.85f; // JPEGHigherQuality
-//	CFMutableDictionaryRef optionsDict = NULL;
-//	CFNumberRef qualityNum = NULL;
-//	
-//	qualityNum = CFNumberCreate(0, kCFNumberFloatType, &JPEGCompQuality);    
-//	if ( qualityNum ) {
-//		optionsDict = CFDictionaryCreateMutable(0, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-//		if ( optionsDict )
-//			CFDictionarySetValue(optionsDict, kCGImageDestinationLossyCompressionQuality, qualityNum);
-//		CFRelease( qualityNum );
-//	}
-//	
-//	CGImageDestinationAddImage( destination, cgImage, optionsDict );
-//	success = CGImageDestinationFinalize( destination );
-//
-//	if ( optionsDict )
-//		CFRelease(optionsDict);
-//	
-//	require(success, bail);
-//	
-//	CFRetain(destinationData);
-//	ALAssetsLibrary *library = [ALAssetsLibrary new];
-//	[library writeImageDataToSavedPhotosAlbum:(__bridge id)destinationData metadata:metadata completionBlock:^(NSURL *assetURL, NSError *error) {
-//		if (destinationData)
-//			CFRelease(destinationData);
-//	}];
-//    }
-//
-//bail:
-//    {
-//	if (destinationData)
-//		CFRelease(destinationData);
-//	if (destination)
-//		CFRelease(destination);
-//	return success;
-//    }
-//}
-
 // main action method to take a still image
 - (void)takePicture:(CaptureImageCompletionBlock)completion
 {
 	// Find out the current orientation and tell the still image output.
 	AVCaptureConnection *stillImageConnection = [self.stillImageOutput connectionWithMediaType:AVMediaTypeVideo];
-//	AVCaptureVideoOrientation avCaptureOrientation = [GPCameraViewController avOrientationForDeviceOrientation:_deviceOrientation];
-//	[stillImageConnection setVideoOrientation:avCaptureOrientation];
 	
     // Set the appropriate pixel format / image type output setting
-    [self.stillImageOutput setOutputSettings:[NSDictionary dictionaryWithObject:AVVideoCodecJPEG forKey:AVVideoCodecKey]];
+    [self.stillImageOutput setOutputSettings:@{ AVVideoCodecKey : AVVideoCodecJPEG }];
 	
 	[self.stillImageOutput captureStillImageAsynchronouslyFromConnection:stillImageConnection
 		completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
@@ -816,24 +807,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
                 
                 if (attachments)
                 {
-                    metadata = (__bridge id)(attachments);
+                    metadata = [NSMutableDictionary dictionaryWithDictionary:(__bridge id)(attachments)];
                     CFRelease(attachments);
-                    
-//                    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
-//                    [library writeImageDataToSavedPhotosAlbum:jpegData
-//                                                     metadata:(__bridge id)attachments
-//                                              completionBlock:^(NSURL *assetURL, NSError *error) {
-//                                                  
-//                                                  if (!error)
-//                                                  {
-//                                                      GPLog(@"Image saved to camera roll.");
-//                                                  }
-//                                                  else
-//                                                  {
-//                                                      GPLogErr(@"%@ %@", error, [error userInfo]);
-//                                                  }
-//                                              }];
-                    
                 }
                 
                 jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
@@ -852,6 +827,54 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
             }
 		}
 	 ];
+}
+
+- (void)useTakenPicture
+{
+    GPLogIN();
+    
+    ALAssetsLibrary *assetsLibrary = [GPAssetsManager defaultAssetsLibrary];
+    
+    UIDeviceOrientation orientation = [_imageMetadata[@"deviceOrientation"] integerValue];
+    GPLog(@"device orientation when image was captured: %ld", (long)orientation);
+    
+    [assetsLibrary writeImageToSavedPhotosAlbum:[self.capturedImage CGImage]
+                                    orientation:[GPCameraViewController assetOrientationForDeviceOrientation:orientation]
+                                completionBlock:^(NSURL *assetURL, NSError *error) {
+                                    
+                                    if (!error)
+                                    {
+                                        GPLog(@"Image saved to camera roll.");
+                                        GPLog(@"assetURL: %@", assetURL);
+                                        
+                                        [assetsLibrary assetForURL:assetURL resultBlock:^(ALAsset *asset) {
+                                            
+                                            GPPhoto *photo = [[GPPhoto alloc] init];
+                                            photo.asset = asset;
+                                            
+                                            _canUpdateButtons = NO;
+                                            
+                                            GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
+                                            [appDelegate dismissCameraViewController:self withPhoto:photo];
+                                            
+                                        } failureBlock:^(NSError *error) {
+                                            
+                                            GPLogErr(@"%@ %@", error, [error userInfo]);
+                                            // TODO: Handle error
+                                            
+                                            [self.bottomToolbar.useButton setEnabled:YES];
+                                        }];
+                                    }
+                                    else
+                                    {
+                                        GPLogErr(@"%@ %@", error, [error userInfo]);
+                                        // TODO: Handle error
+                                        
+                                        [self.bottomToolbar.useButton setEnabled:YES];
+                                    }
+                                }];
+    
+    GPLogOUT();
 }
 
 - (void)setCapturedImage:(UIImage *)capturedImage
@@ -983,6 +1006,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogIN();
     [super appWillResignActive];
     
+    _canUpdateButtons = NO;
+    
 #if (CAMERA_BLUR_ENABLED)
     
     [self.session removeOutput:self.videoDataOutput];
@@ -1026,6 +1051,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogIN();
     [super appDidBecomeActive];
     
+    _canUpdateButtons = YES;
+    [self updateButtonsAnimated:NO];
+    
 #if (CAMERA_BLUR_ENABLED)
     
     [CALayer performWithoutAnimation:^{
@@ -1054,7 +1082,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     if (deviceOrientation != _deviceOrientation)
     {
-        [self rotateControlsToOrientation:deviceOrientation animated:YES];
+        if (_canUpdateButtons)
+        {
+            [self rotateControlsToOrientation:deviceOrientation animated:YES];
+        }
+        
         _deviceOrientation = deviceOrientation;
     }
 }
@@ -1283,6 +1315,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
         
         if (button == self.bottomToolbar.cancelButton)
         {
+            _canUpdateButtons = NO;
+            
             [self dismissViewControllerAnimated:YES completion:^{
                 button.enabled = YES;
             }];
@@ -1291,12 +1325,13 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
         {
             [self takePicture:^(NSData *jpegData, id metadata) {
                 
-                GPLog(@"jpegData: %@, metadata: %@", jpegData, metadata);
+                GPLog(@"metadata: %@", metadata);
                 
                 if (jpegData && metadata)
                 {
                     self.capturedImage = [UIImage imageWithData:jpegData];
-                    _capturedImageMetadata = metadata;
+                    metadata[@"deviceOrientation"] = @([[UIDevice currentDevice] orientation]);
+                    _imageMetadata = metadata;
                     
                     [self updateButtonsAnimated:YES];
                 }
@@ -1312,6 +1347,10 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
         {
             self.capturedImage = nil;
             [self updateButtonsAnimated:YES];
+        }
+        else if (button == self.bottomToolbar.useButton)
+        {
+            [self useTakenPicture];
         }
     }
     

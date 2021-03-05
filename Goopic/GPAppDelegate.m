@@ -10,6 +10,7 @@
 #import "GPPersistentStoreManager.h"
 #import "GPPhotosTableViewController.h"
 #import "GPCameraViewController.h"
+#import "GPPhotoViewController.h"
 
 @implementation GPAppDelegate
 
@@ -127,6 +128,43 @@
     }
     
     return _rootViewController;
+}
+
+- (void)dismissCameraViewController:(GPCameraViewController *)cameraViewController withPhoto:(GPPhoto *)photo
+{
+    GPLogIN();
+    
+    if ([[cameraViewController presentingViewController] isKindOfClass:[GPPhotoViewController class]])
+    {
+        GPPhotoViewController *photoViewController = (GPPhotoViewController *)[cameraViewController presentingViewController];
+        [photoViewController setPhoto:photo];
+        [cameraViewController dismissViewControllerAnimated:YES completion:nil];
+    }
+    else if ([cameraViewController presentingViewController] == [self rootViewController])
+    {
+        UIView *snapshot = [cameraViewController.view snapshotViewAfterScreenUpdates:NO];
+        [self.window addSubview:snapshot];
+        self.cameraViewSnapshot = snapshot;
+        self.cameraViewController = cameraViewController;
+        
+        [cameraViewController dismissViewControllerAnimated:NO completion:^{
+            
+            GPPhotosTableViewController *photosTableViewController = (GPPhotosTableViewController *)[self rootViewController];
+            
+            GPPhotoViewController *photoViewController = [[GPPhotoViewController alloc] initWithPhoto:photo];
+            photoViewController.transitioningDelegate = photosTableViewController;
+            [[GPSearchEngine searchEngine] setDelegate:photoViewController];
+            
+            [photosTableViewController presentViewController:photoViewController animated:YES completion:^{
+                
+                self.cameraViewController = nil;
+                [self.cameraViewSnapshot removeFromSuperview];
+            }];
+            
+        }];
+    }
+    
+    GPLogOUT();
 }
 
 #pragma mark - Core Data

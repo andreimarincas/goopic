@@ -26,8 +26,11 @@
 
 - (void)executePresentationAnimation:(id <UIViewControllerContextTransitioning>)transitionContext
 {
-    GPPhotosTableViewController *fromViewController = (GPPhotosTableViewController *)[transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
-    GPPhotoViewController *toViewController = (GPPhotoViewController *)[transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
+    GPPhotosTableViewController *fromViewController = (GPPhotosTableViewController *)
+        [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
+    
+    GPPhotoViewController *toViewController = (GPPhotoViewController *)
+        [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
     
     UIView *container = [transitionContext containerView];
     [container addSubview:toViewController.view];
@@ -85,6 +88,11 @@
     [container bringSubviewToFront:fromToolbar];
     [container bringSubviewToFront:toBottomToolbar];
     
+    GPPhotoCell *selectedCell = (GPPhotoCell *)[fromViewController selectedCell];
+    NSInteger selectedPhotoIndex = fromViewController.selectedPhotoIndex;
+    
+    [selectedCell setThumbnailHidden:YES atIndex:selectedPhotoIndex];
+    
     [UIView animateWithDuration:self.presentationDuration
                           delay:0
                         options:UIViewAnimationOptionCurveEaseOut
@@ -120,6 +128,8 @@
                          fromTitleLabel.alpha = 1;
                          [fromToolbar updateUI];
                          
+                         [selectedCell setThumbnailHidden:NO atIndex:selectedPhotoIndex];
+                         
                          [transportedView removeFromSuperview];
                          
                          [transitionContext completeTransition:finished];
@@ -128,8 +138,11 @@
 
 - (void)executeDismissalAnimation:(id <UIViewControllerContextTransitioning>)transitionContext
 {
-    GPPhotoViewController *fromViewController = (GPPhotoViewController *)[transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
-    GPPhotosTableViewController *toViewController = (GPPhotosTableViewController *)[transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
+    GPPhotoViewController *fromViewController = (GPPhotoViewController *)
+        [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
+    
+    GPPhotosTableViewController *toViewController = (GPPhotosTableViewController *)
+        [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
     
     UIView *container = [transitionContext containerView];
     [container insertSubview:toViewController.view belowSubview:fromViewController.view];
@@ -190,6 +203,11 @@
     [container bringSubviewToFront:fromTopToolbar];
     [container bringSubviewToFront:fromBottomToolbar];
     
+    GPPhotoCell *selectedCell = (GPPhotoCell *)[toViewController selectedCell];
+    NSInteger selectedPhotoIndex = toViewController.selectedPhotoIndex;
+    
+    [selectedCell setThumbnailHidden:YES atIndex:selectedPhotoIndex];
+    
     [UIView animateWithDuration:self.dismissalDuration
                           delay:0
                         options:UIViewAnimationOptionCurveEaseOut
@@ -223,6 +241,8 @@
                          [toTitleLabel moveToView:toToolbar];
                          [toToolbar updateUI];
                          toToolbar.hidden = NO;
+                         
+                         [selectedCell setThumbnailHidden:NO atIndex:selectedPhotoIndex];
                          
                          [transportedView removeFromSuperview];
                          

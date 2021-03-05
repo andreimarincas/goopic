@@ -15,6 +15,8 @@
 @class CIDetector;
 
 
+#pragma mark - Camera View
+
 @interface GPCameraView : UIView
 
 @property (nonatomic) AVCaptureSession *session;
@@ -26,6 +28,8 @@
 @end
 
 
+#pragma mark - Camera View Controller
+
 @interface GPCameraViewController : GPBaseViewController <UIGestureRecognizerDelegate,
                                                           AVCaptureVideoDataOutputSampleBufferDelegate,
                                                           GPCameraViewToolbarDelegate>
@@ -36,7 +40,9 @@
     BOOL _capturingStillImage;
     
     UIImage *_capturedImage;
-    id _capturedImageMetadata;
+    id _imageMetadata;
+    
+    BOOL _canUpdateButtons;
 }
 
 // Session management
@@ -50,6 +56,7 @@
 // Communicate with the session and other session objects on this queue
 @property (nonatomic, strong) dispatch_queue_t sessionQueue;
 
+
 #if (CAMERA_BLUR_ENABLED)
 
 @property (nonatomic, strong) AVCaptureVideoDataOutput *videoDataOutput;
@@ -57,7 +64,12 @@
 // Process video frames in this queue
 @property (nonatomic, strong) dispatch_queue_t videoDataOutputQueue;
 
+// Blur
+@property (nonatomic, strong) CALayer *blurLayer;
+@property (nonatomic, strong) UIImage *blurImage;
+
 #endif
+
 
 @property (nonatomic, getter = isCameraRunning) BOOL cameraRunning;
 @property (nonatomic, getter = isCapturingStillImage) BOOL capturingStillImage;
@@ -76,13 +88,10 @@
 @property (nonatomic, strong) UIImage *capturedImage;
 @property (nonatomic, strong) UIImageView *capturedImageView;
 
-// Blur
-@property (nonatomic, strong) CALayer *blurLayer;
-@property (nonatomic, strong) UIImage *blurImage;
-
 // Toolbars
 @property (nonatomic, strong) GPCameraViewTopToolbar *topToolbar;
 @property (nonatomic, strong) GPCameraViewBottomToolbar *bottomToolbar;
+
 
 // Designated initializer
 - (instancetype)init;

@@ -10,6 +10,7 @@
 #import "GPCameraViewController.h"
 #import "GPSearchEngine.h"
 #import "GPFadeTransition.h"
+#import "GPCameraToPhotoTransition.h"
 
 @implementation GPPhotoViewController
 
@@ -83,7 +84,19 @@
     GPLogIN();
     [super viewWillAppear:animated];
     
+    [self.photoView setImage:[self.photo largeImage]];
+    
     [self setNeedsStatusBarAppearanceUpdate];
+    
+    GPLogOUT();
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+    GPLogIN();
+    [super viewDidDisappear:animated];
+    
+    [self.photoView setImage:nil];
     
     GPLogOUT();
 }
@@ -114,7 +127,6 @@
         UIImageView *photoView = [[UIImageView alloc] init];
         photoView.contentMode = UIViewContentModeScaleAspectFit;
         photoView.backgroundColor = GPCOLOR_DARK_BLACK;
-        photoView.image = [self.photo largeImage];
         [self.photoScrollView addSubview:photoView];
         _photoView = photoView;
     }
@@ -212,7 +224,6 @@
     GPLogIN();
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
     
-    [self updateUI];
     [self setNeedsStatusBarAppearanceUpdate];
     
     GPLogOUT();
@@ -254,9 +265,7 @@
         }
         else if (button == self.topToolbar.photosButton)
         {
-            [self dismissViewControllerAnimated:YES completion:^{
-                button.enabled = YES;
-            }];
+            [self dismissViewControllerAnimated:YES completion:nil];
         }
     }
     else // bottom toolbar
@@ -280,7 +289,12 @@
 {
     GPLogIN();
     
-    GPFadeTransition *transition = [[GPFadeTransition alloc] init];
+    GPBaseTransition *transition = nil;
+    
+    if ([presentedController isKindOfClass:[GPCameraViewController class]])
+    {
+        transition = [[GPFadeTransition alloc] init];
+    }
     
     GPLogOUT();
     return transition;
@@ -290,7 +304,22 @@
 {
     GPLogIN();
     
-    GPFadeTransition *transition = [[GPFadeTransition alloc] init];
+    GPBaseTransition *transition = nil;
+    
+    if ([dismissedController isKindOfClass:[GPCameraViewController class]])
+    {
+        GPCameraViewController *cameraViewController = (GPCameraViewController *)dismissedController;
+        
+        if ([cameraViewController capturedImage])
+        {
+            transition = [[GPCameraToPhotoTransition alloc] init];
+        }
+        else
+        {
+            transition = [[GPFadeTransition alloc] init];
+        }
+    }
+    
     transition.reverse = YES;
     
     GPLogOUT();

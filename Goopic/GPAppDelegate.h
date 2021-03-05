@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "ImgurSession.h"
 #import "GPBaseViewController.h"
+#import "GPCameraViewController.h"
+#import "GPPhoto.h"
 
 @interface GPAppDelegate : UIResponder <UIApplicationDelegate, IMGSessionDelegate>
 {
@@ -23,7 +25,12 @@
 @property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
+@property (nonatomic, strong) GPCameraViewController *cameraViewController;
+@property (nonatomic, strong) UIView *cameraViewSnapshot;
+
 - (void)saveContext;
 - (NSURL *)applicationDocumentsDirectory;
+
+- (void)dismissCameraViewController:(GPCameraViewController *)cameraViewController withPhoto:(GPPhoto *)photo;
 
 @end
