@@ -37,10 +37,15 @@
     UIView *_viewForInteraction;
     
     UIPanGestureRecognizer *_panGestureRecognizer;
+    
     CGPoint _initialPanningLocation;
+    CGPoint _initialPanningLocationWithContext;
+    
+    CGPoint _currentPanningLocation;
     
     id <UIViewControllerContextTransitioning> _context;
     CGFloat _percentCompleted; // [0,1]
+    CGFloat _highestPercent;
     
     BOOL _shouldDismissPhotoViewControllerWithoutInteraction;
     

@@ -129,10 +129,13 @@
         photoScrollView.backgroundColor = GPCOLOR_DARK_BLACK;
         photoScrollView.showsHorizontalScrollIndicator = NO;
         photoScrollView.showsVerticalScrollIndicator = NO;
-        photoScrollView.minimumZoomScale = 1;
-        photoScrollView.maximumZoomScale = 1;
+        photoScrollView.minimumZoomScale = 0.9999;
+        photoScrollView.maximumZoomScale = 1.0001;
+        photoScrollView.bouncesZoom = YES;
         [self.view addSubview:photoScrollView];
+        
         _photoScrollView = photoScrollView;
+        _photoScrollView.delegate = self;
     }
     
     return _photoScrollView;
@@ -181,6 +184,17 @@
     GPLogOUT();
 }
 
+#pragma mark - Activity View
+
+- (CGRect)preferredActivityViewFrame
+{
+    return CGRectMake(0, self.topToolbar.frame.size.height,
+                      self.view.bounds.size.width,
+                      self.view.bounds.size.height - self.topToolbar.frame.size.height - self.bottomToolbar.frame.size.height);
+}
+
+#pragma mark - Toolbars Visibility
+
 - (void)toggleToolbarsVisibilityAnimated:(BOOL)animated
 {
     GPLogIN();
@@ -225,7 +239,8 @@
 {
     GPLogIN();
     
-    if (!self.activityInProgress)
+    if (!self.activityInProgress &&
+        ![self isBeingPresented] && ![self isBeingDismissed])
     {
         [self toggleToolbarsVisibilityAnimated:YES];
     }
@@ -265,6 +280,45 @@
 - (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
 {
     return UIStatusBarAnimationFade;
+}
+
+#pragma mark - Scroll View Delegate
+
+- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView
+{
+    GPLogIN();
+    
+    if (scrollView == self.photoScrollView)
+    {
+        return self.photoView;
+    }
+    
+    return nil;
+    
+    GPLogOUT();
+}
+
+- (void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(UIView *)view
+{
+    GPLogIN();
+    
+    if (scrollView == self.photoScrollView)
+    {
+        self.topToolbar.userInteractionEnabled = NO;
+        self.bottomToolbar.userInteractionEnabled = NO;
+    }
+    
+    GPLogOUT();
+}
+
+- (void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(CGFloat)scale
+{
+    GPLogIN();
+    
+    self.topToolbar.userInteractionEnabled = YES;
+    self.bottomToolbar.userInteractionEnabled = YES;
+    
+    GPLogOUT();
 }
 
 #pragma mark - Toolbar Delegate
@@ -352,15 +406,6 @@
     
     GPLogOUT();
     return transition;
-}
-
-#pragma mark - Activity View
-
-- (CGRect)preferredActivityViewFrame
-{
-    return CGRectMake(0, self.topToolbar.frame.size.height,
-                      self.view.bounds.size.width,
-                      self.view.bounds.size.height - self.topToolbar.frame.size.height - self.bottomToolbar.frame.size.height);
 }
 
 #pragma mark - Search Engine Delegate

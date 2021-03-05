@@ -84,9 +84,12 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         UIImageView *thumbnailView = [[UIImageView alloc] init];
         thumbnailView.image = [photo thumbnailImage];
         thumbnailView.userInteractionEnabled = NO;
+        thumbnailView.backgroundColor = [UIColor blackColor];
         [self.contentView addSubview:thumbnailView];
         
-        id photoData = @{ kPhotoKey : photo, kThumbnailViewKey : thumbnailView };
+        id photoData = @{ kPhotoKey         : photo,
+                          kThumbnailViewKey : thumbnailView };
+        
         [_photos addObject:photoData];
     }
     
@@ -158,7 +161,16 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     {
         id photoData = _photos[index];
         UIImageView *thumbnailView = photoData[kThumbnailViewKey];
-        thumbnailView.hidden = hidden;
+        
+        if (hidden)
+        {
+            [thumbnailView setImage:nil];
+        }
+        else
+        {
+            GPPhoto *photo = photoData[kPhotoKey];
+            [thumbnailView setImage:[photo thumbnailImage]];
+        }
     }
 }
 

@@ -358,7 +358,6 @@ static const CGFloat kPercentThreshold = 0.3f; // 0..1
     GPLog(@"_context: %@", _context);
     
     CGPoint location = [panGesture locationInView:_viewForInteraction];
-    static CGPoint initialLocation;
     
     switch ([panGesture state])
     {
@@ -367,10 +366,11 @@ static const CGFloat kPercentThreshold = 0.3f; // 0..1
             GPLog(@"UIGestureRecognizerStateBegan");
             
             _shouldDismissPhotoViewControllerWithoutInteraction = NO;
+            _highestPercent = 0;
             
             if (![self isInteractive])
             {
-                _initialPanningLocation = location;
+                _initialPanningLocationWithContext = location;
                 
                 self.reverse = YES;
                 self.interactive = YES;
@@ -391,7 +391,7 @@ static const CGFloat kPercentThreshold = 0.3f; // 0..1
                 [self.photoViewController dismissViewControllerAnimated:YES completion:nil];
             }
             
-            initialLocation = location;
+            _initialPanningLocation = location;
         }
             break;
             
@@ -399,18 +399,21 @@ static const CGFloat kPercentThreshold = 0.3f; // 0..1
         {
             GPLog(@"UIGestureRecognizerStateChanged");
             
+            _currentPanningLocation = location;
+            
             if ([self isInteractive] && _context)
             {
                 CGFloat percent = [self percentForLocation:location];
                 
-                if ((percent > 0) && (percent < 1))
+                if (percent > 0)
                 {
                     [self updateWithPercent:percent];
                 }
             }
             else
             {
-                _initialPanningLocation = location;
+                // Update initial panning location with context so that the percent completed starts only when we'll have a context
+                _initialPanningLocationWithContext = location;
             }
         }
             break;
@@ -429,12 +432,15 @@ static const CGFloat kPercentThreshold = 0.3f; // 0..1
             {
                 if (_context)
                 {
-                    _initialPanningLocation = initialLocation;
+                    // Set the initial panning location with context to be the initial panning locations before the context had been created,
+                    // to have the greatest percent completed possible. This way the percent completed is taken from the time when the panning has
+                    // actually began, and the percent threshold can be exceeded without a transitioning context.
+                    _initialPanningLocationWithContext = _initialPanningLocation;
                     
                     CGFloat percent = [self percentForLocation:location];
-                    GPLog(@"percent: %f", percent);
+                    percent = fmaxf(percent, _highestPercent);
                     
-                    CGFloat finished = (percent > kPercentThreshold);
+                    BOOL finished = (percent > kPercentThreshold);
                     
                     [self stopInteractiveTransition:finished];
                 }
@@ -492,7 +498,7 @@ static const CGFloat kPercentThreshold = 0.3f; // 0..1
 
 - (CGFloat)percentForLocation:(CGPoint)location
 {
-    CGFloat offset = CGPointDistanceToCGPoint(location, _initialPanningLocation);
+    CGFloat offset = CGPointDistanceToCGPoint(location, _initialPanningLocationWithContext);
     CGFloat percent = 0;
     
     if (offset > 0)
@@ -544,14 +550,12 @@ static const CGFloat kPercentThreshold = 0.3f; // 0..1
 {
     GPLogIN();
     
-    _photoViewTopToolbar.userInteractionEnabled = enabled;
     _photoViewTopToolbar.cameraButton.userInteractionEnabled = enabled;
     _photosButton.userInteractionEnabled = enabled;
     _photoViewTopToolbar.disclosureButton.userInteractionEnabled = enabled;
     
-    _photoViewBottomToolbar.userInteractionEnabled = enabled;
+    _photoViewBottomToolbar.searchButton.userInteractionEnabled = enabled;
     
-    _photosTableViewToolbar.userInteractionEnabled = enabled;
     _photosTableViewToolbar.cameraButton.userInteractionEnabled = enabled;
     _titleLabel.userInteractionEnabled = enabled;
     
@@ -682,7 +686,7 @@ static const CGFloat kPercentThreshold = 0.3f; // 0..1
     GPLogOUT();
 }
 
-// percent: 0..1
+// percent: should be between 0..1 but actually it can be larger than 1. make sure you set _percentCompleted to a value between 0..1
 // note: don't update geometry unless we have a _context already! it's safe to update opacity without this restriction, though.
 // Important: Call this only if self.isInteractive && _context != NULL
 //
@@ -693,7 +697,12 @@ static const CGFloat kPercentThreshold = 0.3f; // 0..1
     GPLog(@"isInteractive: %@", NSStringFromBOOL([self isInteractive]));
     GPLog(@"_context: %@", _context);
     
-    self.photoViewController.view.backgroundColor = [_photoViewControllerInitialColor colorWithAlphaComponent:1 - percent];
+    percent = fminf(percent, 1);
+    _highestPercent = fmaxf(percent, _highestPercent);
+    
+    CGFloat r, g, b, a;
+    [self.photoViewController.view.backgroundColor getRed:&r green:&g blue:&b alpha:&a];
+    self.photoViewController.view.backgroundColor = [_photoViewControllerInitialColor colorWithAlphaComponent:fminf(1 - percent, a)];
     
     if (!_photoToolbarsAreHidden)
     {
@@ -724,33 +733,28 @@ static const CGFloat kPercentThreshold = 0.3f; // 0..1
         CGSize transportedViewSize = CGSizeMake(_transportedViewInitialFrame.size.width - percent * (_transportedViewInitialFrame.size.width - _transportedViewToFrame.size.width),
                                                 _transportedViewInitialFrame.size.height - percent * (_transportedViewInitialFrame.size.height - _transportedViewToFrame.size.height));
         
-        CGPoint transportedViewInitialCenter = CenterOfFrame(_transportedViewInitialFrame);
-        CGPoint transportedViewToCenter = CenterOfFrame(_transportedViewToFrame);
+        if ((transportedViewSize.width > _transportedView.frame.size.width) || (transportedViewSize.height > _transportedView.frame.size.height))
+        {
+            transportedViewSize = _transportedView.frame.size;
+        }
         
-        CGPoint transportedViewCenter = CGPointMake(transportedViewInitialCenter.x + percent * (transportedViewToCenter.x - transportedViewInitialCenter.x),
-                                                    transportedViewInitialCenter.y + percent * (transportedViewToCenter.y - transportedViewInitialCenter.y));
+        CGPoint transportedViewInitialCenter = CenterOfFrame(_transportedViewInitialFrame);
+        
+        CGPoint panningOffset = CGPointMake(_currentPanningLocation.x - _initialPanningLocationWithContext.x,
+                                            _currentPanningLocation.y - _initialPanningLocationWithContext.y);
+        
+        CGPoint transportedViewCenter = CGPointMake((1 - _highestPercent) * (transportedViewInitialCenter.x + panningOffset.x) + _highestPercent * _currentPanningLocation.x,
+                                                    (1 - _highestPercent) * (transportedViewInitialCenter.y + panningOffset.y) + _highestPercent * _currentPanningLocation.y);
         
         _transportedView.frame = CGRectMake(transportedViewCenter.x - transportedViewSize.width / 2,
                                             transportedViewCenter.y - transportedViewSize.height / 2,
                                             transportedViewSize.width,
                                             transportedViewSize.height);
         
-        CGSize photoViewSize = CGSizeMake(_photoViewInitialFrame.size.width - percent * (_photoViewInitialFrame.size.width - _photoViewToFrame.size.width),
-                                          _photoViewInitialFrame.size.height - percent * (_photoViewInitialFrame.size.height - _photoViewToFrame.size.height));
-        
-        CGPoint photoViewInitialCenter = CenterOfFrame(_photoViewInitialFrame);
-        CGPoint photoViewToCenter = CenterOfFrame(_photoViewToFrame);
-        
-        CGPoint photoViewCenter = CGPointMake(photoViewInitialCenter.x + percent * (photoViewToCenter.x - photoViewInitialCenter.x),
-                                              photoViewInitialCenter.y + percent * (photoViewToCenter.y - photoViewInitialCenter.y));
-        
-        _photoView.frame = CGRectMake(photoViewCenter.x - photoViewSize.width / 2,
-                                      photoViewCenter.y - photoViewSize.height / 2,
-                                      photoViewSize.width,
-                                      photoViewSize.height);
+        _photoView.frame = _transportedView.bounds;
     }
     
-    _blackOverlay.alpha = 1 - percent;
+    _blackOverlay.alpha = fminf(1 - percent, _blackOverlay.alpha);
     
     if (_context)
     {
