@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		751767DD19BB06B300D561B9 /* CALayer+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 751767DC19BB06B300D561B9 /* CALayer+Extension.m */; };
 		7529C94C19ADCD2E00655FC1 /* NSDate+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529C94719ADCD2E00655FC1 /* NSDate+Extension.m */; };
 		7529C95719AE202200655FC1 /* UIImage+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529C95619AE202200655FC1 /* UIImage+Extension.m */; };
 		7529C9E419AF05F300655FC1 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7529C9E319AF05F300655FC1 /* CoreData.framework */; };
@@ -17,7 +18,7 @@
 		7529C9FC19B0A3EA00655FC1 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7529C9FB19B0A3EA00655FC1 /* MobileCoreServices.framework */; };
 		7529C9FE19B0C43900655FC1 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7529C9FD19B0C43900655FC1 /* AVFoundation.framework */; };
 		7529CA0019B0CBBB00655FC1 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7529C9FF19B0CBBB00655FC1 /* ImageIO.framework */; };
-		7529CA1519B1545100655FC1 /* GPCameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529CA0C19B1545100655FC1 /* GPCameraViewController.m */; };
+		7529CA1519B1545100655FC1 /* GPCameraViewController_tmp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529CA0C19B1545100655FC1 /* GPCameraViewController_tmp.m */; };
 		7529CA1619B1545100655FC1 /* GPPhotosTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529CA0E19B1545100655FC1 /* GPPhotosTableViewController.m */; };
 		7529CA1719B1545100655FC1 /* GPPhotoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529CA1019B1545100655FC1 /* GPPhotoViewController.m */; };
 		7529CA2619B1850800655FC1 /* GPPhotosTableViewToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529CA2519B1850800655FC1 /* GPPhotosTableViewToolbar.m */; };
@@ -96,8 +97,9 @@
 		75D1BFAE19AA0C7C00FDA569 /* IMGMemeGen.m in Sources */ = {isa = PBXBuildFile; fileRef = 75D1BF9119AA0C7C00FDA569 /* IMGMemeGen.m */; };
 		75D1BFAF19AA0C7C00FDA569 /* IMGNotificationRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 75D1BF9319AA0C7C00FDA569 /* IMGNotificationRequest.m */; };
 		75D1BFB719AA346E00FDA569 /* OpenInChromeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 75D1BFB619AA346E00FDA569 /* OpenInChromeController.m */; };
+		75E6BEA119BA674A004DB6BF /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75E6BEA019BA674A004DB6BF /* CoreImage.framework */; };
+		75E6BEA719BA6AE9004DB6BF /* GPCameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 75E6BEA619BA6AE9004DB6BF /* GPCameraViewController.m */; };
 		F240EEAE19B475E800A88F94 /* GPBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F240EEAD19B475E800A88F94 /* GPBaseViewController.m */; };
-		F240EEB519B476DA00A88F94 /* GPBaseViewController+Private.m in Sources */ = {isa = PBXBuildFile; fileRef = F240EEB419B476DA00A88F94 /* GPBaseViewController+Private.m */; };
 		F240EEB919B47E4500A88F94 /* GPBaseTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = F240EEB819B47E4500A88F94 /* GPBaseTransition.m */; };
 		F240EEBC19B47ECA00A88F94 /* GPFadeTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = F240EEBB19B47ECA00A88F94 /* GPFadeTransition.m */; };
 		F240EEBF19B49B3800A88F94 /* GPTableToPhotoTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = F240EEBE19B49B3800A88F94 /* GPTableToPhotoTransition.m */; };
@@ -114,6 +116,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		751767DB19BB06B300D561B9 /* CALayer+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CALayer+Extension.h"; sourceTree = "<group>"; };
+		751767DC19BB06B300D561B9 /* CALayer+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CALayer+Extension.m"; sourceTree = "<group>"; };
 		7529C94619ADCD2E00655FC1 /* NSDate+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+Extension.h"; sourceTree = "<group>"; };
 		7529C94719ADCD2E00655FC1 /* NSDate+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+Extension.m"; sourceTree = "<group>"; };
 		7529C95519AE202200655FC1 /* UIImage+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Extension.h"; sourceTree = "<group>"; };
@@ -128,8 +132,8 @@
 		7529C9FB19B0A3EA00655FC1 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		7529C9FD19B0C43900655FC1 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		7529C9FF19B0CBBB00655FC1 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
-		7529CA0B19B1545100655FC1 /* GPCameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPCameraViewController.h; sourceTree = "<group>"; };
-		7529CA0C19B1545100655FC1 /* GPCameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPCameraViewController.m; sourceTree = "<group>"; };
+		7529CA0B19B1545100655FC1 /* GPCameraViewController_tmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPCameraViewController_tmp.h; sourceTree = "<group>"; };
+		7529CA0C19B1545100655FC1 /* GPCameraViewController_tmp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPCameraViewController_tmp.m; sourceTree = "<group>"; };
 		7529CA0D19B1545100655FC1 /* GPPhotosTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPPhotosTableViewController.h; sourceTree = "<group>"; };
 		7529CA0E19B1545100655FC1 /* GPPhotosTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPPhotosTableViewController.m; sourceTree = "<group>"; };
 		7529CA0F19B1545100655FC1 /* GPPhotoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPPhotoViewController.h; sourceTree = "<group>"; };
@@ -271,10 +275,11 @@
 		75D1BF9319AA0C7C00FDA569 /* IMGNotificationRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IMGNotificationRequest.m; sourceTree = "<group>"; };
 		75D1BFB519AA346E00FDA569 /* OpenInChromeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenInChromeController.h; sourceTree = "<group>"; };
 		75D1BFB619AA346E00FDA569 /* OpenInChromeController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenInChromeController.m; sourceTree = "<group>"; };
+		75E6BEA019BA674A004DB6BF /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
+		75E6BEA519BA6AE9004DB6BF /* GPCameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPCameraViewController.h; sourceTree = "<group>"; };
+		75E6BEA619BA6AE9004DB6BF /* GPCameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPCameraViewController.m; sourceTree = "<group>"; };
 		F240EEAC19B475E800A88F94 /* GPBaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GPBaseViewController.h; path = "goopic/View Controllers/GPBaseViewController.h"; sourceTree = SOURCE_ROOT; };
 		F240EEAD19B475E800A88F94 /* GPBaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GPBaseViewController.m; path = "goopic/View Controllers/GPBaseViewController.m"; sourceTree = SOURCE_ROOT; };
-		F240EEB319B476DA00A88F94 /* GPBaseViewController+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "GPBaseViewController+Private.h"; sourceTree = "<group>"; };
-		F240EEB419B476DA00A88F94 /* GPBaseViewController+Private.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GPBaseViewController+Private.m"; sourceTree = "<group>"; };
 		F240EEB719B47E4500A88F94 /* GPBaseTransition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPBaseTransition.h; sourceTree = "<group>"; };
 		F240EEB819B47E4500A88F94 /* GPBaseTransition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPBaseTransition.m; sourceTree = "<group>"; };
 		F240EEBA19B47ECA00A88F94 /* GPFadeTransition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPFadeTransition.h; sourceTree = "<group>"; };
@@ -292,6 +297,7 @@
 				7529C9FE19B0C43900655FC1 /* AVFoundation.framework in Frameworks */,
 				7529C9E419AF05F300655FC1 /* CoreData.framework in Frameworks */,
 				75D1BEF819A9ED5300FDA569 /* CoreGraphics.framework in Frameworks */,
+				75E6BEA119BA674A004DB6BF /* CoreImage.framework in Frameworks */,
 				75D1BEF619A9ED5300FDA569 /* Foundation.framework in Frameworks */,
 				7529CA0019B0CBBB00655FC1 /* ImageIO.framework in Frameworks */,
 				7529C9FC19B0A3EA00655FC1 /* MobileCoreServices.framework in Frameworks */,
@@ -315,6 +321,8 @@
 		7529C94519ADCD2E00655FC1 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				751767DB19BB06B300D561B9 /* CALayer+Extension.h */,
+				751767DC19BB06B300D561B9 /* CALayer+Extension.m */,
 				757BEC2E19B67D5C00043028 /* NSArray+Extension.h */,
 				757BEC2F19B67D5C00043028 /* NSArray+Extension.m */,
 				7529C94619ADCD2E00655FC1 /* NSDate+Extension.h */,
@@ -352,12 +360,13 @@
 		7529CA0A19B1545100655FC1 /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				F240EEAF19B4767200A88F94 /* Private */,
 				F240EEB619B47DD400A88F94 /* Transitions */,
 				F240EEAC19B475E800A88F94 /* GPBaseViewController.h */,
 				F240EEAD19B475E800A88F94 /* GPBaseViewController.m */,
-				7529CA0B19B1545100655FC1 /* GPCameraViewController.h */,
-				7529CA0C19B1545100655FC1 /* GPCameraViewController.m */,
+				75E6BEA519BA6AE9004DB6BF /* GPCameraViewController.h */,
+				75E6BEA619BA6AE9004DB6BF /* GPCameraViewController.m */,
+				7529CA0B19B1545100655FC1 /* GPCameraViewController_tmp.h */,
+				7529CA0C19B1545100655FC1 /* GPCameraViewController_tmp.m */,
 				7529CA0F19B1545100655FC1 /* GPPhotoViewController.h */,
 				7529CA1019B1545100655FC1 /* GPPhotoViewController.m */,
 				7529CA0D19B1545100655FC1 /* GPPhotosTableViewController.h */,
@@ -462,6 +471,7 @@
 				7529C9FD19B0C43900655FC1 /* AVFoundation.framework */,
 				7529C9E319AF05F300655FC1 /* CoreData.framework */,
 				75D1BEF719A9ED5300FDA569 /* CoreGraphics.framework */,
+				75E6BEA019BA674A004DB6BF /* CoreImage.framework */,
 				75D1BEF519A9ED5300FDA569 /* Foundation.framework */,
 				7529C9FF19B0CBBB00655FC1 /* ImageIO.framework */,
 				7529C9FB19B0A3EA00655FC1 /* MobileCoreServices.framework */,
@@ -655,16 +665,6 @@
 			path = Chrome;
 			sourceTree = "<group>";
 		};
-		F240EEAF19B4767200A88F94 /* Private */ = {
-			isa = PBXGroup;
-			children = (
-				F240EEB319B476DA00A88F94 /* GPBaseViewController+Private.h */,
-				F240EEB419B476DA00A88F94 /* GPBaseViewController+Private.m */,
-			);
-			name = Private;
-			path = "goopic/View Controllers/Private";
-			sourceTree = SOURCE_ROOT;
-		};
 		F240EEB619B47DD400A88F94 /* Transitions */ = {
 			isa = PBXGroup;
 			children = (
@@ -793,14 +793,15 @@
 				757BEC3019B67D5C00043028 /* NSArray+Extension.m in Sources */,
 				75D1BF9819AA0C7C00FDA569 /* IMGAlbum.m in Sources */,
 				757F72C719B27CC800F59B8D /* GPLogs.m in Sources */,
-				F240EEB519B476DA00A88F94 /* GPBaseViewController+Private.m in Sources */,
 				75D1BF3F19A9EEC600FDA569 /* AFURLConnectionOperation.m in Sources */,
 				757F72C619B27CC800F59B8D /* GPConstants.m in Sources */,
+				751767DD19BB06B300D561B9 /* CALayer+Extension.m in Sources */,
 				75D1BF3E19A9EEC600FDA569 /* AFSecurityPolicy.m in Sources */,
 				75D1BF9519AA0C7C00FDA569 /* IMGSession.m in Sources */,
+				75E6BEA719BA6AE9004DB6BF /* GPCameraViewController.m in Sources */,
 				F240EEBF19B49B3800A88F94 /* GPTableToPhotoTransition.m in Sources */,
 				7529C9E819AF08A400655FC1 /* Goopic.xcdatamodeld in Sources */,
-				7529CA1519B1545100655FC1 /* GPCameraViewController.m in Sources */,
+				7529CA1519B1545100655FC1 /* GPCameraViewController_tmp.m in Sources */,
 				75D1BF3A19A9EEC600FDA569 /* AFHTTPRequestOperation.m in Sources */,
 				75D1BF9919AA0C7C00FDA569 /* IMGBasicAlbum.m in Sources */,
 				75D1BFA419AA0C7C00FDA569 /* IMGVote.m in Sources */,

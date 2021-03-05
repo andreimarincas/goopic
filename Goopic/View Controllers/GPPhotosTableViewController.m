@@ -14,6 +14,7 @@
 #import "GPSearchEngine.h"
 #import "GPFadeTransition.h"
 #import "GPTableToPhotoTransition.h"
+#import "GPCameraViewController.h"
 
 static NSString * const kPhotoCellID                    = @"PhotoCell";
 static NSString * const kPhotosHeaderID                 = @"PhotosHeader";
@@ -284,6 +285,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         self.separatorStyle = UITableViewCellSeparatorStyleNone;
         self.decelerationRate = UIScrollViewDecelerationRateNormal;
         self.scrollEnabled = YES;
+        self.scrollsToTop = NO;
         
         [self registerClass:[GPPhotoCell class] forCellReuseIdentifier:kPhotoCellID];
         [self registerClass:[GPPhotosHeaderView class] forHeaderFooterViewReuseIdentifier:kPhotosHeaderID];
@@ -328,6 +330,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         // Custom initialization
         
         self.automaticallyAdjustsScrollViewInsets = NO;
+        self.canShowDate = NO;
     }
     
     return self;
@@ -406,6 +409,8 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     self.selectedIndexPath = nil;
     self.selectedPhotoIndex = 0;
     
+    self.canShowDate = YES;
+    
     GPLogOUT();
 }
 
@@ -415,6 +420,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     [super viewWillDisappear:animated];
     
     _photosCountPerCellOnViewWillDisappear = [GPPhotosTableViewController photosCountPerCell];
+    self.canShowDate = NO;
     
     GPLogOUT();
 }
@@ -435,6 +441,8 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 {
     GPLogIN();
     [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    
+    self.canShowDate = NO;
     
     NSArray *visibleIndexPaths = [self.photosTableView indexPathsForVisibleRows];
     NSInteger photosCountPerCell = [GPPhotosTableViewController photosCountPerCell];
@@ -472,34 +480,6 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
             }
         }
     }
-    
-//    if ([_thumbnailViewsForInterfaceOrientation count] > 0)
-//    {
-//        [UIView animateWithDuration:duration / 2
-//                              delay:0
-//                            options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseOut
-//                         animations:^{
-//                             
-//                             for (UIImageView *thumbnailView in _thumbnailViewsForInterfaceOrientation)
-//                             {
-//                                 thumbnailView.alpha = 0.5;
-//                             }
-//                             
-//                         } completion:^(BOOL finished) {
-//                             
-//                             [UIView animateWithDuration:duration / 2
-//                                                   delay:0
-//                                                 options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseIn
-//                                              animations:^{
-//                                                  
-//                                                  for (UIImageView *thumbnailView in _thumbnailViewsForInterfaceOrientation)
-//                                                  {
-//                                                      thumbnailView.alpha = 1;
-//                                                  }
-//                                                  
-//                                              } completion:nil];
-//                         }];
-//    }
     
     GPLogOUT();
 }
@@ -539,6 +519,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     }
     
     self.photosTableView.hidden = NO;
+    self.canShowDate = YES;
     
     GPLogOUT();
 }
@@ -585,8 +566,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 
-//                [self.photosTableView reloadData];
-                [self updateUI];
+                [self.photosTableView reloadData];
             });
         }
         else if ([[group valueForProperty:ALAssetsGroupPropertyType] intValue] == ALAssetsGroupSavedPhotos)
@@ -984,14 +964,11 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 {
     GPLogIN();
     
-//    CGPoint pos = [tapGr locationInView:self.view];
-//    CGPoint posInTableView = [self.photosTableView convertPoint:pos fromView:self.view];
-//    GPLog(@"tap: %@ %@", NSStringFromCGPoint(pos), NSStringFromCGPoint(posInTableView));
-    
     CGPoint posInTableView = [tapGr locationInView:self.photosTableView];
     GPLog(@"tap: %@", NSStringFromCGPoint(posInTableView));
     
-    GPPhoto *selectedPhoto = [self photoAtPoint:posInTableView];
+    self.canShowDate = NO;
+    GPPhoto *selectedPhoto = [self selectPhotoAtPoint:posInTableView];
     
     if (selectedPhoto)
     {
@@ -1005,13 +982,16 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
             [GPSearchEngine searchEngine].delegate = photoViewController;
             
             [self presentViewController:photoViewController animated:YES completion:nil];
+            
+            GPLogOUT();
+            return;
         }
-        else
-        {
-            GPLogErr(@"Could not create GPPhotoViewController.");
-            // TODO: Handle error
-        }
+        
+        GPLogErr(@"Could not create GPPhotoViewController.");
+        // TODO: Handle error
     }
+    
+    self.canShowDate = YES;
     
     GPLogOUT();
 }
@@ -1025,7 +1005,8 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         CGPoint posInTableView = [longPressGr locationInView:self.photosTableView];
         GPLog(@"long press loc: %@", NSStringFromCGPoint(posInTableView));
         
-        GPPhoto *selectedPhoto = [self photoAtPoint:posInTableView];
+        self.canShowDate = NO;
+        GPPhoto *selectedPhoto = [self selectPhotoAtPoint:posInTableView];
         
         if (selectedPhoto)
         {
@@ -1042,20 +1023,22 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
                     
                     [[GPSearchEngine searchEngine] searchGoogleForPhoto:selectedPhoto completion:nil];
                 }];
+                
+                GPLogOUT();
+                return;
             }
-            else
-            {
-                GPLogErr(@"Could not create GPPhotoViewController.");
-                // TODO: Handle error
-            }
+            
+            GPLogErr(@"Could not create GPPhotoViewController.");
+            // TODO: Handle error
         }
+        
+        self.canShowDate = YES;
     }
 }
 
-- (GPPhoto *)photoAtPoint:(CGPoint)posInTableView
+- (GPPhoto *)selectPhotoAtPoint:(CGPoint)posInTableView
 {
     NSIndexPath *indexPath = [self.photosTableView indexPathForRowAtPoint:posInTableView];
-    self.selectedIndexPath = indexPath;
     
     if ((indexPath.section > 0) && (indexPath.section < [self.photosSections count] - 1)) // Ignore table view header & footer
     {
@@ -1064,13 +1047,41 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         if (photoCell)
         {
             NSInteger index = (posInTableView.x / self.photosTableView.bounds.size.width) * [GPPhotosTableViewController photosCountPerCell];
-            self.selectedPhotoIndex = index;
-            
             NSArray *photos = [photoCell photos];
             
             if ((index >= 0) && (index < [photos count]))
             {
                 GPPhoto *photo = (GPPhoto *)photos[index];
+                
+                if (photo)
+                {
+                    self.selectedIndexPath = indexPath;
+                    self.selectedPhotoIndex = index;
+                    
+                    CGRect photoFrame = [self frameForPhotoAtIndexPath:indexPath photoIndex:index];
+                    
+                    if (photoFrame.origin.y < self.toolbar.frame.size.height)
+                    {
+                        CGPoint pointToScrollAt = CGPointMake(photoFrame.origin.x, photoFrame.origin.y - self.toolbar.frame.size.height);
+                        CGPoint pointToScrollAtInTableView = [self.view convertPoint:pointToScrollAt toView:self.photosTableView];
+                        
+                        CGRect rectToScrollAtInTableView = CGRectMake(pointToScrollAtInTableView.x, pointToScrollAtInTableView.y,
+                                                                      photoFrame.size.width, photoFrame.size.height);
+                        
+                        [self.photosTableView scrollRectToVisible:rectToScrollAtInTableView animated:YES];
+                    }
+                    else if (photoFrame.origin.y + photoFrame.size.height > self.view.bounds.size.height)
+                    {
+                        CGPoint pointToScrollAt = CGPointMake(photoFrame.origin.x, self.view.bounds.size.height);
+                        CGPoint pointToScrollAtInTableView = [self.view convertPoint:pointToScrollAt toView:self.photosTableView];
+                        
+                        CGRect rectToScrollAtInTableView = CGRectMake(pointToScrollAtInTableView.x, pointToScrollAtInTableView.y,
+                                                                      photoFrame.size.width, photoFrame.origin.y + photoFrame.size.height - self.view.bounds.size.height);
+                        
+                        [self.photosTableView scrollRectToVisible:rectToScrollAtInTableView animated:YES];
+                    }
+                }
+                
                 return photo;
             }
         }
@@ -1085,17 +1096,34 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 {
     [self updateDateTitle];
     
-    if ([self.toolbar.dateLabel isHidden])
+    if (self.canShowDate)
     {
         [self.toolbar showDate:YES];
+        
+        [self.hideTitleTimer invalidate];
+        self.hideTitleTimer = [NSTimer scheduledTimerWithTimeInterval:kTitleVisibilityTimeout
+                                                               target:self.toolbar
+                                                             selector:@selector(hideDateAnimated)
+                                                             userInfo:nil
+                                                              repeats:NO];
     }
     
-    [self.hideTitleTimer invalidate];
-    self.hideTitleTimer = [NSTimer scheduledTimerWithTimeInterval:kTitleVisibilityTimeout
-                                                           target:self.toolbar
-                                                         selector:@selector(hideDateAnimated)
-                                                         userInfo:nil
-                                                          repeats:NO];
+    if (scrollView.contentOffset.y == 0)
+    {
+        if ([scrollView.delegate respondsToSelector:@selector(scrollViewDidScrollToTop:)])
+        {
+            [scrollView.delegate performSelector:@selector(scrollViewDidScrollToTop:) withObject:scrollView];
+        }
+    }
+}
+
+- (void)scrollViewDidScrollToTop:(UIScrollView *)scrollView
+{
+    GPLogIN();
+    
+    self.canShowDate = YES;
+    
+    GPLogOUT();
 }
 
 #pragma mark - Toolbar Delegate
@@ -1119,6 +1147,8 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 {
     if (toolbar == self.toolbar)
     {
+        self.canShowDate = NO;
+        
         [self.photosTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]
                                     atScrollPosition:UITableViewScrollPositionTop animated:YES];
     }

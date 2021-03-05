@@ -6,23 +6,29 @@
 //  Copyright (c) 2014 JUPITER. All rights reserved.
 //
 
-#import <MobileCoreServices/MobileCoreServices.h>
-#import <ImageIO/ImageIO.h>
 #import "GPCameraViewController.h"
-#import "GPButton.h"
-
+#import <CoreImage/CoreImage.h>
+#import <ImageIO/ImageIO.h>
+#import <AssertMacros.h>
+#import <AssetsLibrary/AssetsLibrary.h>
 
 // Constants
 
-static const CGFloat kCameraPreset = 640.0f / 480.0f;
+static const CGFloat kTopToolbarSize = 41.33f;
+static const CGFloat kBottomToolbarSize = 100.0f;
 
-// Context
+static const CGFloat kGaussianBlur = 25.0f;
+static const CGFloat kSmoothFactor = 0.6f;
+
+// Contexts
+
+// used for KVO observation of the @"capturingStillImage" property to perform flash bulb animation
 static void * CapturingStillImageContext = &CapturingStillImageContext;
 static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDeviceAuthorizedContext;
 
 
-#pragma mark -
-#pragma mark - Camera View
+#pragma mark - 
+#pragma mark = Camera View
 
 @implementation GPCameraView
 
@@ -31,30 +37,43 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	return [AVCaptureVideoPreviewLayer class];
 }
 
-- (AVCaptureVideoPreviewLayer *)previewLayer
+- (instancetype)init
+{
+    self = [super init];
+    
+    if (self)
+    {
+        [self.videoLayer setBackgroundColor:[[UIColor blackColor] CGColor]];
+        [self.videoLayer setVideoGravity:AVLayerVideoGravityResizeAspect];
+    }
+    
+    return self;
+}
+
+- (AVCaptureVideoPreviewLayer *)videoLayer
 {
     return (AVCaptureVideoPreviewLayer *)self.layer;
 }
 
 - (void)setSession:(AVCaptureSession *)session
 {
-    self.previewLayer.session = session;
+    self.videoLayer.session = session;
 }
 
 - (AVCaptureSession *)session
 {
-    return self.previewLayer.session;
+    return self.videoLayer.session;
 }
 
 @end
 
 
-#pragma mark -
+#pragma mark - 
 #pragma mark - Camera View Controller
 
 @implementation GPCameraViewController
 
-@synthesize rootViewController = _rootViewController;
+#pragma mark - Utils
 
 + (NSSet *)keyPathsForValuesAffectingSessionRunningAndDeviceAuthorized
 {
@@ -78,7 +97,129 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	return captureDevice;
 }
 
-#pragma mark - Init / Dealloc
+// WARNING: This litle monster returns 'nan' values from time to time...
+// find where the video box is positioned within the preview layer based on the video size and gravity
++ (CGRect)videoPreviewBoxForGravity:(NSString *)gravity frameSize:(CGSize)frameSize apertureSize:(CGSize)apertureSize
+{
+    GPLogIN();
+    
+    GPLog(@"gravity: %@", gravity);
+    GPLog(@"frame size: %@", NSStringFromCGSize(frameSize));
+    GPLog(@"aperture size: %@", NSStringFromCGSize(apertureSize));
+    
+    CGFloat apertureRatio = apertureSize.height / apertureSize.width;
+    CGFloat viewRatio = frameSize.width / frameSize.height;
+    
+    CGSize size = CGSizeZero;
+    
+    if ([gravity isEqualToString:AVLayerVideoGravityResizeAspectFill])
+    {
+        if (viewRatio > apertureRatio)
+        {
+            size.width = frameSize.width;
+            size.height = apertureSize.width * (frameSize.width / apertureSize.height);
+        }
+        else
+        {
+            size.width = apertureSize.height * (frameSize.height / apertureSize.width);
+            size.height = frameSize.height;
+        }
+    }
+    else if ([gravity isEqualToString:AVLayerVideoGravityResizeAspect])
+    {
+        if (viewRatio > apertureRatio)
+        {
+            size.width = apertureSize.height * (frameSize.height / apertureSize.width);
+            size.height = frameSize.height;
+        }
+        else
+        {
+            size.width = frameSize.width;
+            size.height = apertureSize.width * (frameSize.width / apertureSize.height);
+        }
+    }
+    else if ([gravity isEqualToString:AVLayerVideoGravityResize])
+    {
+        size.width = frameSize.width;
+        size.height = frameSize.height;
+    }
+	
+	CGRect videoBox;
+	videoBox.size = size;
+    
+	if (size.width < frameSize.width)
+    {
+		videoBox.origin.x = (frameSize.width - size.width) / 2;
+    }
+	else
+    {
+		videoBox.origin.x = (size.width - frameSize.width) / 2;
+    }
+	
+	if (size.height < frameSize.height)
+    {
+		videoBox.origin.y = (frameSize.height - size.height) / 2;
+    }
+	else
+    {
+		videoBox.origin.y = (size.height - frameSize.height) / 2;
+    }
+    
+    GPLog(@"video box: %@", NSStringFromCGRect(videoBox));
+    
+    GPLogOUT();
+	return videoBox;
+}
+
+// utility routing used during image capture to set up capture orientation
++ (AVCaptureVideoOrientation)avOrientationForDeviceOrientation:(UIDeviceOrientation)deviceOrientation
+{
+	AVCaptureVideoOrientation result = (AVCaptureVideoOrientation)deviceOrientation;
+    
+	if (deviceOrientation == UIDeviceOrientationLandscapeLeft) {
+		result = AVCaptureVideoOrientationLandscapeRight;
+    }
+	else if (deviceOrientation == UIDeviceOrientationLandscapeRight) {
+		result = AVCaptureVideoOrientationLandscapeLeft;
+    }
+    
+	return result;
+}
+
++ (UIImage *)fixOrientation:(UIImage *)image
+{
+    const CGFloat degrees = 90;
+    return [image imageRotatedByDegrees:degrees];
+}
+
++ (CGImageRef)blurredImage:(CGImageRef)image
+{
+    CIImage *ciImage = [[CIImage alloc] initWithCGImage:image];
+    
+    // Apply Gausian filter to blur the image
+    CIFilter *gaussianFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
+    [gaussianFilter setValue:ciImage forKey:kCIInputImageKey];
+    [gaussianFilter setValue:@( kGaussianBlur ) forKey:kCIInputRadiusKey];
+    ciImage = [gaussianFilter valueForKey:kCIOutputImageKey];
+    
+    // Apply Bloom that makes soft edges and adds glow to image
+    CIFilter *bloomFilter = [CIFilter filterWithName:@"CIBloom"];
+    [bloomFilter setValue:ciImage forKey:kCIInputImageKey];
+    [bloomFilter setValue:[NSNumber numberWithDouble: kSmoothFactor] forKey:@"inputRadius"];
+    ciImage = [bloomFilter valueForKey:kCIOutputImageKey];
+    
+    static CIContext *context;
+    
+    if (!context)
+    {
+        context = [CIContext contextWithOptions:nil];
+    }
+    
+    CGImageRef blurredImage = [context createCGImage:ciImage fromRect:[ciImage extent]];
+    return blurredImage;
+}
+
+#pragma mark - Init/Dealloc
 
 - (instancetype)init
 {
@@ -88,26 +229,27 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     if (self)
     {
         // Custom initialization
-        _gpDeviceOrientation = [UIDevice currentDevice].orientation;
-        
-        [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-        [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(deviceOrientationChanged)
-                                                    name:UIDeviceOrientationDidChangeNotification object:nil];
+        _deviceOrientation = [UIDevice currentDevice].orientation;
     }
     
-    return self;
     GPLogOUT();
+    return self;
 }
 
 - (void)dealloc
 {
     GPLogIN();
     
-    // Dealloc code
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
-    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+    self.stillImageOutput = nil;
+    self.cameraDeviceInput = nil;
+    self.sessionQueue = nil;
+    self.session = nil;
     
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    self.videoDeviceInput = nil;
+    self.videoDataOutput = nil;
+    self.videoDataOutputQueue = nil;
+    self.videoSessionQueue = nil;
+    self.videoSession = nil;
     
     GPLogOUT();
 }
@@ -118,6 +260,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 {
     GPLogIN();
     [super viewDidLoad];
+	// Do any additional setup after loading the view, typically from a nib.
     
     self.view.backgroundColor = GPCOLOR_DARK_BLACK;
     self.edgesForExtendedLayout = UIRectEdgeNone;
@@ -133,74 +276,22 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     [self.view addSubview:bottomToolbar];
     self.bottomToolbar = bottomToolbar;
     
+    [self rotateControlsToOrientation:_deviceOrientation animated:NO];
+    
+    // Flash
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     NSString *flashValue = [userDefaults stringForKey:kCameraFlashKey];
     [topToolbar selectFlashButtonForValue:flashValue];
     
-    [self rotateControlsToOrientation:_gpDeviceOrientation animated:NO];
+	[self setupCamera];
+//    [self setupVideoCapture];
     
-    // Create the capture session
-	AVCaptureSession *session = [[AVCaptureSession alloc] init];
-    session.sessionPreset = AVCaptureSessionPreset640x480;
-	self.session = session;
-	
-	// Setup the preview view
-    GPCameraView *cameraView = [[GPCameraView alloc] init];
-    cameraView.backgroundColor = GPCOLOR_DARK_BLACK;
-    cameraView.session = session;
-    cameraView.previewLayer.videoGravity = AVLayerVideoGravityResizeAspect;
-    
-    UITapGestureRecognizer *tapGr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(focusAndExposeTap:)];
-    [cameraView addGestureRecognizer:tapGr];
-    UIPanGestureRecognizer *panGr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanning:)];
-    [cameraView addGestureRecognizer:panGr];
-    
-    [self.view addSubview:cameraView];
-    self.cameraView = cameraView;
-	
-	// Check for device authorization
-	[self checkDeviceAuthorizationStatus];
-    
-    // Dispatch session setup to the sessionQueue so that the main queue isn't blocked
-    dispatch_queue_t sessionQueue = dispatch_queue_create("session queue", DISPATCH_QUEUE_SERIAL);
-	self.sessionQueue = sessionQueue;
-    
-    dispatch_async(sessionQueue, ^{
-		
-        // Create the video device (back camera)
-		AVCaptureDevice *videoDevice = [GPCameraViewController deviceWithMediaType:AVMediaTypeVideo
-                                                                preferringPosition:AVCaptureDevicePositionBack];
-        
-        // Set the video input
-        NSError *error = nil;
-		AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:videoDevice error:&error];
-        
-        if (error)
-		{
-			GPLogErr(@"%@ %@", error, [error userInfo]); // TODO: handle error
-		}
-        
-        if ([session canAddInput:videoDeviceInput])
-		{
-			[session addInput:videoDeviceInput];
-			self.videoDeviceInput = videoDeviceInput;
-            
-			dispatch_async(dispatch_get_main_queue(), ^{
-                // The backing layer for camera view and the view can only be manipulated on main thread.
-                [[self.cameraView.previewLayer connection] setVideoOrientation:(AVCaptureVideoOrientation)[self interfaceOrientation]];
-			});
-		}
-        
-        // Set the image output
-        AVCaptureStillImageOutput *stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
-        
-		if ([session canAddOutput:stillImageOutput])
-		{
-			[stillImageOutput setOutputSettings:@{ AVVideoCodecKey : AVVideoCodecJPEG }];
-			[session addOutput:stillImageOutput];
-			self.stillImageOutput = stillImageOutput;
-		}
-    });
+    CALayer *blurLayer = [CALayer layer];
+    blurLayer.masksToBounds = YES;
+    blurLayer.backgroundColor = [[UIColor blackColor] CGColor];
+    blurLayer.opacity = 0;
+    [self.view.layer addSublayer:blurLayer];
+    self.blurLayer = blurLayer;
     
     GPLogOUT();
 }
@@ -210,37 +301,72 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogIN();
     [super viewWillAppear:animated];
     
-	dispatch_async(self.sessionQueue, ^{
+    [self showActivity:GPActivityStartingCamera animated:NO];
+    
+    [[NSNotificationCenter defaultCenter] addObserver: self
+                                            selector: @selector(deviceOrientationChanged:)
+                                                name: UIDeviceOrientationDidChangeNotification
+                                              object: nil];
+
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+
+    [[NSNotificationCenter defaultCenter] addObserver: self
+                                             selector: @selector(captureSessionDidStartRunning:)
+                                                 name: AVCaptureSessionDidStartRunningNotification
+                                               object: nil];
+    
+    // Start the camera session
+    dispatch_async(self.sessionQueue, ^{
         
-		[self addObserver:self forKeyPath:@"sessionRunningAndDeviceAuthorized"
-                  options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew)
-                  context:SessionRunningAndDeviceAuthorizedContext];
+		[self addObserver: self
+               forKeyPath: @"sessionRunningAndDeviceAuthorized"
+                  options: (NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew)
+                  context: SessionRunningAndDeviceAuthorizedContext];
         
-		[self addObserver:self forKeyPath:@"stillImageOutput.capturingStillImage"
-                  options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew)
-                  context:CapturingStillImageContext];
+		[self addObserver: self
+               forKeyPath: @"stillImageOutput.capturingStillImage"
+                  options: (NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew)
+                  context: CapturingStillImageContext];
         
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(subjectAreaDidChange:)
-                                                     name:AVCaptureDeviceSubjectAreaDidChangeNotification
-                                                   object:[self.videoDeviceInput device]];
+		[[NSNotificationCenter defaultCenter] addObserver: self
+                                                 selector: @selector(subjectAreaDidChange:)
+                                                     name: AVCaptureDeviceSubjectAreaDidChangeNotification
+                                                   object: [self.cameraDeviceInput device]];
 		
 		__weak GPCameraViewController *weakSelf = self;
         
-		self.runtimeErrorHandlingObserver = [[NSNotificationCenter defaultCenter] addObserverForName:AVCaptureSessionRuntimeErrorNotification
-                                                                                              object:self.session
-                                                                                               queue:nil
-                                                                                          usingBlock:^(NSNotification *note)
-        {
-			GPCameraViewController *strongSelf = weakSelf;
-            
-			dispatch_async([strongSelf sessionQueue], ^{
-				// Manually restarting the session since it must have been stopped due to an error.
-				[strongSelf.session startRunning];
-			});
-		}];
-        
-		[self.session startRunning];
+		self.runtimeErrorHandlingObserver =
+        [[NSNotificationCenter defaultCenter] addObserverForName: AVCaptureSessionRuntimeErrorNotification
+                                                          object: self.session
+                                                           queue: nil
+                                                      usingBlock: ^(NSNotification *note) {
+                                                          
+                                                          GPCameraViewController *strongSelf = weakSelf;
+                                                          
+                                                          // Manually restarting the session since it must have been stopped due to an error.
+                                                          [strongSelf.session startRunning];
+                                                      }];
+        [self.session startRunning];
 	});
+    
+    // Start the video session
+//    dispatch_async(self.videoSessionQueue, ^{
+//        
+//        __weak GPCameraViewController *weakSelf = self;
+//        
+//		self.videoRuntimeErrorHandlingObserver =
+//        [[NSNotificationCenter defaultCenter] addObserverForName: AVCaptureSessionRuntimeErrorNotification
+//                                                          object: self.videoSession
+//                                                           queue: nil
+//                                                      usingBlock: ^(NSNotification *note) {
+//                                                          
+//                                                          GPCameraViewController *strongSelf = weakSelf;
+//                                                          
+//                                                          // Manually restarting the session since it must have been stopped due to an error.
+//                                                          [strongSelf.videoSession startRunning];
+//                                                      }];
+//        [self.videoSession startRunning];
+//    });
     
     if (![[UIApplication sharedApplication] isStatusBarHidden])
     {
@@ -255,94 +381,208 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogIN();
     [super viewDidDisappear:animated];
     
-	dispatch_async([self sessionQueue], ^{
+    [[NSNotificationCenter defaultCenter] removeObserver: self
+                                                    name: AVCaptureSessionDidStartRunningNotification
+                                                  object: nil];
+    
+    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+    [[NSNotificationCenter defaultCenter] removeObserver: self
+                                                    name: UIDeviceOrientationDidChangeNotification
+                                                  object: nil];
+    
+    // Stop the camera session
+	dispatch_async(self.sessionQueue, ^{
         
-		[self.session stopRunning];
+        [self.session stopRunning];
 		
-		[[NSNotificationCenter defaultCenter] removeObserver:self
-                                                        name:AVCaptureDeviceSubjectAreaDidChangeNotification
-                                                      object:[self.videoDeviceInput device]];
+		[[NSNotificationCenter defaultCenter] removeObserver: self
+                                                        name: AVCaptureDeviceSubjectAreaDidChangeNotification
+                                                      object: [self.cameraDeviceInput device]];
         
 		[[NSNotificationCenter defaultCenter] removeObserver:self.runtimeErrorHandlingObserver];
 		
-		[self removeObserver:self forKeyPath:@"sessionRunningAndDeviceAuthorized" context:SessionRunningAndDeviceAuthorizedContext];
-		[self removeObserver:self forKeyPath:@"stillImageOutput.capturingStillImage" context:CapturingStillImageContext];
+		[self removeObserver: self
+                  forKeyPath: @"sessionRunningAndDeviceAuthorized"
+                     context: SessionRunningAndDeviceAuthorizedContext];
+        
+		[self removeObserver: self
+                  forKeyPath: @"stillImageOutput.capturingStillImage"
+                     context: CapturingStillImageContext];
 	});
     
+    // Stop the video session
+//    dispatch_async(self.videoSessionQueue, ^{
+//        
+//        [self.videoSession stopRunning];
+//        
+//		[[NSNotificationCenter defaultCenter] removeObserver:self.videoRuntimeErrorHandlingObserver];
+//	});
+    
     GPLogOUT();
 }
 
-//- (void)captureImage
-//{
-//    // Find the connection whose input port is collecting video:
-//    AVCaptureConnection *videoConnection = nil;
-//    
-//    for (AVCaptureConnection *connection in self.stillImageOutput.connections)
-//    {
-//        for (AVCaptureInputPort *port in [connection inputPorts])
-//        {
-//            if ([[port mediaType] isEqual:AVMediaTypeVideo] )
-//            {
-//                videoConnection = connection;
-//                break;
-//            }
-//        }
-//        
-//        if (videoConnection) { break; }
-//    }
-//    
-//    // Capture image
-//    [self.stillImageOutput captureStillImageAsynchronouslyFromConnection:videoConnection
-//                                                       completionHandler: ^(CMSampleBufferRef imageSampleBuffer, NSError *error) {
-//                                                           
-//                                                           CFDictionaryRef exifAttachments = CMGetAttachment(imageSampleBuffer, kCGImagePropertyExifDictionary, NULL);
-//                                                           
-//                                                           if (exifAttachments)
-//                                                           {
-//                                                               // Do something with the attachments.
-//                                                           }
-//                                                           
-//                                                           // Continue as appropriate.
-//     }];
-//}
+#pragma mark - Camera Setup
 
-#pragma mark - User Interface
-
-- (void)updateUI
+- (void)setupCamera
 {
     GPLogIN();
-    [super updateUI];
     
-    self.cameraView.frame = CGRectMake(0, [self topMargin], [self cameraVisibleSize].width, [self cameraVisibleSize].height);
-    [self.cameraView setNeedsDisplay];
+    // Create the capture session
+	AVCaptureSession *session = [[AVCaptureSession alloc] init];
+    session.sessionPreset = AVCaptureSessionPreset640x480;
+	self.session = session;
     
-    self.topToolbar.frame = CGRectMake(0, 0, self.view.bounds.size.width, [self topMargin]);
-    [self.topToolbar updateUI];
-    [self.view bringSubviewToFront:self.topToolbar];
+    // Setup the camera view
+    GPCameraView *cameraView = [[GPCameraView alloc] init];
+//    [cameraView setSession:session];
+    [self.view addSubview:cameraView];
+    self.cameraView = cameraView;
     
-    self.bottomToolbar.frame = CGRectMake(0, self.view.bounds.size.height - [self bottomMargin],
-                                          self.view.bounds.size.width, [self bottomMargin]);
-    [self.bottomToolbar updateUI];
-    [self.view bringSubviewToFront:self.bottomToolbar];
+//    UITapGestureRecognizer *tapGr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(focusAndExposeTap:)];
+//    [cameraView addGestureRecognizer:tapGr];
     
-    [self.view setNeedsDisplay];
+    // Dispatch session setup to the sessionQueue so that the main queue isn't blocked
+    dispatch_queue_t sessionQueue = dispatch_queue_create("CameraSessionQueue", DISPATCH_QUEUE_SERIAL);
+	self.sessionQueue = sessionQueue;
+    
+    // Check for device authorization
+	[self checkDeviceAuthorizationStatus];
+    
+    dispatch_async(self.sessionQueue, ^{
+        
+        // Get the video device (back camera)
+		AVCaptureDevice *videoDevice = [GPCameraViewController deviceWithMediaType:AVMediaTypeVideo
+                                                                preferringPosition:AVCaptureDevicePositionBack];
+        
+        // TODO: Adjust activeVideoMinFrameDuration and activeVideoMaxFrameDuration on AVCaptureDevice
+        
+        // Set the video input
+        NSError *error = nil;
+		AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:videoDevice error:&error];
+        
+        if (error)
+		{
+			GPLogErr(@"%@ %@", error, [error userInfo]);
+            self.session = nil;
+            
+            GPLogOUT();
+            return;
+		}
+        
+        if ([self.session canAddInput:videoDeviceInput])
+		{
+			[self.session addInput:videoDeviceInput];
+			self.cameraDeviceInput = videoDeviceInput;
+            
+//			dispatch_async(dispatch_get_main_queue(), ^{
+//                
+//                // The backing layer for camera view and the view can only be manipulated on main thread.
+//                [[self.cameraView.videoLayer connection] setVideoOrientation:(AVCaptureVideoOrientation)[self interfaceOrientation]];
+//			});
+		}
+        
+        // Set the image output
+        AVCaptureStillImageOutput *stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
+        [stillImageOutput setOutputSettings:@{ AVVideoCodecKey : AVVideoCodecJPEG }];
+        
+		if ([self.session canAddOutput:stillImageOutput])
+		{
+			[self.session addOutput:stillImageOutput];
+			self.stillImageOutput = stillImageOutput;
+		}
+        
+        // Set the video data output
+        AVCaptureVideoDataOutput *videoDataOutput = [[AVCaptureVideoDataOutput alloc] init];
+        
+        // we want BGRA, both CoreGraphics and OpenGL work well with 'BGRA'
+        id rgbOutputSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCMPixelFormat_32BGRA) };
+        
+        [videoDataOutput setVideoSettings:rgbOutputSettings];
+        [videoDataOutput setAlwaysDiscardsLateVideoFrames:YES]; // discard if the data output queue is blocked (as we process the still image)
+        
+        // create a serial dispatch queue used for the sample buffer delegate as well as when a still image is captured
+        // a serial dispatch queue must be used to guarantee that video frames will be delivered in order
+        // see the header doc for setSampleBufferDelegate:queue: for more information
+        dispatch_queue_t videoDataOutputQueue = dispatch_queue_create("VideoDataOutputQueue", DISPATCH_QUEUE_SERIAL);
+        [videoDataOutput setSampleBufferDelegate:self queue:videoDataOutputQueue];
+        self.videoDataOutputQueue = videoDataOutputQueue;
+        
+        if ([self.session canAddOutput:videoDataOutput])
+        {
+            [self.session addOutput:videoDataOutput];
+            self.videoDataOutput = videoDataOutput;
+        }
+        
+        AVCaptureConnection *videoOutputConnection = [self.videoDataOutput connectionWithMediaType:AVMediaTypeVideo];
+        [videoOutputConnection setEnabled:YES];
+    });
     
     GPLogOUT();
 }
 
-- (CGSize)cameraVisibleSize
+- (void)setupVideoCapture
 {
-    return CGSizeMake(self.view.bounds.size.width, kCameraPreset * self.view.bounds.size.width);
-}
-
-- (CGFloat)topMargin
-{
-    return (self.view.bounds.size.height - [self cameraVisibleSize].height - [self bottomMargin]);
-}
-
-- (CGFloat)bottomMargin
-{
-    return 0.7f * (self.view.bounds.size.height - [self cameraVisibleSize].height);
+    // Create the video session
+	AVCaptureSession *videoSession = [[AVCaptureSession alloc] init];
+    videoSession.sessionPreset = AVCaptureSessionPreset640x480;
+	self.videoSession = videoSession;
+    
+    // Dispatch session setup to the sessionQueue so that the main queue isn't blocked
+    dispatch_queue_t videoSessionQueue = dispatch_queue_create("VideoSessionQueue", DISPATCH_QUEUE_SERIAL);
+	self.videoSessionQueue = videoSessionQueue;
+    
+    dispatch_async(self.videoSessionQueue, ^{
+        
+        // Get the video device (back camera)
+		AVCaptureDevice *videoDevice = [GPCameraViewController deviceWithMediaType:AVMediaTypeVideo
+                                                                preferringPosition:AVCaptureDevicePositionBack];
+        
+        // TODO: Adjust activeVideoMinFrameDuration and activeVideoMaxFrameDuration on AVCaptureDevice
+        
+        // Set the video input
+        NSError *error = nil;
+		AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:videoDevice error:&error];
+        
+        if (error)
+		{
+			GPLogErr(@"%@ %@", error, [error userInfo]);
+            self.videoSessionQueue = nil;
+            
+            GPLogOUT();
+            return;
+		}
+        
+        if ([self.videoSession canAddInput:videoDeviceInput])
+		{
+			[self.videoSession addInput:videoDeviceInput];
+			self.videoDeviceInput = videoDeviceInput;
+		}
+        
+        // Set the video data output
+        AVCaptureVideoDataOutput *videoDataOutput = [[AVCaptureVideoDataOutput alloc] init];
+        
+        // we want BGRA, both CoreGraphics and OpenGL work well with 'BGRA'
+        id rgbOutputSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCMPixelFormat_32BGRA) };
+        
+        [videoDataOutput setVideoSettings:rgbOutputSettings];
+        [videoDataOutput setAlwaysDiscardsLateVideoFrames:YES]; // discard if the data output queue is blocked (as we process the still image)
+        
+        // create a serial dispatch queue used for the sample buffer delegate as well as when a still image is captured
+        // a serial dispatch queue must be used to guarantee that video frames will be delivered in order
+        // see the header doc for setSampleBufferDelegate:queue: for more information
+        dispatch_queue_t videoDataOutputQueue = dispatch_queue_create("VideoDataOutputQueue", DISPATCH_QUEUE_SERIAL);
+        [videoDataOutput setSampleBufferDelegate:self queue:videoDataOutputQueue];
+        self.videoDataOutputQueue = videoDataOutputQueue;
+        
+        if ([self.videoSession canAddOutput:videoDataOutput])
+        {
+            [self.videoSession addOutput:videoDataOutput];
+            self.videoDataOutput = videoDataOutput;
+        }
+        
+        AVCaptureConnection *videoOutputConnection = [self.videoDataOutput connectionWithMediaType:AVMediaTypeVideo];
+        [videoOutputConnection setEnabled:YES];
+    });
 }
 
 #pragma mark - Interface Orientation
@@ -362,14 +602,409 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     return UIInterfaceOrientationPortrait;
 }
 
-- (void)deviceOrientationChanged
+#pragma mark - Status Bar
+
+- (BOOL)prefersStatusBarHidden
+{
+	return YES;
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle
+{
+    return UIStatusBarStyleDefault;
+}
+
+- (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
+{
+    return UIStatusBarAnimationSlide;
+}
+
+#pragma mark - Update UI
+
+- (void)updateUI
+{
+    GPLogIN();
+    [super updateUI];
+    
+    self.cameraView.frame = CGRectMake(0, kTopToolbarSize,
+                                       self.view.bounds.size.width,
+                                       self.view.bounds.size.height - kTopToolbarSize - kBottomToolbarSize);
+    [self.cameraView setNeedsDisplay];
+    
+    GPLog(@"camera view :%@", self.cameraView);
+    
+    self.topToolbar.frame = CGRectMake(0, 0, self.view.bounds.size.width, kTopToolbarSize);
+    [self.topToolbar updateUI];
+    [self.view bringSubviewToFront:self.topToolbar];
+    
+    GPLog(@"top toolbar: %@", self.topToolbar);
+    
+    self.bottomToolbar.frame = CGRectMake(0, self.view.bounds.size.height - kBottomToolbarSize,
+                                          self.view.bounds.size.width, kBottomToolbarSize);
+    [self.bottomToolbar updateUI];
+    [self.view bringSubviewToFront:self.bottomToolbar];
+    
+    GPLog(@"bottom toolbar: %@", self.bottomToolbar);
+    
+    [CALayer performWithoutAnimation:^{
+        
+        CATransform3D t = self.blurLayer.transform;
+        self.blurLayer.transform = CATransform3DIdentity;
+        
+        self.blurLayer.bounds = self.cameraView.bounds;
+        self.blurLayer.position = self.cameraView.center;
+        
+        self.blurLayer.transform = t;
+        
+        GPLog(@"camera view frame: %@", NSStringFromCGRect(self.cameraView.frame));
+        GPLog(@"blur layer: %@", NSStringFromCGRect(self.blurLayer.frame));
+        
+        [self.blurLayer removeFromSuperlayer];
+        [self.view.layer insertSublayer:self.blurLayer above:self.cameraView.layer];
+    }];
+    
+    [self.view.layer bringSublayerToFront:self.topToolbar.layer];
+    [self.view.layer bringSublayerToFront:self.bottomToolbar.layer];
+    [self.view bringSubviewToFront:self.topToolbar];
+    [self.view bringSubviewToFront:self.bottomToolbar];
+    
+    GPLogOUT();
+}
+
+#pragma mark - Key-Value Observer
+
+// perform a flash bulb animation using KVO to monitor the value of the capturingStillImage property of the AVCaptureStillImageOutput class
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+	if (context == CapturingStillImageContext)
+    {
+		BOOL isCapturingStillImage = [change[NSKeyValueChangeNewKey] boolValue];
+		
+		if (isCapturingStillImage)
+        {
+            GPLog(@"is capturing still image...");
+            
+//            [self runStillImageCaptureAnimation];
+            
+//			// do flash bulb like animation
+//			flashView = [[UIView alloc] initWithFrame:[self.cameraView frame]];
+//			[flashView setBackgroundColor:[UIColor whiteColor]];
+//			[flashView setAlpha:0.f];
+//			[[[self view] window] addSubview:flashView];
+//			
+//			[UIView animateWithDuration:.4f
+//							 animations:^{
+//								 [flashView setAlpha:1.f];
+//							 }
+//			 ];
+		}
+		else
+        {
+//			[UIView animateWithDuration:.4f
+//							 animations:^{
+//								 [flashView setAlpha:0.f];
+//							 }
+//							 completion:^(BOOL finished){
+//								 [flashView removeFromSuperview];
+//								 flashView = nil;
+//							 }
+//			 ];
+		}
+	}
+    else if (context == SessionRunningAndDeviceAuthorizedContext)
+	{
+//        BOOL isRunning = [change[NSKeyValueChangeNewKey] boolValue];
+//
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//
+//            if (isRunning)
+//            {
+//                [[self cameraButton] setEnabled:YES];
+//                [[self recordButton] setEnabled:YES];
+//                [[self stillButton] setEnabled:YES];
+//            }
+//            else
+//            {
+//                [[self cameraButton] setEnabled:NO];
+//                [[self recordButton] setEnabled:NO];
+//                [[self stillButton] setEnabled:NO];
+//            }
+//        });
+	}
+	else
+	{
+		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+	}
+}
+
+#pragma mark - Image Processing
+
+// utility routine used after taking a still image to write the resulting image to the camera roll
+//- (BOOL)writeCGImageToCameraRoll:(CGImageRef)cgImage withMetadata:(NSDictionary *)metadata
+//{
+//	CFMutableDataRef destinationData = CFDataCreateMutable(kCFAllocatorDefault, 0);
+//	CGImageDestinationRef destination = CGImageDestinationCreateWithData(destinationData, 
+//																		 CFSTR("public.jpeg"), 
+//																		 1, 
+//																		 NULL);
+//	BOOL success = (destination != NULL);
+//	require(success, bail);
+//    {
+//	const float JPEGCompQuality = 0.85f; // JPEGHigherQuality
+//	CFMutableDictionaryRef optionsDict = NULL;
+//	CFNumberRef qualityNum = NULL;
+//	
+//	qualityNum = CFNumberCreate(0, kCFNumberFloatType, &JPEGCompQuality);    
+//	if ( qualityNum ) {
+//		optionsDict = CFDictionaryCreateMutable(0, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+//		if ( optionsDict )
+//			CFDictionarySetValue(optionsDict, kCGImageDestinationLossyCompressionQuality, qualityNum);
+//		CFRelease( qualityNum );
+//	}
+//	
+//	CGImageDestinationAddImage( destination, cgImage, optionsDict );
+//	success = CGImageDestinationFinalize( destination );
+//
+//	if ( optionsDict )
+//		CFRelease(optionsDict);
+//	
+//	require(success, bail);
+//	
+//	CFRetain(destinationData);
+//	ALAssetsLibrary *library = [ALAssetsLibrary new];
+//	[library writeImageDataToSavedPhotosAlbum:(__bridge id)destinationData metadata:metadata completionBlock:^(NSURL *assetURL, NSError *error) {
+//		if (destinationData)
+//			CFRelease(destinationData);
+//	}];
+//    }
+//
+//bail:
+//    {
+//	if (destinationData)
+//		CFRelease(destinationData);
+//	if (destination)
+//		CFRelease(destination);
+//	return success;
+//    }
+//}
+
+// main action method to take a still image -- if face detection has been turned on and a face has been detected
+// the square overlay will be composited on top of the captured image and saved to the camera roll
+//- (void)takePicture
+//{
+//	// Find out the current orientation and tell the still image output.
+//	AVCaptureConnection *stillImageConnection = [_stillImageOutput connectionWithMediaType:AVMediaTypeVideo];
+//	UIDeviceOrientation curDeviceOrientation = [[UIDevice currentDevice] orientation];
+//	AVCaptureVideoOrientation avcaptureOrientation = [self avOrientationForDeviceOrientation:curDeviceOrientation];
+//	[stillImageConnection setVideoOrientation:avcaptureOrientation];
+//	[stillImageConnection setVideoScaleAndCropFactor:effectiveScale];
+//	
+//    // set the appropriate pixel format / image type output setting
+//    [_stillImageOutput setOutputSettings:[NSDictionary dictionaryWithObject:AVVideoCodecJPEG forKey:AVVideoCodecKey]];
+//	
+//	[_stillImageOutput captureStillImageAsynchronouslyFromConnection:stillImageConnection
+//		completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
+//            
+//            if (!error)
+//            {
+//                NSData *jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
+//                CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(kCFAllocatorDefault,
+//                                                                            imageDataSampleBuffer,
+//                                                                            kCMAttachmentMode_ShouldPropagate);
+//                ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
+//                [library writeImageDataToSavedPhotosAlbum:jpegData metadata:(__bridge id)attachments
+//                                          completionBlock:^(NSURL *assetURL, NSError *error) {
+//                    if (!error) {
+//                        GPLog(@"Image saved to camera roll.");
+//                    } else
+//                    {
+//                        GPLogErr(@"%@ %@", error, [error userInfo]);
+//                    }
+//                }];
+//            }
+//            else
+//            {
+//                GPLogErr(@"%@ %@", error, [error userInfo]);
+//            }
+//		}
+//	 ];
+//}
+
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
+       fromConnection:(AVCaptureConnection *)connection
+{
+//    GPLogIN();
+    
+    static const NSInteger maxFPS = 24; // 24 fps
+    static NSDate *lastVisit = nil;
+    
+    NSDate *now = [NSDate now];
+    BOOL canProcessFrame = YES;
+    
+    if (lastVisit)
+    {
+        if ([now timeIntervalSinceDate:lastVisit] < 1.0 / maxFPS)
+        {
+            canProcessFrame = NO;
+        }
+    }
+    
+    if (canProcessFrame)
+    {
+        GPLog(@"process frame");
+        lastVisit = now;
+        
+        __weak typeof(self) weakSelf = self;
+        
+        @autoreleasepool {
+            
+            CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+            
+            /* Lock the image buffer */
+            CVPixelBufferLockBaseAddress(imageBuffer, 0);
+            
+            /* Get information about the image */
+            uint8_t *baseAddress = (uint8_t *)CVPixelBufferGetBaseAddress(imageBuffer);
+            size_t bytesPerRow   = CVPixelBufferGetBytesPerRow(imageBuffer);
+            size_t width         = CVPixelBufferGetWidth(imageBuffer);
+            size_t height        = CVPixelBufferGetHeight(imageBuffer);
+            
+            /* Create a CGImageRef from the CVImageBufferRef */
+            CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+            CGContextRef newContext = CGBitmapContextCreate(baseAddress,
+                                                            width,
+                                                            height,
+                                                            8,
+                                                            bytesPerRow,
+                                                            colorSpace,
+                                                            kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
+            CGImageRef cgImage = CGBitmapContextCreateImage(newContext);
+            
+//            GPLog(@"image size: h %zu, w %zu", height, width);
+            
+            // unlock the  image buffer
+            CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+            
+            // release some components
+            CGContextRelease(newContext);
+            CGColorSpaceRelease(colorSpace);
+            
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+                
+                CGImageRef cgBlurredImage = [GPCameraViewController blurredImage:cgImage];
+                CGImageRelease(cgImage);
+                
+                UIImage *blurredImage = [[UIImage alloc] initWithCGImage:cgBlurredImage];
+                CGImageRelease(cgBlurredImage);
+                
+                blurredImage = [GPCameraViewController fixOrientation:blurredImage];
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                    _blurImage = blurredImage;
+                    _blurImageOrientation = [[UIDevice currentDevice] orientation];
+                    
+//                    if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateInactive)
+                    {
+                        GPLog(@"Application inactive, setting the blur image.");
+                        [weakSelf setCameraBlurImage:_blurImage animated:NO];
+                    }
+                });
+            });
+        }
+    }
+    
+//    GPLogOUT();
+}
+
+#pragma mark - Camera Blur
+
+// image: pass nil to remove the camera blur
+- (void)setCameraBlurImage:(UIImage *)image animated:(BOOL)animated
+{
+    GPLogIN();
+    
+    [CALayer performWithoutAnimation:^{
+        
+        if (image)
+        {
+            self.blurLayer.contents = (__bridge id)([image CGImage]);
+            const CGFloat scale = 1.5;
+            self.blurLayer.transform = CATransform3DMakeScale(scale, scale, 0);
+            self.blurLayer.opacity = 1; // TODO: if animated
+        }
+        else
+        {
+            self.blurLayer.opacity = 0; // TODO: if animated
+            self.blurLayer.contents = nil;
+            self.blurLayer.transform = CATransform3DIdentity;
+        }
+        
+        [self updateUI];
+    }];
+    
+    GPLogOUT();
+}
+
+- (BOOL)hasCameraBlur
+{
+    return ([self.blurLayer contents] != nil);
+}
+
+#pragma mark - Gesture Recognizers
+
+- (void)handleTap:(UITapGestureRecognizer *)tapGr
+{
+    GPLogIN();
+    
+    //
+    if (![self hasCameraBlur]) {
+        [self setCameraBlurImage:_blurImage animated:NO];
+    }
+    else {
+        [self setCameraBlurImage:nil animated:NO];
+    }
+    //
+    
+    GPLogOUT();
+}
+
+#pragma mark - App Notifications
+
+- (void)appWillResignActive
+{
+    GPLogIN();
+    [super appWillResignActive];
+    
+    if (![self hasCameraBlur])
+    {
+        [self setCameraBlurImage:_blurImage animated:NO];
+    }
+    
+    GPLogOUT();
+}
+
+- (void)appDidBecomeActive
+{
+    GPLogIN();
+    [super appDidBecomeActive];
+    
+    if ([self hasCameraBlur])
+    {
+        [self setCameraBlurImage:nil animated:YES];
+    }
+    
+    GPLogOUT();
+}
+
+- (void)deviceOrientationChanged:(NSNotification *)notification
 {
     UIDeviceOrientation deviceOrientation = [UIDevice currentDevice].orientation;
     
-    if (deviceOrientation != _gpDeviceOrientation)
+    if (deviceOrientation != _deviceOrientation)
     {
         [self rotateControlsToOrientation:deviceOrientation animated:YES];
-        _gpDeviceOrientation = deviceOrientation;
+        _deviceOrientation = deviceOrientation;
     }
 }
 
@@ -394,96 +1029,31 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogOUT();
 }
 
-#pragma mark - Status Bar
+#pragma mark - Activity View
 
-- (BOOL)prefersStatusBarHidden
+- (CGRect)preferredActivityViewFrame
 {
-	return YES;
+    return CGRectMake(0, kTopToolbarSize,
+                      self.view.bounds.size.width,
+                      self.view.bounds.size.height - kTopToolbarSize - kBottomToolbarSize);
 }
 
-- (UIStatusBarStyle)preferredStatusBarStyle
+- (UIColor *)preferredActivityViewBackgroundColor
 {
-    return UIStatusBarStyleDefault;
+    return GPCOLOR_DARK_BLACK;
 }
 
-- (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
+- (void)captureSessionDidStartRunning:(NSNotification *)notification
 {
-    return UIStatusBarAnimationSlide;
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-	if (context == CapturingStillImageContext)
-	{
-//		BOOL isCapturingStillImage = [change[NSKeyValueChangeNewKey] boolValue];
-//
-//		if (isCapturingStillImage)
-//		{
-//			[self runStillImageCaptureAnimation];
-//		}
-	}
-	else if (context == SessionRunningAndDeviceAuthorizedContext)
-	{
-//		BOOL isRunning = [change[NSKeyValueChangeNewKey] boolValue];
-//		
-//		dispatch_async(dispatch_get_main_queue(), ^{
-//
-//			if (isRunning)
-//			{
-//				[[self cameraButton] setEnabled:YES];
-//				[[self recordButton] setEnabled:YES];
-//				[[self stillButton] setEnabled:YES];
-//			}
-//			else
-//			{
-//				[[self cameraButton] setEnabled:NO];
-//				[[self recordButton] setEnabled:NO];
-//				[[self stillButton] setEnabled:NO];
-//			}
-//		});
-	}
-	else
-	{
-		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-	}
-}
-
-#pragma mark - Device Authorization
-
-- (BOOL)isSessionRunningAndDeviceAuthorized
-{
-	return [[self session] isRunning] && [self isDeviceAuthorized];
-}
-
-- (void)checkDeviceAuthorizationStatus
-{
-	NSString *mediaType = AVMediaTypeVideo;
-	
-	[AVCaptureDevice requestAccessForMediaType:mediaType
-                             completionHandler:^(BOOL granted)
-    {
-        if (granted)
-        {
-            // Granted access to mediaType
-            [self setDeviceAuthorized:YES];
-        }
-        else
-        {
-            // Not granted access to mediaType
-            dispatch_async(dispatch_get_main_queue(), ^{
-                
-//                [[[UIAlertView alloc] initWithTitle:@"AVCam!"
-//                                            message:@"AVCam doesn't have permission to use Camera, please change privacy settings"
-//                                           delegate:self
-//                                  cancelButtonTitle:@"OK"
-//                                  otherButtonTitles:nil] show];
-                
-                // TODO: Show appropriate error message & dismiss controller
-                
-                [self setDeviceAuthorized:NO];
-            });
-        }
-    }];
+    GPLogIN();
+    
+    __weak typeof(self) weakSelf = self;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [weakSelf hideActivityAnimated:YES];
+    });
+    
+    GPLogOUT();
 }
 
 #pragma mark - Focus and Exposure
@@ -541,52 +1111,65 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 {
     GPLogIN();
     
-	CGPoint devicePoint = [self.cameraView.previewLayer captureDevicePointOfInterestForPoint:[tapGr locationInView:tapGr.view]];
+	CGPoint devicePoint = [self.cameraView.videoLayer captureDevicePointOfInterestForPoint:[tapGr locationInView:tapGr.view]];
     
 	[self focusWithMode:AVCaptureFocusModeContinuousAutoFocus exposeWithMode:AVCaptureExposureModeContinuousAutoExposure
           atDevicePoint:devicePoint monitorSubjectAreaChange:YES];
     
+//    ///
+//    if (![self.cameraView hasCameraBlur])
+//    {
+//        [self captureSnapshotWithCompletion:^(UIImage *image) {
+//            [self.cameraView addCameraBlurWithSnapshot:image];
+//        }];
+//    }
+//    else
+//    {
+//        [self.cameraView removeCameraBlur];
+//    }
+//    ///
+    
     GPLogOUT();
 }
 
-#pragma mark - Zoom on panning
+#pragma mark - Device Authorization
 
-- (void)handlePanning:(UIPanGestureRecognizer *)panGr
+- (BOOL)isSessionRunningAndDeviceAuthorized
 {
-    static CGPoint initialLocation;
-    
-    switch (panGr.state)
-    {
-        case UIGestureRecognizerStateBegan:
-        {
-            initialLocation = [panGr locationInView:self.cameraView];
-        }
-            break;
-            
-        case UIGestureRecognizerStateChanged:
-        {
-            CGPoint loc = [panGr locationInView:self.cameraView];
-            CGFloat offset = initialLocation.y - loc.y;
-            
-            static const CGFloat totalDistance = 400.0f;
-            CGFloat percent = offset / totalDistance;
-            
-            GPLog(@"offset: %f, percent: %f", offset, percent);
-            
-            percent = fmaxf(-1, fminf(percent, 1));
-            
-            CGFloat maxScale = [[self.cameraView.previewLayer connection] videoMaxScaleAndCropFactor];
-            GPLog(@"max scale: %f", maxScale);
-            percent = -1;
-            
-//            [[self.cameraView.previewLayer connection] setVideoScaleAndCropFactor:percent];
-//            [self.cameraView setTransform:CGAffineTransformMakeScale(2.0, 2.0 )];
-        }
-            break;
-            
-        default:
-            break;
-    }
+	return [self.session isRunning] && [self isDeviceAuthorized];
+}
+
+- (void)checkDeviceAuthorizationStatus
+{
+	NSString *mediaType = AVMediaTypeVideo;
+	
+	[AVCaptureDevice requestAccessForMediaType:mediaType
+                             completionHandler:^(BOOL granted)
+     {
+         if (granted)
+         {
+             // Granted access to mediaType
+             [self setDeviceAuthorized:YES];
+         }
+         else
+         {
+             // Not granted access to mediaType
+             dispatch_async(dispatch_get_main_queue(), ^{
+                 
+                 GPLogErr(@"AVCam doesn't have permission to use Camera, please change privacy settings");
+                 
+                 //                [[[UIAlertView alloc] initWithTitle:@"AVCam!"
+                 //                                            message:@"AVCam doesn't have permission to use Camera, please change privacy settings"
+                 //                                           delegate:self
+                 //                                  cancelButtonTitle:@"OK"
+                 //                                  otherButtonTitles:nil] show];
+                 
+                 // TODO: Show appropriate error message & dismiss controller
+                 
+                 [self setDeviceAuthorized:NO];
+             });
+         }
+     }];
 }
 
 #pragma mark - Toolbar Delegate

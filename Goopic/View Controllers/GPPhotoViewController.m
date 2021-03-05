@@ -299,7 +299,7 @@
 
 #pragma mark - Activity View
 
-- (CGRect)preferredFrameForActivityView
+- (CGRect)preferredActivityViewFrame
 {
     return CGRectMake(0, self.topToolbar.frame.size.height,
                       self.view.bounds.size.width,
@@ -375,9 +375,12 @@
         
         if (showError)
         {
-            [[[UIAlertView alloc] initWithTitle:title message:message
-                                       delegate:nil
-                              cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle: title
+                                                                message: message
+                                                               delegate: nil
+                                                      cancelButtonTitle: @"OK"
+                                                      otherButtonTitles: nil];
+            [self showAlert:alertView];
         }
     }
     

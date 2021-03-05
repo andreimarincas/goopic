@@ -169,32 +169,25 @@ static const CGFloat kHitTestEdgeInset = 40.0f;
 
 - (void)hideDate:(BOOL)animated
 {
+    Block hideDateBlock = ^{
+        
+        self.dateLabel.alpha = 0;
+    };
+    
     if (animated)
     {
-        UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState |
-        UIViewAnimationCurveEaseInOut;
+        UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationCurveEaseInOut;
         
         [UIView animateWithDuration:kDateFadingDuration
                               delay:0
                             options:options
-                         animations:^{
-                             
-                             self.dateLabel.alpha = 0;
-                             
-                         } completion:^(BOOL finished) {
-                             
-                             self.dateLabel.hidden = YES;
-                         }];
+                         animations:hideDateBlock
+                         completion:nil];
     }
     else
     {
-        [UIView performWithoutAnimation:^{
-            
-            self.dateLabel.alpha = 0;
-            self.dateLabel.hidden = YES;
-        }];
+        [UIView performWithoutAnimation:hideDateBlock];
     }
-    
 }
 
 - (void)hideDateAnimated
@@ -204,28 +197,24 @@ static const CGFloat kHitTestEdgeInset = 40.0f;
 
 - (void)showDate:(BOOL)animated
 {
-    self.dateLabel.hidden = NO;
+    Block showDateBlock = ^{
+        
+        self.dateLabel.alpha = 1;
+    };
     
     if (animated)
     {
-        UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState |
-        UIViewAnimationCurveEaseInOut;
+        UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationCurveEaseInOut;
         
         [UIView animateWithDuration:kDateFadingDuration
                               delay:0
                             options:options
-                         animations:^{
-                             
-                             self.dateLabel.alpha = 1;
-                             
-                         } completion:nil];
+                         animations:showDateBlock
+                         completion:nil];
     }
     else
     {
-        [UIView performWithoutAnimation:^{
-            
-            self.dateLabel.alpha = 1;
-        }];
+        [UIView performWithoutAnimation:showDateBlock];
     }
 }
 

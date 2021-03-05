@@ -7,7 +7,20 @@
 //
 
 #import "GPBaseViewController.h"
-#import "GPBaseViewController+Private.h"
+
+
+@interface GPBaseView (Private)
+
+- (void)setBaseViewController:(GPBaseViewController *)baseViewController;
+
+@end
+
+@interface GPBaseViewController (Private)
+
+- (void)updateBaseUI;
+
+@end
+
 
 #pragma mark -
 #pragma mark - Base Controller's View
@@ -70,6 +83,13 @@
     GPLogOUT();
 }
 
+#pragma mark - Base View Controller
+
+- (void)setBaseViewController:(GPBaseViewController *)baseViewController
+{
+    _baseViewController = baseViewController;
+}
+
 #pragma mark - Geometry Updates
 
 - (void)setBounds:(CGRect)bounds
@@ -112,6 +132,7 @@
 
 - (instancetype)init
 {
+    GPLogIN();
     self = [super init];
     
     if (self)
@@ -119,6 +140,7 @@
         // Custom initialization
     }
     
+    GPLogOUT();
     return self;
 }
 
@@ -157,6 +179,17 @@
     GPLogOUT();
 }
 
+- (void)viewDidDisappear:(BOOL)animated
+{
+    GPLogIN();
+    [super viewDidDisappear:animated];
+    
+    // safety
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    GPLogOUT();
+}
+
 #pragma mark - Interface Orientation
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
@@ -191,16 +224,24 @@
 
 - (void)updateUI
 {
-    self.activityIndicatorView.frame = [self preferredFrameForActivityView];
+    self.activityIndicatorView.frame = [self preferredActivityViewFrame];
+    self.activityIndicatorView.backgroundColor = [self preferredActivityViewBackgroundColor];
     [self.activityIndicatorView setNeedsDisplay];
     
     [self.activityLabel sizeToFit];
     const CGFloat activityLabelOffsetY = 50.0f;
-    self.activityLabel.center = CGPointMake(self.view.bounds.size.width / 2, self.view.bounds.size.height / 2 - activityLabelOffsetY);
+    self.activityLabel.center = CGPointMake(self.activityIndicatorView.center.x,
+                                            self.activityIndicatorView.center.y - activityLabelOffsetY);
     [self.activityLabel setNeedsDisplay];
     
     [self.view setNeedsLayout];
     [self.view setNeedsDisplay];
+}
+
+- (void)updateBaseUI
+{
+    [self updateUI];
+    [self bringActivityViewToFrontIfActivityInProgress];
 }
 
 @end
@@ -217,10 +258,10 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
 {
     if (!_activityIndicatorView)
     {
-        UIActivityIndicatorView *activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+        UIActivityIndicatorView *activityIndicatorView = [[UIActivityIndicatorView alloc]
+                                                          initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
         activityIndicatorView.hidesWhenStopped = NO;
         activityIndicatorView.userInteractionEnabled = NO;
-        activityIndicatorView.backgroundColor = GPCOLOR_TRANSLUCENT_BLACK;
         activityIndicatorView.alpha = 0;
         [self.view addSubview:activityIndicatorView];
         _activityIndicatorView = activityIndicatorView;
@@ -246,9 +287,14 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
     return _activityLabel;
 }
 
-- (CGRect)preferredFrameForActivityView
+- (CGRect)preferredActivityViewFrame
 {
     return self.view.bounds;
+}
+
+- (UIColor *)preferredActivityViewBackgroundColor
+{
+    return GPCOLOR_TRANSLUCENT_BLACK;
 }
 
 - (BOOL)activityInProgress
@@ -303,10 +349,10 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
     switch (activity)
     {
         case GPActivityProcessingImage:
-        {
-            self.activityLabel.text = @"Processing image...";
-        }
-            break;
+            self.activityLabel.text = @"Processing image..."; break;
+            
+        case GPActivityStartingCamera:
+//            self.activityLabel.text = @"Starting camera..."; break;
             
         default:
         {
@@ -336,6 +382,84 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
     {
         [self.view bringSubviewToFront:self.activityIndicatorView];
         [self.view bringSubviewToFront:self.activityLabel];
+    }
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark - Base View Controller (Alert View)
+
+@implementation GPBaseViewController (AlertView)
+
+- (UIAlertView *)alertView
+{
+    return _alertView;
+}
+
+- (void)showAlert:(UIAlertView *)alertView
+{
+    if (!_alertView)
+    {
+        _alertView = alertView;
+        
+        alertView.delegate = self;
+        
+        // Display the alert view on the main queue
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [alertView show];
+        });
+    }
+}
+
+#pragma mark - Alert View Delegate
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    if (alertView == _alertView)
+    {
+        _alertView = nil;
+    }
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark - Base View Controller (Notifications)
+
+@implementation GPBaseViewController (Notifications)
+
+- (void)appWillResignActive
+{
+    if ([self.presentedViewController isKindOfClass:[GPBaseViewController class]])
+    {
+        [(GPBaseViewController *)self.presentedViewController appWillResignActive];
+    }
+}
+
+- (void)appDidBecomeActive
+{
+    if ([self.presentedViewController isKindOfClass:[GPBaseViewController class]])
+    {
+        [(GPBaseViewController *)self.presentedViewController appDidBecomeActive];
+    }
+}
+
+- (void)appDidEnterBackground
+{
+    if ([self.presentedViewController isKindOfClass:[GPBaseViewController class]])
+    {
+        [(GPBaseViewController *)self.presentedViewController appDidEnterBackground];
+    }
+}
+
+- (void)appWillEnterForeground
+{
+    if ([self.presentedViewController isKindOfClass:[GPBaseViewController class]])
+    {
+        [(GPBaseViewController *)self.presentedViewController appWillEnterForeground];
     }
 }
 

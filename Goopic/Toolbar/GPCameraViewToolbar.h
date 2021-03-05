@@ -28,14 +28,11 @@
 
 @property (nonatomic, weak) id <GPCameraViewToolbarDelegate> delegate;
 
+@property (nonatomic, strong) UIImageView *flashIcon;
+
 @property (nonatomic, strong) GPButton *flashAutoButton;
-@property (nonatomic, strong) UIImageView *flashAutoIcon;
-
 @property (nonatomic, strong) GPButton *flashOnButton;
-@property (nonatomic, strong) UIImageView *flashOnIcon;
-
 @property (nonatomic, strong) GPButton *flashOffButton;
-@property (nonatomic, strong) UIImageView *flashOffIcon;
 
 - (instancetype)init;
 

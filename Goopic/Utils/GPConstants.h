@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CoreMedia/CMSampleBuffer.h>
 
 
 // Forward declarations
@@ -38,10 +39,8 @@ static const NSTimeInterval kPhotoImgurExpirationInterval = 30 * kDay; // actual
 
 
 /* Use ToolbarHeight() instead these constants! */
-//static const CGFloat kToolbarHeight_Portrait  = 50.0f; // 43.6f;
-//static const CGFloat kToolbarHeight_Landscape = 30.0f;
 
-static const CGFloat kToolbarHeight_Portrait  = 65.0f; // 43.6f;
+static const CGFloat kToolbarHeight_Portrait  = 65.0f;
 static const CGFloat kToolbarHeight_Landscape = 44.0f;
 
 static const CGFloat kToolbarButtonFontSize   = 19.0f;
@@ -72,10 +71,14 @@ static NSString * const kStoreEntityPhotosKeyDeleteHash  = @"deleteHash";
 
 // Blocks
 
-typedef void (^Block)(void);
-typedef void (^CompletionBlock)(NSError *error);
-typedef void (^UploadCompletionBlock)(NSString *link, NSString *deleteHash, NSError *error);
-typedef void (^BodyConstructionBlock)(id <AFMultipartFormData>);
+//struct CMSampleBufferRef;
+
+typedef void (^Block)                       (void);
+typedef void (^CompletionBlock)             (NSError *error);
+typedef void (^UploadCompletionBlock)       (NSString *link, NSString *deleteHash, NSError *error);
+typedef void (^BodyConstructionBlock)       (id <AFMultipartFormData>);
+typedef void (^CaptureStillImageBlock)      (CMSampleBufferRef sampleBuffer, NSError *error);
+typedef void (^CaptureImageCompletionBlock) (UIImage *image);
 
 
 // Enums
@@ -138,7 +141,8 @@ typedef NS_ENUM (NSInteger, GPErrorCode)
 // Activity types
 typedef NS_ENUM (NSInteger, GPActivity)
 {
-    GPActivityProcessingImage = 100
+    GPActivityProcessingImage = 100,
+    GPActivityStartingCamera
 };
 
 

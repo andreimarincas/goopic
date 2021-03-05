@@ -13,4 +13,8 @@
 // scale : [0, 1]
 + (UIImage *)imageWithImage:(UIImage *)image scale:(CGFloat)scale;
 
+- (UIImage *)fixOrientation;
+
+- (UIImage *)imageRotatedByDegrees:(CGFloat)degrees;
+
 @end

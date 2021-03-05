@@ -121,3 +121,8 @@ UIEdgeInsets GPEdgeInsetsMake(CGFloat inset)
 {
     return UIEdgeInsetsMake(inset, inset, inset, inset);
 }
+
+CGFloat DegreesToRadians(CGFloat degrees)
+{
+    return degrees * M_PI / 180;
+}

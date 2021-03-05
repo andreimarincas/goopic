@@ -33,6 +33,8 @@
 
 @property (nonatomic, weak) GPButton *connectedButton;
 
+@property (nonatomic) BOOL smallButton;
+
 - (instancetype)init;
 
 - (void)connectTo:(GPButton *)button;

@@ -33,3 +33,5 @@ CGSize CGSizeIntegral(CGSize size);
 
 UIEdgeInsets GPEdgeInsetsNegate(UIEdgeInsets insets);
 UIEdgeInsets GPEdgeInsetsMake(CGFloat inset);
+
+CGFloat DegreesToRadians(CGFloat degrees);

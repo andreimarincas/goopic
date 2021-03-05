@@ -8,17 +8,19 @@
 
 #import "GPCameraViewToolbar.h"
 
+static const CGFloat kFlashIconSize          = 20.0f;
+static const CGFloat kFlashIconOverlap       = 16.0f;
 
-#define FLASH_ICON_MULTIPLE 0
+static const CGFloat kFlashMargin            = 5.0f;
+static const CGFloat kFlashOffsetWhenRotated = 8.0f;
 
-static const CGFloat kFlashIconSize = 20.0f;
-static const CGFloat kFlashMargin = 5.0f;
-static const CGFloat kFlashIconOverlap = 3.0f;
+static const CGFloat kFlashButtonWidth       = 60.0f;
+static const CGFloat kFlashButtonHeight      = 60.0f;
+static const CGFloat kFlashButtonsFontSize   = 13.0f;
 
-static const CGFloat kFlashButtonsFontSize = 13.0f;
-static const CGFloat kFlashButtonsSpacing = 22.0f;
+static const CGFloat kFlashButtonEdgeInset   = 20.0f;
 
-static const CGFloat kTakeButtonSize = 50.0f;
+static const CGFloat kTakeButtonSize         = 50.0f;
 static const CGFloat kButtonHitTestEdgeInset = 40.0f;
 
 
@@ -35,6 +37,13 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
     {
         // Custom initialization
         
+        self.backgroundColor = GPCOLOR_DARK_BLACK;
+        
+        UIImageView *flashIcon = [[UIImageView alloc] init];
+        flashIcon.image = [UIImage imageNamed:@"flash-icon.png"];
+        [self addSubview:flashIcon];
+        self.flashIcon = flashIcon;
+        
         GPButton *flashAutoButton = [[GPButton alloc] init];
         [flashAutoButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
         [flashAutoButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
@@ -46,11 +55,6 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         flashAutoButton.forceHighlight = YES;
         [self addSubview:flashAutoButton];
         self.flashAutoButton = flashAutoButton;
-        
-        UIImageView *flashAutoIcon = [[UIImageView alloc] init];
-        flashAutoIcon.image = [UIImage imageNamed:@"flash-icon.png"];
-        [self addSubview:flashAutoIcon];
-        self.flashAutoIcon = flashAutoIcon;
         
         GPButton *flashOnButton = [[GPButton alloc] init];
         [flashOnButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
@@ -64,11 +68,6 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         [self addSubview:flashOnButton];
         self.flashOnButton = flashOnButton;
         
-        UIImageView *flashOnIcon = [[UIImageView alloc] init];
-        flashOnIcon.image = [UIImage imageNamed:@"flash-icon.png"];
-        [self addSubview:flashOnIcon];
-        self.flashOnIcon = flashOnIcon;
-        
         GPButton *flashOffButton = [[GPButton alloc] init];
         [flashOffButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
         [flashOffButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
@@ -80,16 +79,6 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         flashOffButton.forceHighlight = YES;
         [self addSubview:flashOffButton];
         self.flashOffButton = flashOffButton;
-        
-        UIImageView *flashOffIcon = [[UIImageView alloc] init];
-        flashOffIcon.image = [UIImage imageNamed:@"flash-icon.png"];
-        [self addSubview:flashOffIcon];
-        self.flashOffIcon = flashOffIcon;
-        
-#if !(FLASH_ICON_MULTIPLE)
-        self.flashOnIcon.hidden = YES;
-        self.flashOffIcon.hidden = YES;
-#endif
     }
     
     return self;
@@ -117,66 +106,40 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
     
     CGFloat x = kFlashMargin;
     
-    self.flashAutoIcon.frame = CGRectMake(x, (self.bounds.size.height - kFlashIconSize) / 2, kFlashIconSize, kFlashIconSize);
-    [self.flashAutoIcon setNeedsDisplay];
+    self.flashIcon.frame = CGRectMake(x, (self.bounds.size.height - kFlashIconSize) / 2, kFlashIconSize, kFlashIconSize);
+    [self.flashIcon setNeedsDisplay];
     
-    x = self.flashAutoIcon.frame.origin.x + kFlashIconSize - kFlashIconOverlap;
+    x = self.flashIcon.frame.origin.x + kFlashIconSize - kFlashIconOverlap;
     
-    if (_buttonsRotationAngle != 0) x -= 5;
+    if (_buttonsRotationAngle != 0)
+    {
+        x -= kFlashOffsetWhenRotated;
+    }
     
     CGAffineTransform t = self.flashAutoButton.transform;
     self.flashAutoButton.transform = CGAffineTransformIdentity;
-    [self.flashAutoButton sizeToFit];
-    self.flashAutoButton.frame = CGRectMake(x, (self.bounds.size.height - self.flashAutoButton.frame.size.height) / 2,
-                                            self.flashAutoButton.frame.size.width, self.flashAutoButton.frame.size.height);
-    self.flashAutoButton.hitTestEdgeInsets = UIEdgeInsetsMake(kFlashButtonsSpacing / 2, kFlashButtonsSpacing / 2 + kFlashIconSize,
-                                                              kFlashButtonsSpacing / 2, kFlashButtonsSpacing / 2);
+    self.flashAutoButton.frame = CGRectMake(x, (self.bounds.size.height - kFlashButtonHeight) / 2, kFlashButtonWidth, kFlashButtonHeight);
+    self.flashAutoButton.hitTestEdgeInsets = UIEdgeInsetsMake(kFlashButtonEdgeInset, kFlashIconSize, kFlashButtonEdgeInset, 0);
     self.flashAutoButton.transform = t;
     [self.flashAutoButton setNeedsDisplay];
     
-    x = x + self.flashAutoButton.frame.size.width + kFlashButtonsSpacing;
-    
-    if (_buttonsRotationAngle != 0) x -= 5;
-    
-    self.flashOnIcon.frame = CGRectMake(x, (self.bounds.size.height - kFlashIconSize) / 2, kFlashIconSize, kFlashIconSize);
-    [self.flashOnIcon setNeedsDisplay];
-    
-    x = x + kFlashIconSize - kFlashIconOverlap - 5;
+    x = x + self.flashAutoButton.frame.size.width;
     
     t = self.flashOnButton.transform;
     self.flashOnButton.transform = CGAffineTransformIdentity;
-    [self.flashOnButton sizeToFit];
-    self.flashOnButton.frame = CGRectMake(x, (self.bounds.size.height - self.flashOnButton.frame.size.height) / 2,
-                                          self.flashOnButton.frame.size.width, self.flashOnButton.frame.size.height);
-    self.flashOnButton.hitTestEdgeInsets = UIEdgeInsetsMake(kFlashButtonsSpacing / 2, kFlashButtonsSpacing / 2 + kFlashIconSize,
-                                                            kFlashButtonsSpacing / 2, kFlashButtonsSpacing / 2);
+    self.flashOnButton.frame = CGRectMake(x, (self.bounds.size.height - kFlashButtonHeight) / 2, kFlashButtonWidth, kFlashButtonHeight);
+    self.flashOnButton.hitTestEdgeInsets = UIEdgeInsetsMake(kFlashButtonEdgeInset, 0, kFlashButtonEdgeInset, 0);
     self.flashOnButton.transform = t;
     [self.flashOnButton setNeedsDisplay];
     
-    x = x + self.flashOnButton.frame.size.width + kFlashButtonsSpacing - 5;
-    
-    self.flashOffIcon.frame = CGRectMake(x, (self.bounds.size.height - kFlashIconSize) / 2, kFlashIconSize, kFlashIconSize);
-    [self.flashOffIcon setNeedsDisplay];
-    
-    x = x + kFlashIconSize - kFlashIconOverlap - 5;
+    x = x + self.flashOnButton.frame.size.width;
     
     t = self.flashOffButton.transform;
     self.flashOffButton.transform = CGAffineTransformIdentity;
-    [self.flashOffButton sizeToFit];
-    self.flashOffButton.frame = CGRectMake(x, (self.bounds.size.height - self.flashOffButton.frame.size.height) / 2,
-                                           self.flashOffButton.frame.size.width, self.flashOffButton.frame.size.height);
-    self.flashOffButton.hitTestEdgeInsets = UIEdgeInsetsMake(kFlashButtonsSpacing / 2, kFlashButtonsSpacing / 2 + kFlashIconSize,
-                                                             kFlashButtonsSpacing / 2, kFlashButtonsSpacing / 2);
+    self.flashOffButton.frame = CGRectMake(x, (self.bounds.size.height - kFlashButtonHeight) / 2, kFlashButtonWidth, kFlashButtonHeight);
+    self.flashOffButton.hitTestEdgeInsets = UIEdgeInsetsMake(kFlashButtonEdgeInset, 0, kFlashButtonEdgeInset, 0);
     self.flashOffButton.transform = t;
     [self.flashOffButton setNeedsDisplay];
-    
-    [self bringSubviewToFront:self.flashAutoIcon];
-    [self bringSubviewToFront:self.flashOnIcon];
-    [self bringSubviewToFront:self.flashOffIcon];
-    
-    [self bringSubviewToFront:self.flashAutoButton];
-    [self bringSubviewToFront:self.flashOnButton];
-    [self bringSubviewToFront:self.flashOffButton];
     
     [self setNeedsDisplay];
     

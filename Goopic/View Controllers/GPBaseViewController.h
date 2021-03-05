@@ -38,6 +38,8 @@
     UILabel *_activityLabel;
     
     BOOL _activityInProgress;
+    
+    __strong UIAlertView *_alertView;
 }
 
 @property (nonatomic, readonly, getter = isRotatingInterfaceOrientation) BOOL rotatingInterfaceOrientation;
@@ -64,6 +66,7 @@
 
 @end
 
+
 @interface GPBaseViewController (ActivityView)
 
 @property (nonatomic, readonly) UIActivityIndicatorView *activityIndicatorView;
@@ -72,7 +75,10 @@
 @property (nonatomic, readonly) BOOL activityInProgress;
 
 // Override. Default value is view's bounds.
-- (CGRect)preferredFrameForActivityView;
+- (CGRect)preferredActivityViewFrame;
+
+// Override. Default is translucent black.
+- (UIColor *)preferredActivityViewBackgroundColor;
 
 - (void)showActivity:(GPActivity)activity animated:(BOOL)animated;
 
@@ -80,5 +86,24 @@
 - (void)hideActivityAnimated:(BOOL)animated;
 
 - (void)bringActivityViewToFrontIfActivityInProgress;
+
+@end
+
+
+@interface GPBaseViewController (AlertView)
+
+@property (nonatomic, readonly) UIAlertView *alertView;
+
+- (void)showAlert:(UIAlertView *)alertView;
+
+@end
+
+
+@interface GPBaseViewController (Notifications)
+
+- (void)appWillResignActive;
+- (void)appDidBecomeActive;
+- (void)appDidEnterBackground;
+- (void)appWillEnterForeground;
 
 @end

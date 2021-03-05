@@ -84,6 +84,8 @@
 
 @property (nonatomic, strong) GPPhotosTableViewToolbar *toolbar;
 
+@property (nonatomic) BOOL canShowDate;
+
 @property (nonatomic, strong) NSArray *photosSections; // NSArray*'s of GPPhoto*
 
 @property (nonatomic) NSInteger selectedPhotoIndex;

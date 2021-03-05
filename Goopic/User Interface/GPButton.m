@@ -219,13 +219,10 @@
 
 - (void)setTransform:(CGAffineTransform)transform
 {
-    GPLogIN();
     [super setTransform:transform];
     
     self.viewForHighlightState.transform = transform;
     self.viewForNormalState.transform = transform;
-    
-    GPLogOUT();
 }
 
 - (void)connectTo:(GPButton *)button

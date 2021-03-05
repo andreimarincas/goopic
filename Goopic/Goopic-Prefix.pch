@@ -23,5 +23,6 @@
     #import "UIView+Extension.h"
     #import "UIImage+Extension.h"
     #import "UIImageView+Extension.h"
+    #import "CALayer+Extension.h"
 
 #endif
