@@ -109,6 +109,7 @@
 - (void)appDidBecomeActive
 {
     GPLogIN();
+    [super appDidBecomeActive];
     
     if (![self.photo exists]) // image was deleted from camera roll from outside the app
     {
@@ -173,7 +174,10 @@
     
     [self.view setNeedsDisplay];
     
+    // update super's ui here because it uses our preferredActivityViewFrame,
+    // which is based on the geometry defined above
     [super updateUI];
+    
     GPLogOUT();
 }
 
@@ -272,6 +276,7 @@
         if (button == self.topToolbar.cameraButton)
         {
             GPCameraViewController *cameraViewController = [[GPCameraViewController alloc] init];
+            cameraViewController.interfaceOrientationWhenPresented = GPInterfaceOrientation();
             cameraViewController.transitioningDelegate = self;
             
             [self presentViewController:cameraViewController animated:YES completion:^{

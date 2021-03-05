@@ -11,10 +11,12 @@
 #import <ImageIO/ImageIO.h>
 #import <AssertMacros.h>
 #import <AssetsLibrary/AssetsLibrary.h>
+
 #import "GPAppDelegate.h"
 #import "GPPhotoViewController.h"
 #import "GPPhotosTableViewController.h"
 #import "GPAssetsManager.h"
+#import "GPPermissionsManager.h"
 
 
 // Constants
@@ -55,6 +57,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     if (self)
     {
+        self.backgroundColor = [UIColor blackColor];
+        
         [self.videoLayer setBackgroundColor:[[UIColor blackColor] CGColor]];
         [self.videoLayer setVideoGravity:AVLayerVideoGravityResizeAspect];
     }
@@ -249,6 +253,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     {
         // Custom initialization
         _deviceOrientation = (UIDeviceOrientation)GPInterfaceOrientation(); // will be portrait, the only allowed interface orientation here
+        self.interfaceOrientationWhenPresented = UIInterfaceOrientationPortrait; // assumed
     }
     
     GPLogOUT();
@@ -361,6 +366,12 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     [super viewWillAppear:animated];
     
+    [[GPPermissionsManager sharedManager] requestAccessToAssetsLibrary:^(BOOL granted) {
+        [self updateButtonsAnimated:YES];
+    }];
+    
+    [self requestAccessToCamera];
+    
     self.cameraOverlay.opacity = 1; // fade to 0 on camera did start
     
     [[NSNotificationCenter defaultCenter] addObserver: self
@@ -414,10 +425,22 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
         [self.session startRunning];
     });
     
-    if (![[UIApplication sharedApplication] isStatusBarHidden])
+    if (!UIInterfaceOrientationIsLandscape(self.interfaceOrientationWhenPresented))
     {
         [self setNeedsStatusBarAppearanceUpdate];
     }
+    
+    GPLogOUT();
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    GPLogIN();
+    [super viewDidAppear:animated];
+    
+    [[GPPermissionsManager sharedManager] requestAccessToAssetsLibrary:^(BOOL granted) {
+        [self updateButtonsAnimated:YES];
+    }];
     
     GPLogOUT();
 }
@@ -486,8 +509,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     // Setup the camera view
     GPCameraView *cameraView = [[GPCameraView alloc] init];
-    cameraView.backgroundColor = [UIColor greenColor];
-    cameraView.layer.backgroundColor = [UIColor blueColor].CGColor;
     [cameraView setSession:session];
     [self.view addSubview:cameraView];
     self.cameraView = cameraView;
@@ -730,6 +751,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogOUT();
 }
 
+// Note: Calling updateButtonsAnimated:NO will cancel all other animations including view controller transitions!
 - (void)updateButtonsAnimated:(BOOL)animated
 {
     GPLogIN();
@@ -754,7 +776,17 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
             [self.bottomToolbar.retakeButton setAlpha:0];
             [self.bottomToolbar.useButton setAlpha:0];
             [self.bottomToolbar.takeButton setEnabled:self.cameraRunning ||
-             [[UIApplication sharedApplication] applicationState] != UIApplicationStateActive];
+                [[UIApplication sharedApplication] applicationState] != UIApplicationStateActive];
+        }
+        
+        if (![[GPPermissionsManager sharedManager] canAccessAssetsLibrary])
+        {
+            [self.bottomToolbar.useButton setEnabled:NO];
+        }
+        
+        if (![[GPPermissionsManager sharedManager] canAccessCamera])
+        {
+            [self.bottomToolbar.takeButton setEnabled:NO];
         }
     };
     
@@ -1092,17 +1124,6 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogOUT();
 }
 
-- (void)appDidEnterBackground
-{
-    [super appDidEnterBackground];
-    
-#if (CAMERA_BLUR_ENABLED)
-    
-    [self.blurLayer removeAllAnimations];
-    
-#endif
-}
-
 - (void)appDidBecomeActive
 {
     GPLogIN();
@@ -1132,17 +1153,47 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogOUT();
 }
 
+- (void)appDidEnterBackground
+{
+    GPLogIN();
+    [super appDidEnterBackground];
+    
+#if (CAMERA_BLUR_ENABLED)
+    
+    [self.blurLayer removeAllAnimations];
+    
+#endif
+    
+    GPLogOUT();
+}
+
+- (void)appWillEnterForeground
+{
+    GPLogIN();
+    [super appWillEnterForeground];
+    
+    [[GPPermissionsManager sharedManager] requestAccessToAssetsLibrary:^(BOOL granted) {
+        [self updateButtonsAnimated:YES];
+    }];
+    
+    [self requestAccessToCamera];
+    
+    GPLogOUT();
+}
+
+#pragma mark - Device Orientation
+
 - (void)deviceOrientationChanged:(NSNotification *)notification
 {
     GPLogIN();
     
-    [self updateButtonsRotationAnimated:YES withDelay:0];
+    [self updateButtonsRotationAnimated:YES];
     
     GPLogOUT();
 }
 
 // updates buttons rotation based on current device orientation
-- (void)updateButtonsRotationAnimated:(BOOL)animated withDelay:(NSTimeInterval)delay
+- (void)updateButtonsRotationAnimated:(BOOL)animated
 {
     GPLogIN();
     
@@ -1363,6 +1414,28 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
              });
          }
      }];
+}
+
+- (void)requestAccessToCamera
+{
+    GPLogIN();
+    
+    [[GPPermissionsManager sharedManager] requestAccessToCamera:^(BOOL granted) {
+        
+        [self updateButtonsAnimated:YES];
+        
+        if (!granted)
+        {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle: @"Privacy"
+                                                            message: @"Goopic doesn't have permission to use the camera, please change this in privacy settings."
+                                                           delegate: nil
+                                                  cancelButtonTitle: @"OK"
+                                                  otherButtonTitles: nil];
+            [self showAlert:alert];
+        }
+    }];
+    
+    GPLogOUT();
 }
 
 #pragma mark - Toolbar Delegate

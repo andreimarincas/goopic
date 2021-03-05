@@ -56,6 +56,7 @@
 		75AE45F519B3A81100E419DD /* disclosure-button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 75AE45F419B3A81100E419DD /* disclosure-button@2x.png */; };
 		75AE45F819B3AA3A00E419DD /* disclosure-button-highlight.png in Resources */ = {isa = PBXBuildFile; fileRef = 75AE45F619B3AA3A00E419DD /* disclosure-button-highlight.png */; };
 		75AE45F919B3AA3A00E419DD /* disclosure-button-highlight@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 75AE45F719B3AA3A00E419DD /* disclosure-button-highlight@2x.png */; };
+		75B1AC1819C5A70800FE207C /* GPPermissionsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 75B1AC1719C5A70800FE207C /* GPPermissionsManager.m */; };
 		75BBDCA719AAFB4F0013AC4A /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75BBDCA619AAFB4F0013AC4A /* AssetsLibrary.framework */; };
 		75CE7E5F19BE1AAD0060FE9C /* GPCameraToPhotoTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = 75CE7E5E19BE1AAD0060FE9C /* GPCameraToPhotoTransition.m */; };
 		75D1BEF619A9ED5300FDA569 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75D1BEF519A9ED5300FDA569 /* Foundation.framework */; };
@@ -198,6 +199,8 @@
 		75AE45F419B3A81100E419DD /* disclosure-button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "disclosure-button@2x.png"; sourceTree = "<group>"; };
 		75AE45F619B3AA3A00E419DD /* disclosure-button-highlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "disclosure-button-highlight.png"; sourceTree = "<group>"; };
 		75AE45F719B3AA3A00E419DD /* disclosure-button-highlight@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "disclosure-button-highlight@2x.png"; sourceTree = "<group>"; };
+		75B1AC1619C5A70800FE207C /* GPPermissionsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPPermissionsManager.h; sourceTree = "<group>"; };
+		75B1AC1719C5A70800FE207C /* GPPermissionsManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPPermissionsManager.m; sourceTree = "<group>"; };
 		75BBDCA619AAFB4F0013AC4A /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		75CE7E5D19BE1AAD0060FE9C /* GPCameraToPhotoTransition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GPCameraToPhotoTransition.h; path = "Goopic/View Controllers/Transitions/GPCameraToPhotoTransition.h"; sourceTree = SOURCE_ROOT; };
 		75CE7E5E19BE1AAD0060FE9C /* GPCameraToPhotoTransition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GPCameraToPhotoTransition.m; path = "Goopic/View Controllers/Transitions/GPCameraToPhotoTransition.m"; sourceTree = SOURCE_ROOT; };
@@ -427,6 +430,8 @@
 				757F72B619B27C8300F59B8D /* GPAssetsManager.m */,
 				757F72B719B27C8300F59B8D /* GPImgurManager.h */,
 				757F72B819B27C8300F59B8D /* GPImgurManager.m */,
+				75B1AC1619C5A70800FE207C /* GPPermissionsManager.h */,
+				75B1AC1719C5A70800FE207C /* GPPermissionsManager.m */,
 				757F72B919B27C8300F59B8D /* GPSearchEngine.h */,
 				757F72BA19B27C8300F59B8D /* GPSearchEngine.m */,
 			);
@@ -832,6 +837,7 @@
 				757BEC2D19B53AB400043028 /* UIImageView+Extension.m in Sources */,
 				75D1BF4019A9EEC600FDA569 /* AFURLRequestSerialization.m in Sources */,
 				757BEC3019B67D5C00043028 /* NSArray+Extension.m in Sources */,
+				75B1AC1819C5A70800FE207C /* GPPermissionsManager.m in Sources */,
 				75D1BF9819AA0C7C00FDA569 /* IMGAlbum.m in Sources */,
 				757F72C719B27CC800F59B8D /* GPLogs.m in Sources */,
 				75D1BF3F19A9EEC600FDA569 /* AFURLConnectionOperation.m in Sources */,

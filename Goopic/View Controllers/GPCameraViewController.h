@@ -90,6 +90,8 @@
 @property (nonatomic, strong) GPCameraViewTopToolbar *topToolbar;
 @property (nonatomic, strong) GPCameraViewBottomToolbar *bottomToolbar;
 
+@property (nonatomic) UIInterfaceOrientation interfaceOrientationWhenPresented;
+
 
 // Designated initializer
 - (instancetype)init;

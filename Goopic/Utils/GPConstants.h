@@ -83,6 +83,7 @@ typedef void (^UploadCompletionBlock)       (NSString *link, NSString *deleteHas
 typedef void (^BodyConstructionBlock)       (id <AFMultipartFormData>);
 typedef void (^CaptureStillImageBlock)      (CMSampleBufferRef sampleBuffer, NSError *error);
 typedef void (^CaptureImageCompletionBlock) (NSData *jpegData, id metadata);
+typedef void (^PermissionBlock)             (BOOL granted);
 
 
 // Enums

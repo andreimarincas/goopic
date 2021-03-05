@@ -17,6 +17,7 @@
 #import "GPCameraViewController.h"
 #import "GPCameraToPhotoTransition.h"
 #import "GPAppDelegate.h"
+#import "GPPermissionsManager.h"
 
 static NSString * const kPhotoCellID                  = @"PhotoCell";
 static NSString * const kPhotosHeaderID               = @"PhotosHeader";
@@ -426,9 +427,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     GPLogIN();
     [super viewDidAppear:animated];
     
-    // Clear selection
-//    self.selectedIndexPath = nil;
-//    self.selectedPhotoIndex = 0;
+    [self requestAccessToAssetsLibrary];
     
     self.canShowDate = YES;
     
@@ -632,7 +631,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         
     } failureBlock:^(NSError *error) {
         
-        GPLog(@"Library failed to enumerate library groups: %@", [error localizedDescription]);
+        GPLogErr(@"Library failed to enumerate library groups: %@", [error localizedDescription]);
     }];
     
     GPLogOUT();
@@ -688,6 +687,26 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     }
     
     return nil;
+}
+
+- (void)requestAccessToAssetsLibrary
+{
+    GPLogIN();
+    
+    [[GPPermissionsManager sharedManager] requestAccessToAssetsLibrary:^(BOOL granted) {
+        
+        if (!granted)
+        {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle: @"Privacy"
+                                                            message: @"Goopic doesn't have permission to access your photos, please change this in privacy settings."
+                                                           delegate: nil
+                                                  cancelButtonTitle: @"OK"
+                                                  otherButtonTitles: nil];
+            [self showAlert:alert];
+        }
+    }];
+    
+    GPLogOUT();
 }
 
 #pragma mark - Update Interface
@@ -1262,6 +1281,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     if (button == toolbar.cameraButton)
     {
         GPCameraViewController *cameraViewController = [[GPCameraViewController alloc] init];
+        cameraViewController.interfaceOrientationWhenPresented = GPInterfaceOrientation();
         cameraViewController.transitioningDelegate = self;
         
         button.enabled = NO;
@@ -1347,6 +1367,18 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     
     GPLogOUT();
     return transition;
+}
+
+#pragma mark - Notifications
+
+- (void)appWillEnterForeground
+{
+    GPLogIN();
+    [super appWillEnterForeground];
+    
+    [self requestAccessToAssetsLibrary];
+    
+    GPLogOUT();
 }
 
 @end

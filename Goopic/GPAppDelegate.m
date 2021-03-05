@@ -11,6 +11,7 @@
 #import "GPPhotosTableViewController.h"
 #import "GPCameraViewController.h"
 #import "GPPhotoViewController.h"
+#import "GPPermissionsManager.h"
 
 @implementation GPAppDelegate
 
@@ -24,6 +25,9 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    [[GPPermissionsManager sharedManager] requestAccessToAssetsLibrary:nil];
+    [[GPPermissionsManager sharedManager] requestAccessToCamera:nil];
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     
