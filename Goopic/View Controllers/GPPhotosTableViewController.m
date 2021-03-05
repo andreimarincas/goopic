@@ -50,7 +50,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     {
         // Custom initialization
         
-        self.contentView.backgroundColor = GPCOLOR_BLACK;
+        self.contentView.backgroundColor = GPCOLOR_LIGHT_BLACK;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
         
         _photos = [NSMutableArray array];
@@ -869,6 +869,17 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     }
     
     photoCell.photos = cellPhotos;
+    
+    if ((indexPath.section == kPhotosSection) &&
+        ((indexPath.row < [tableView numberOfRowsInSection:indexPath.section] - 1) || ([cellPhotos count] == photosCountPerCell)))
+    {
+        // If last photo cell then make it light black only if is full with photos
+        photoCell.contentView.backgroundColor = GPCOLOR_LIGHT_BLACK;
+    }
+    else
+    {
+        photoCell.contentView.backgroundColor = GPCOLOR_BLACK;
+    }
     
     return photoCell;
 }

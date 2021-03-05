@@ -47,6 +47,7 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         GPButton *flashAutoButton = [[GPButton alloc] init];
         [flashAutoButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
         [flashAutoButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
+//        [flashAutoButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
         [flashAutoButton setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
         [flashAutoButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [flashAutoButton setTitle:@"Auto" forState:UIControlStateNormal];
@@ -59,6 +60,7 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         GPButton *flashOnButton = [[GPButton alloc] init];
         [flashOnButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
         [flashOnButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
+//        [flashOnButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
         [flashOnButton setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
         [flashOnButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [flashOnButton setTitle:@"On" forState:UIControlStateNormal];
@@ -71,6 +73,7 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         GPButton *flashOffButton = [[GPButton alloc] init];
         [flashOffButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
         [flashOffButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
+//        [flashOffButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
         [flashOffButton setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
         [flashOffButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [flashOffButton setTitle:@"Off" forState:UIControlStateNormal];
@@ -264,12 +267,6 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         [takeButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:takeButton];
         self.takeButton = takeButton;
-        
-//        self.cancelButton.hidden = YES;
-        self.retakeButton.hidden = YES;
-        self.useButton.hidden = YES;
-        
-        // TODO: states
     }
     
     return self;

@@ -30,21 +30,11 @@
                                                           AVCaptureVideoDataOutputSampleBufferDelegate,
                                                           GPCameraViewToolbarDelegate>
 {
-//	UIView *flashView;
-    
-//    id _videoBox; // CGRect
-    
-//    UIImage *_blurImage;
-      CGImageRef _cgImage;
-//    UIDeviceOrientation _blurImageOrientation;
-    
     UIDeviceOrientation _deviceOrientation;
     
-//    NSTimer *_blurTimer;
+    BOOL _cameraRunning;
+    BOOL _capturingStillImage;
 }
-
-//@property (nonatomic, strong) UIImage *blurImage;
-//@property (nonatomic) UIDeviceOrientation blurImageOrientation;
 
 // Session management
 
@@ -53,35 +43,33 @@
 
 @property (nonatomic, strong) AVCaptureDeviceInput * cameraDeviceInput;
 @property (nonatomic, strong) AVCaptureStillImageOutput * stillImageOutput;
+@property (nonatomic, strong) AVCaptureVideoDataOutput *videoDataOutput;
 
 // Communicate with the session and other session objects on this queue
 @property (nonatomic, strong) dispatch_queue_t sessionQueue;
 
-
-// Video Session
-//@property (nonatomic, strong) AVCaptureSession * videoSession;
-
-//@property (nonatomic, strong) AVCaptureDeviceInput * videoDeviceInput;
-@property (nonatomic, strong) AVCaptureVideoDataOutput *videoDataOutput;
-//@property (nonatomic, strong) dispatch_queue_t videoSessionQueue;
-
 // Process video frames in this queue
 @property (nonatomic, strong) dispatch_queue_t videoDataOutputQueue;
 
+@property (nonatomic, getter = isCameraRunning) BOOL cameraRunning;
+@property (nonatomic, getter = isCapturingStillImage) BOOL capturingStillImage;
 
 // Utilities
 @property (nonatomic, getter = isDeviceAuthorized) BOOL deviceAuthorized;
 @property (nonatomic, readonly, getter = isSessionRunningAndDeviceAuthorized) BOOL sessionRunningAndDeviceAuthorized;
 @property (nonatomic) id runtimeErrorHandlingObserver;
 
-//@property (nonatomic) id videoRuntimeErrorHandlingObserver;
-
-// Interface
+// Camera
 @property (nonatomic, strong) GPCameraView *cameraView;
+@property (nonatomic, strong) CALayer *cameraOverlay;
+
+@property (nonatomic, strong) UIView *flashView;
+
+@property (nonatomic, strong) UIImage *capturedImage;
 
 // Blur
 @property (nonatomic, strong) CALayer *blurLayer;
-//@property (nonatomic, readonly) BOOL hasCameraBlur;
+@property (nonatomic, strong) UIImage *blurImage;
 
 // Toolbars
 @property (nonatomic, strong) GPCameraViewTopToolbar *topToolbar;

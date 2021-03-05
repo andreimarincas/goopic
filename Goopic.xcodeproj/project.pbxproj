@@ -18,7 +18,6 @@
 		7529C9FC19B0A3EA00655FC1 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7529C9FB19B0A3EA00655FC1 /* MobileCoreServices.framework */; };
 		7529C9FE19B0C43900655FC1 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7529C9FD19B0C43900655FC1 /* AVFoundation.framework */; };
 		7529CA0019B0CBBB00655FC1 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7529C9FF19B0CBBB00655FC1 /* ImageIO.framework */; };
-		7529CA1519B1545100655FC1 /* GPCameraViewController_tmp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529CA0C19B1545100655FC1 /* GPCameraViewController_tmp.m */; };
 		7529CA1619B1545100655FC1 /* GPPhotosTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529CA0E19B1545100655FC1 /* GPPhotosTableViewController.m */; };
 		7529CA1719B1545100655FC1 /* GPPhotoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529CA1019B1545100655FC1 /* GPPhotoViewController.m */; };
 		7529CA2619B1850800655FC1 /* GPPhotosTableViewToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529CA2519B1850800655FC1 /* GPPhotosTableViewToolbar.m */; };
@@ -132,8 +131,6 @@
 		7529C9FB19B0A3EA00655FC1 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		7529C9FD19B0C43900655FC1 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		7529C9FF19B0CBBB00655FC1 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
-		7529CA0B19B1545100655FC1 /* GPCameraViewController_tmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPCameraViewController_tmp.h; sourceTree = "<group>"; };
-		7529CA0C19B1545100655FC1 /* GPCameraViewController_tmp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPCameraViewController_tmp.m; sourceTree = "<group>"; };
 		7529CA0D19B1545100655FC1 /* GPPhotosTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPPhotosTableViewController.h; sourceTree = "<group>"; };
 		7529CA0E19B1545100655FC1 /* GPPhotosTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPPhotosTableViewController.m; sourceTree = "<group>"; };
 		7529CA0F19B1545100655FC1 /* GPPhotoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPPhotoViewController.h; sourceTree = "<group>"; };
@@ -365,8 +362,6 @@
 				F240EEAD19B475E800A88F94 /* GPBaseViewController.m */,
 				75E6BEA519BA6AE9004DB6BF /* GPCameraViewController.h */,
 				75E6BEA619BA6AE9004DB6BF /* GPCameraViewController.m */,
-				7529CA0B19B1545100655FC1 /* GPCameraViewController_tmp.h */,
-				7529CA0C19B1545100655FC1 /* GPCameraViewController_tmp.m */,
 				7529CA0F19B1545100655FC1 /* GPPhotoViewController.h */,
 				7529CA1019B1545100655FC1 /* GPPhotoViewController.m */,
 				7529CA0D19B1545100655FC1 /* GPPhotosTableViewController.h */,
@@ -801,7 +796,6 @@
 				75E6BEA719BA6AE9004DB6BF /* GPCameraViewController.m in Sources */,
 				F240EEBF19B49B3800A88F94 /* GPTableToPhotoTransition.m in Sources */,
 				7529C9E819AF08A400655FC1 /* Goopic.xcdatamodeld in Sources */,
-				7529CA1519B1545100655FC1 /* GPCameraViewController_tmp.m in Sources */,
 				75D1BF3A19A9EEC600FDA569 /* AFHTTPRequestOperation.m in Sources */,
 				75D1BF9919AA0C7C00FDA569 /* IMGBasicAlbum.m in Sources */,
 				75D1BFA419AA0C7C00FDA569 /* IMGVote.m in Sources */,

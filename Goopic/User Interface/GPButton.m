@@ -131,7 +131,7 @@
     [self.superview addSubview:viewForNormalState];
     self.viewForNormalState = viewForNormalState;
     
-    self.alpha = 0.00001;
+    self.alpha = 0.001;
     
     UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState |
                                      UIViewAnimationOptionCurveEaseOut;
@@ -195,9 +195,63 @@
     }
 }
 
+- (void)setUserInteractionEnabled:(BOOL)userInteractionEnabled
+{
+    GPLogIN();
+    [super setUserInteractionEnabled:userInteractionEnabled];
+    
+    [self updateTitleColor];
+    
+    GPLogOUT();
+}
+
+- (void)updateTitleColor
+{
+    GPLogIN();
+    
+    if ([self isUserInteractionEnabled])
+    {
+        if ([self isSelected])
+        {
+            [self setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
+            [self setTitleColor:GPCOLOR_ORANGE_HIGHLIGHT forState:UIControlStateHighlighted];
+            [self setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
+            [self setTitleColor:GPCOLOR_ORANGE_HIGHLIGHT forState:UIControlStateDisabled];
+        }
+        else
+        {
+            [self setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
+            [self setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
+            [self setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
+            [self setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
+        }
+    }
+    else
+    {
+        if ([self isSelected])
+        {
+            [self setTitleColor:GPCOLOR_ORANGE_HIGHLIGHT forState:UIControlStateNormal];
+            [self setTitleColor:GPCOLOR_ORANGE_HIGHLIGHT forState:UIControlStateHighlighted];
+            [self setTitleColor:GPCOLOR_ORANGE_HIGHLIGHT forState:UIControlStateSelected];
+            [self setTitleColor:GPCOLOR_ORANGE_HIGHLIGHT forState:UIControlStateDisabled];
+        }
+        else
+        {
+            [self setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateNormal];
+            [self setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
+            [self setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateSelected];
+            [self setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
+        }
+    }
+    
+    GPLogOUT();
+}
+
 - (void)setEnabled:(BOOL)enabled
 {
     [super setEnabled:enabled];
+    
+    [self updateTitleColor];
     
     if (!enabled)
     {

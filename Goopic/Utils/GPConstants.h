@@ -28,13 +28,16 @@ static const NSTimeInterval kPhotoImgurExpirationInterval = 30 * kDay; // actual
 
 // Colors
 
-#define GPCOLOR_BLACK             [UIColor colorWithWhite:0.1f alpha:1.0f]
+#define GPCOLOR_BLACK             [UIColor blackColor]
+#define GPCOLOR_LIGHT_BLACK       [UIColor colorWithWhite:0.1f alpha:1.0f]
+#define GPCOLOR_TRANSLUCENT_BLACK [GPCOLOR_LIGHT_BLACK colorWithAlphaComponent:0.75]
 #define GPCOLOR_DARK_BLACK        [UIColor blackColor]
-#define GPCOLOR_TRANSLUCENT_BLACK [GPCOLOR_BLACK colorWithAlphaComponent:0.75]
+
 #define GPCOLOR_BLUE              [UIColor colorWithRed:75 / 255.0f green:142 / 255.0f blue:250 / 255.0f alpha:1.0f] // (.29,.56,.98)
 #define GPCOLOR_DARK_BLUE         [UIColor colorWithRed:50 / 255.0f green:95 / 255.0f blue:167 / 255.0f alpha:1.0f]
-#define GPCOLOR_BLUE_HIGHLIGHT    [GPCOLOR_BLUE colorWithAlphaComponent:0.3f]
+#define GPCOLOR_BLUE_HIGHLIGHT    [GPCOLOR_BLUE colorWithAlphaComponent:0.35f]
 #define GPCOLOR_ORANGE_SELECTED   [UIColor orangeColor]
+#define GPCOLOR_ORANGE_HIGHLIGHT  [GPCOLOR_ORANGE_SELECTED colorWithAlphaComponent:0.35f]
 #define GPCOLOR_WHITE_TITLE       [UIColor whiteColor]
 
 
@@ -163,6 +166,8 @@ static NSString * const kCameraFlashOffValue  = @"off";
 // Macros
 
 #define LOGS_ENABLED              1
+
+#define CAMERA_BLUR_ENABLED       1
 
 #define IMGUR_RATE_LIMITS_ENABLED 0 // TODO: Set to 1 use it
 
