@@ -318,6 +318,7 @@ static const CGFloat kButtonsRotationAnimationDuration = 0.3f;
         [takeButton setImage:[UIImage imageNamed:@"take-button-highlight.png"] forState:UIControlStateHighlighted];
         [takeButton setImage:[UIImage imageNamed:@"take-button-highlight.png"] forState:UIControlStateDisabled];
         [takeButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        takeButton.isImageBased = YES;
         [self addSubview:takeButton];
         self.takeButton = takeButton;
     }

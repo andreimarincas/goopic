@@ -8,7 +8,7 @@
 
 #import "UIView+Extension.h"
 
-static const NSTimeInterval kTransitionAnimation = 0.15f;
+static const NSTimeInterval kTransitionAnimationDuration = 0.1f;
 
 @implementation UIView (Extension)
 
@@ -34,7 +34,7 @@ static const NSTimeInterval kTransitionAnimation = 0.15f;
             UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState |
                                              UIViewAnimationOptionCurveLinear;
             
-            [UIView animateWithDuration:kTransitionAnimation
+            [UIView animateWithDuration:kTransitionAnimationDuration
                                   delay:0
                                 options:options
                              animations:transitionBlock

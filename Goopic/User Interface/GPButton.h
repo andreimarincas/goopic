@@ -44,6 +44,8 @@
 
 @property (nonatomic, weak) id <GPButtonDelegate> delegate;
 
+@property (nonatomic) BOOL isImageBased;
+
 - (instancetype)init;
 
 - (void)connectTo:(GPButton *)button;

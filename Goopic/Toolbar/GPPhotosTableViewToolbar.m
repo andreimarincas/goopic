@@ -59,6 +59,7 @@ static const CGFloat kCameraButtonSize          = 30.0f;
         [cameraButton setImage:[UIImage imageNamed:@"camera-button-highlight.png"] forState:UIControlStateHighlighted];
         [cameraButton setImage:[UIImage imageNamed:@"camera-button-highlight.png"] forState:UIControlStateDisabled];
         [cameraButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        cameraButton.isImageBased = YES;
         [self addSubview:cameraButton];
         self.cameraButton = cameraButton;
         

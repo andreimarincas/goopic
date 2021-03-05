@@ -156,7 +156,6 @@
 - (void)updateUI
 {
     GPLogIN();
-    [super updateUI];
     
     self.photoScrollView.frame = self.view.bounds;
     [self.photoScrollView setNeedsDisplay];
@@ -176,6 +175,7 @@
     
     [self.view setNeedsDisplay];
     
+    [super updateUI];
     GPLogOUT();
 }
 

@@ -55,6 +55,7 @@ static const CGFloat kCameraButtonSize     = 30.0f;
         [disclosureButton setImage:[UIImage imageNamed:@"disclosure-button-highlight.png"] forState:UIControlStateHighlighted];
         [disclosureButton setImage:[UIImage imageNamed:@"disclosure-button-highlight.png"] forState:UIControlStateDisabled];
         [disclosureButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        disclosureButton.isImageBased = YES;
         [self addSubview:disclosureButton];
         self.disclosureButton = disclosureButton;
         
@@ -65,6 +66,7 @@ static const CGFloat kCameraButtonSize     = 30.0f;
         [cameraButton setImage:[UIImage imageNamed:@"camera-button-highlight.png"] forState:UIControlStateHighlighted];
         [cameraButton setImage:[UIImage imageNamed:@"camera-button-highlight.png"] forState:UIControlStateDisabled];
         [cameraButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        cameraButton.isImageBased = YES;
         [self addSubview:cameraButton];
         self.cameraButton = cameraButton;
     }
@@ -175,6 +177,7 @@ static const CGFloat kCameraButtonSize     = 30.0f;
         cancelButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
         cancelButton.titleLabel.textAlignment = NSTextAlignmentCenter;
         cancelButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+        cancelButton.forceHighlight = YES;
         cancelButton.alpha = 0;
         [self addSubview:cancelButton];
         self.cancelButton = cancelButton;

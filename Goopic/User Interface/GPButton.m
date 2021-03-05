@@ -8,6 +8,11 @@
 
 #import "GPButton.h"
 
+static const CGFloat kButtonAlphaForHighlightTransition = 0.001f;
+static const NSTimeInterval kButtonHighlightTransitionDuration = 0.2f;
+
+
+#pragma mark - GP Button State Transition View
 
 @implementation GPButtonStateTransitionView
 
@@ -20,20 +25,25 @@
         self.frame = button.frame;
         self.transform = button.transform;
         
-        UIImageView *imageView = [[UIImageView alloc] initWithImage:[button imageForState:state]];
-        imageView.frame = self.bounds;
-        [self addSubview:imageView];
-        self.imageView = imageView;
-        
-        UILabel *label = [[UILabel alloc] init];
-        label.font = button.titleLabel.font;
-        label.text = [button titleForState:UIControlStateNormal];
-        label.textColor = [button titleColorForState:state];
-        label.textAlignment = NSTextAlignmentCenter;
-        [label sizeToFit];
-        [self addSubview:label];
-        label.center = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2);
-        self.label = label;
+        if ([button isImageBased])
+        {
+            UIImageView *imageView = [[UIImageView alloc] initWithImage:[button imageForState:state]];
+            imageView.frame = self.bounds;
+            [self addSubview:imageView];
+            self.imageView = imageView;
+        }
+        else
+        {
+            UILabel *label = [[UILabel alloc] init];
+            label.font = button.titleLabel.font;
+            label.text = [button titleForState:UIControlStateNormal];
+            label.textColor = [button titleColorForState:state];
+            label.textAlignment = NSTextAlignmentCenter;
+            [label sizeToFit];
+            [self addSubview:label];
+            label.center = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2);
+            self.label = label;
+        }
     }
     
     return self;
@@ -42,6 +52,7 @@
 @end
 
 
+#pragma mark - GP Button
 
 @implementation GPButton
 
@@ -56,6 +67,7 @@
         self.forceHighlight = NO;
         self.hitTestEdgeInsets = UIEdgeInsetsZero;
         self.animateHighlightStateChange = YES;
+        self.isImageBased = NO;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAppWillResignActive:)
                                                      name:UIApplicationWillResignActiveNotification object:nil];
@@ -99,7 +111,7 @@
 //        GPLog(@"hit frame: %@", NSStringFromCGRect(hitFrame));
 //        GPLog(@"point: %@", NSStringFromCGPoint(point));
         
-        // TODO: UIButton not responsive near the screen margin?
+        // TODO: UIButton not responsive near the screen margins?
         
         inside = CGRectContainsPoint(hitFrame, point);
     }
@@ -126,23 +138,24 @@
     [self.viewForNormalState removeFromSuperview];
     self.viewForNormalState = nil;
     
+    // set this alpha value before creating the transition views, otherwise they will be affected too
+    self.alpha = kButtonAlphaForHighlightTransition;
+    
     UIControlState highlightState = self.isSelected ? UIControlStateNormal : UIControlStateHighlighted;
     GPButtonStateTransitionView *viewForHighlightState = [[GPButtonStateTransitionView alloc] initWithButton:self state:highlightState];
-    [self.superview addSubview:viewForHighlightState];
+    [self.superview insertSubview:viewForHighlightState aboveSubview:self];
     self.viewForHighlightState = viewForHighlightState;
     
     UIControlState normalState = self.isSelected ? UIControlStateSelected : UIControlStateNormal;
     GPButtonStateTransitionView *viewForNormalState = [[GPButtonStateTransitionView alloc] initWithButton:self state:normalState];
     viewForNormalState.alpha = 0;
-    [self.superview addSubview:viewForNormalState];
+    [self.superview insertSubview:viewForNormalState aboveSubview:self.viewForHighlightState];
     self.viewForNormalState = viewForNormalState;
-    
-    self.alpha = 0.001;
     
     UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState |
                                      UIViewAnimationOptionCurveEaseOut;
     
-    [UIView animateWithDuration:0.2
+    [UIView animateWithDuration:kButtonHighlightTransitionDuration
                           delay:0
                         options:options
                      animations:^{
