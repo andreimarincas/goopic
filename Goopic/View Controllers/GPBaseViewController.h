@@ -40,6 +40,8 @@
     BOOL _activityInProgress;
     
     __strong UIAlertView *_alertView;
+    
+    BOOL _dismissedFromInteractiveTransitionWithoutInteraction;
 }
 
 @property (nonatomic, readonly, getter = isRotatingInterfaceOrientation) BOOL rotatingInterfaceOrientation;
@@ -106,5 +108,12 @@
 - (void)appDidBecomeActive;
 - (void)appDidEnterBackground;
 - (void)appWillEnterForeground;
+
+@end
+
+@interface GPBaseViewController (InteractiveTransition)
+
+@property (nonatomic, getter = isBeingDismissedFromInteractiveTransitionWithoutInteraction)
+BOOL dismissedFromInteractiveTransitionWithoutInteraction;
 
 @end

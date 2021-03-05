@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
+
 @interface GPBaseTransition : NSObject <UIViewControllerAnimatedTransitioning>
 
 @property (nonatomic) NSTimeInterval presentationDuration;

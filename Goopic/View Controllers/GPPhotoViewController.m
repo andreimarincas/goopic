@@ -32,7 +32,6 @@
         {
             self.automaticallyAdjustsScrollViewInsets = NO;
             self.photo = photo;
-//            self.transformOnViewDidAppear = CGAffineTransformIdentity;
         }
         else
         {
@@ -105,30 +104,6 @@
     GPLogOUT();
 }
 
-//- (void)viewDidAppear:(BOOL)animated
-//{
-//    [super viewDidAppear:animated];
-//    
-//    CGAffineTransform t = self.view.transform;
-//    GPLog(@"self.photoViewController.view.transform: %@, is identity: %@", NSStringFromCGAffineTransform(t), NSStringFromBOOL(CGAffineTransformIsIdentity(t)));
-//    t = self.topToolbar.transform;
-//    GPLog(@"_photoViewTopToolbar.transform: %@, is identity: %@", NSStringFromCGAffineTransform(t), NSStringFromBOOL(CGAffineTransformIsIdentity(t)));
-//    
-//    GPLog(@"self.frame: %@", NSStringFromCGRect(self.view.frame));
-//    
-//    self.transformOnViewDidAppear = self.view.transform;
-//}
-//
-//- (void)viewWillDisappear:(BOOL)animated
-//{
-//    [super viewWillDisappear:animated];
-//    
-//    CGAffineTransform t = self.view.transform;
-//    GPLog(@"self.photoViewController.view.transform: %@, is identity: %@", NSStringFromCGAffineTransform(t), NSStringFromBOOL(CGAffineTransformIsIdentity(t)));
-//    t = self.topToolbar.transform;
-//    GPLog(@"_photoViewTopToolbar.transform: %@, is identity: %@", NSStringFromCGAffineTransform(t), NSStringFromBOOL(CGAffineTransformIsIdentity(t)));
-//}
-
 #pragma mark - Notifications
 
 - (void)appDidBecomeActive
@@ -200,7 +175,7 @@
     [self.view setNeedsDisplay];
     
     // update super's ui here because it uses our preferredActivityViewFrame,
-    // which is based on the geometry defined above
+    // which is based on the geometry defined here
     [super updateUI];
     
     GPLogOUT();
@@ -210,18 +185,17 @@
 {
     GPLogIN();
     
-    static CGFloat _alpha = 0;
-    CGFloat alpha = _alpha;
+    CGFloat alpha = [self toolbarsAreHidden] ? 1 : 0;
     
     if (animated)
     {
         UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState |
                                          UIViewAnimationOptionCurveEaseInOut;
         
-        [UIView animateWithDuration:0.2
-                              delay:0
-                            options:options
-                         animations:^{
+        [UIView animateWithDuration: 0.2
+                              delay: 0
+                            options: options
+                         animations: ^{
                              
                              self.topToolbar.alpha = alpha;
                              self.bottomToolbar.alpha = alpha;
@@ -237,9 +211,12 @@
         }];
     }
     
-    _alpha = 1 - alpha;
-    
     GPLogOUT();
+}
+
+- (BOOL)toolbarsAreHidden
+{
+    return (self.topToolbar.alpha == 0) && (self.bottomToolbar.alpha == 0);
 }
 
 #pragma mark - Gestures Handling
@@ -294,10 +271,12 @@
 
 - (void)toolbar:(id)toolbar didSelectButton:(UIButton *)button
 {
-    button.enabled = NO;
+    GPLogIN();
     
     if (toolbar == self.topToolbar)
     {
+        button.enabled = NO;
+        
         if (button == self.topToolbar.cameraButton)
         {
             GPCameraViewController *cameraViewController = [[GPCameraViewController alloc] init];
@@ -313,8 +292,10 @@
             [self dismissViewControllerAnimated:YES completion:nil];
         }
     }
-    else // bottom toolbar
+    else if (toolbar == self.bottomToolbar)
     {
+        button.enabled = NO;
+        
         if (button == self.bottomToolbar.searchButton)
         {
             [[GPSearchEngine searchEngine] searchGoogleForPhoto:self.photo completion:nil];
@@ -324,6 +305,8 @@
             [[GPSearchEngine searchEngine] cancelPhotoSearching];
         }
     }
+    
+    GPLogOUT();
 }
 
 #pragma mark - Transitioning Delegate

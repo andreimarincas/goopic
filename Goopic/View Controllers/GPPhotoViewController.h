@@ -20,12 +20,12 @@
 @property (nonatomic, strong) GPPhotoViewTopToolbar *topToolbar;
 @property (nonatomic, strong) GPPhotoViewBottomToolbar *bottomToolbar;
 
+@property (nonatomic, readonly) BOOL toolbarsAreHidden;
+
 @property (nonatomic, strong) GPPhoto *photo;
 
 @property (nonatomic, strong) UIImageView *photoView;
 @property (nonatomic, strong) UIScrollView *photoScrollView;
-
-//@property (nonatomic) CGAffineTransform transformOnViewDidAppear;
 
 - (instancetype)initWithPhoto:(GPPhoto *)photo;
 

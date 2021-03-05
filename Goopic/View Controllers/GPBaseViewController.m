@@ -141,6 +141,32 @@ static CGFloat _lastStatusBarHeightWhenVisible;
     GPLogOUT();
 }
 
+- (void)setTransform:(CGAffineTransform)transform
+{
+    GPLogIN();
+    [super setTransform:transform];
+    
+    GPLog(@"%@ %@ : transform: %@", self, self.baseViewController, NSStringFromCGAffineTransform(transform));
+    GPLog(@"presented view controller: %@", [self.baseViewController presentedViewController]);
+    
+    if ([[self.baseViewController presentedViewController] isKindOfClass:[GPBaseViewController class]])
+    {
+        GPBaseViewController *presentedViewController = (GPBaseViewController *)[self.baseViewController presentedViewController];
+        
+        if ([presentedViewController isBeingDismissedFromInteractiveTransitionWithoutInteraction] && GPInterfaceOrientationIsLandscape())
+        {
+            [UIView performWithoutAnimation:^{
+                
+                presentedViewController.view.transform = CGAffineTransformIdentity;
+                presentedViewController.view.frame = self.frame;
+                presentedViewController.view.transform = self.transform;
+            }];
+        }
+    }
+    
+    GPLogOUT();
+}
+
 @end
 
 
@@ -159,6 +185,7 @@ static CGFloat _lastStatusBarHeightWhenVisible;
     if (self)
     {
         // Custom initialization
+        self.dismissedFromInteractiveTransitionWithoutInteraction = NO;
     }
     
     GPLogOUT();
@@ -528,6 +555,24 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
     {
         [(GPBaseViewController *)self.presentedViewController appWillEnterForeground];
     }
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark - Base View Controller (InteractiveTransition)
+
+@implementation GPBaseViewController (InteractiveTransition)
+
+- (void)setDismissedFromInteractiveTransitionWithoutInteraction:(BOOL)dismissedFromInteractiveTransitionWithoutInteraction
+{
+    _dismissedFromInteractiveTransitionWithoutInteraction = dismissedFromInteractiveTransitionWithoutInteraction;
+}
+
+- (BOOL)isBeingDismissedFromInteractiveTransitionWithoutInteraction
+{
+    return _dismissedFromInteractiveTransitionWithoutInteraction;
 }
 
 @end

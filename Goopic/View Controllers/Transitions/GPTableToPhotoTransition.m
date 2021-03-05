@@ -31,11 +31,13 @@
 
 - (void)executePresentationAnimation:(id <UIViewControllerContextTransitioning>)transitionContext
 {
+    GPLogIN();
+    
     GPPhotosTableViewController *fromViewController = (GPPhotosTableViewController *)
-    [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
+        [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
     
     GPPhotoViewController *toViewController = (GPPhotoViewController *)
-    [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
+        [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
     
     UIView *container = [transitionContext containerView];
     [container addSubview:toViewController.view];
@@ -109,10 +111,10 @@
     transportedViewFrame = CGRectMake(transportedViewFrame.origin.x, transportedViewFrame.origin.y + yOffset,
                                       transportedViewFrame.size.width, transportedViewFrame.size.height);
     
-    [UIView animateWithDuration:self.presentationDuration
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseOut
-                     animations:^{
+    [UIView animateWithDuration: self.presentationDuration
+                          delay: 0
+                        options: UIViewAnimationOptionCurveEaseOut
+                     animations: ^{
                          
                          toViewController.view.alpha = 1;
                          
@@ -151,15 +153,22 @@
                          
                          [transitionContext completeTransition:finished];
                      }];
+    
+    GPLogOUT();
 }
 
 - (void)executeDismissalAnimation:(id <UIViewControllerContextTransitioning>)transitionContext
 {
+    GPLogIN();
+    
     GPPhotoViewController *fromViewController = (GPPhotoViewController *)
-    [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
+        [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
     
     GPPhotosTableViewController *toViewController = (GPPhotosTableViewController *)
-    [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
+        [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
+    
+    // This happens when the photo view controller is being dismissed from interactive transition without interaction while toolbars are hidden
+    BOOL photoToolbarsAreHidden = [fromViewController toolbarsAreHidden];
     
     UIView *container = [transitionContext containerView];
     [container insertSubview:toViewController.view belowSubview:fromViewController.view];
@@ -168,19 +177,23 @@
     [fromTopToolbar moveToView:container];
     
     GPPhotosTableViewToolbar *toToolbar = toViewController.toolbar;
-    toToolbar.hidden = YES;
-    
     UILabel *toTitleLabel = toToolbar.titleLabel;
     CGPoint toTitleLabelInitialCenter = toTitleLabel.center;
-    [toTitleLabel moveToView:fromTopToolbar];
+    
     GPButton *fromPhotosButton = fromTopToolbar.photosButton;
     
-    if (GPInterfaceOrientationIsPortrait())
+    if (!photoToolbarsAreHidden)
     {
-        toTitleLabel.center = fromPhotosButton.center;
+        toToolbar.hidden = YES;
+        [toTitleLabel moveToView:fromTopToolbar];
+        
+        if (GPInterfaceOrientationIsPortrait())
+        {
+            toTitleLabel.center = fromPhotosButton.center;
+        }
+        
+        toTitleLabel.alpha = 0;
     }
-    
-    toTitleLabel.alpha = 0;
     
     GPButton *fromDisclosureButton = fromTopToolbar.disclosureButton;
     
@@ -210,12 +223,15 @@
     photoView.frame = transportedView.bounds;
     photoView.image = [fromViewController.photo largeImage];
     
-    
     [container addSubview:transportedView];
     
     GPPhotoViewBottomToolbar *fromBottomToolbar = fromViewController.bottomToolbar;
     [fromBottomToolbar moveToView:container];
-    fromBottomToolbar.alpha = 1;
+    
+    if (!photoToolbarsAreHidden)
+    {
+        fromBottomToolbar.alpha = 1;
+    }
     
     [container bringSubviewToFront:transportedView];
     [container bringSubviewToFront:fromTopToolbar];
@@ -236,23 +252,26 @@
     transportedViewFrame = CGRectMake(transportedViewFrame.origin.x, transportedViewFrame.origin.y + yOffset,
                                       transportedViewFrame.size.width, transportedViewFrame.size.height);
     
-    [UIView animateWithDuration:self.dismissalDuration
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseOut
-                     animations:^{
+    [UIView animateWithDuration: self.dismissalDuration
+                          delay: 0
+                        options: UIViewAnimationOptionCurveEaseOut
+                     animations: ^{
                          
                          fromViewController.view.alpha = 0;
                          
-                         if (GPInterfaceOrientationIsPortrait())
+                         if (!photoToolbarsAreHidden)
                          {
-                             toTitleLabel.center = toTitleLabelInitialCenter;
-                             fromPhotosButton.center = toTitleLabelInitialCenter;
+                             if (GPInterfaceOrientationIsPortrait())
+                             {
+                                 toTitleLabel.center = toTitleLabelInitialCenter;
+                                 fromPhotosButton.center = toTitleLabelInitialCenter;
+                             }
+                             
+                             toTitleLabel.alpha = 1;
+                             fromPhotosButton.alpha = 0;
+                             fromDisclosureButton.alpha = 0;
+                             fromBottomToolbar.alpha = 0;
                          }
-                         
-                         toTitleLabel.alpha = 1;
-                         fromPhotosButton.alpha = 0;
-                         fromDisclosureButton.alpha = 0;
-                         fromBottomToolbar.alpha = 0;
                          
                          transportedView.frame = transportedViewFrame;
                          photoView.frame = photoViewFrame;
@@ -266,9 +285,12 @@
                          [fromTopToolbar moveToView:fromViewController.view];
                          [fromBottomToolbar moveToView:fromViewController.view];
                          
-                         [toTitleLabel moveToView:toToolbar];
-                         [toToolbar updateUI];
-                         toToolbar.hidden = NO;
+                         if (!photoToolbarsAreHidden)
+                         {
+                             [toTitleLabel moveToView:toToolbar];
+                             toToolbar.hidden = NO;
+                             [toToolbar updateUI];
+                         }
                          
                          [selectedCell setThumbnailHidden:NO atIndex:selectedPhotoIndex];
                          
@@ -276,6 +298,8 @@
                          
                          [transitionContext completeTransition:finished];
                      }];
+    
+    GPLogOUT();
 }
 
 @end
@@ -283,7 +307,7 @@
 
 #pragma mark - Interactive Table to Photo transition
 
-static const CGFloat kPercentThreshold = 0.35f; // 0..1
+static const CGFloat kPercentThreshold = 0.3f; // 0..1
 
 
 @implementation GPInteractiveTableToPhotoTransition
@@ -297,6 +321,7 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
     if (self)
     {
         // Custom initialization
+        _shouldDismissPhotoViewControllerWithoutInteraction = NO;
     }
     
     return self;
@@ -317,6 +342,9 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
         _viewForInteraction = viewForInteraction;
         
         UIPanGestureRecognizer *panGr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanning:)];
+        panGr.minimumNumberOfTouches = 1;
+        panGr.maximumNumberOfTouches = 1;
+        panGr.delegate = self;
         [viewForInteraction addGestureRecognizer:panGr];
         _panGestureRecognizer = panGr;
     }
@@ -338,12 +366,16 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
         {
             GPLog(@"UIGestureRecognizerStateBegan");
             
+            _shouldDismissPhotoViewControllerWithoutInteraction = NO;
+            
             if (![self isInteractive])
             {
                 _initialPanningLocation = location;
                 
                 self.reverse = YES;
                 self.interactive = YES;
+                
+                _photoToolbarsAreHidden = [self.photoViewController toolbarsAreHidden];
                 
                 _photoViewTopToolbar = [self.photoViewController topToolbar];
                 
@@ -383,24 +415,45 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
         }
             break;
             
-        case UIGestureRecognizerStateEnded:
-            GPLog(@"UIGestureRecognizerStateEnded");
-            // let it fall through to the next case
-            
         case UIGestureRecognizerStateCancelled:
         {
             GPLog(@"UIGestureRecognizerStateCancelled");
+        }
+            // Let it fall through to the next case
             
-            if ([self isInteractive] && _context)
+        case UIGestureRecognizerStateEnded:
+        {
+            GPLog(@"UIGestureRecognizerStateEnded");
+            
+            if ([self isInteractive])
             {
-                _initialPanningLocation = initialLocation;
-                
-                CGFloat percent = [self percentForLocation:location];
-                GPLog(@"percent: %f", percent);
-                
-                CGFloat finished = (percent > kPercentThreshold);
-                
-                [self stopInteractiveTransition:finished];
+                if (_context)
+                {
+                    _initialPanningLocation = initialLocation;
+                    
+                    CGFloat percent = [self percentForLocation:location];
+                    GPLog(@"percent: %f", percent);
+                    
+                    CGFloat finished = (percent > kPercentThreshold);
+                    
+                    [self stopInteractiveTransition:finished];
+                }
+                else
+                {
+                    _photoViewTopToolbar.photosButton = _photosButton;
+                    _photosButton = nil;
+                    self.photoViewController.topToolbar = _photoViewTopToolbar;
+                    _photoViewTopToolbar = nil;
+                    
+                    self.photoViewController.bottomToolbar = _photoViewBottomToolbar;
+                    _photoViewBottomToolbar = nil;
+                    
+                    // Set interactive to NO to prevent startInteractiveTransition: being executed in this stage
+                    self.interactive = NO;
+                    
+                    // Photos view controller will still be dismissed after animationEnded: is called on this interactive transition
+                    _shouldDismissPhotoViewControllerWithoutInteraction = YES;
+                }
             }
         }
             break;
@@ -409,6 +462,31 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
             break;
     }
     
+    GPLogOUT();
+}
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
+{
+    GPLogIN();
+    
+    if (gestureRecognizer == _panGestureRecognizer)
+    {
+        CGPoint location = [_panGestureRecognizer locationInView:_viewForInteraction];
+        
+        if (CGPointInFrame(location, self.photoViewController.topToolbar.frame))
+        {
+            GPLog(@"Attempt to start panning from top toolbar area.");
+            return NO;
+        }
+        
+        if (CGPointInFrame(location, self.photoViewController.bottomToolbar.frame))
+        {
+            GPLog(@"Attempt to start panning from bottom toolbar area.");
+            return NO;
+        }
+    }
+    
+    return YES;
     GPLogOUT();
 }
 
@@ -446,16 +524,47 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
 
 - (void)animationEnded:(BOOL)transitionCompleted
 {
+    GPLogIN();
+    
     self.interactive = NO;
+    
+    if (_shouldDismissPhotoViewControllerWithoutInteraction)
+    {
+        GPLog(@"Dismiss photo view controller after interactive transition.");
+        _shouldDismissPhotoViewControllerWithoutInteraction = NO;
+        
+        self.photoViewController.dismissedFromInteractiveTransitionWithoutInteraction = YES;
+        [self.photoViewController dismissViewControllerAnimated:YES completion:nil];
+    }
+    
+    GPLogOUT();
 }
 
-// assumption: transitionContext is always valid here
+- (void)setUserInteractionEnabled:(BOOL)enabled
+{
+    GPLogIN();
+    
+    _photoViewTopToolbar.userInteractionEnabled = enabled;
+    _photoViewTopToolbar.cameraButton.userInteractionEnabled = enabled;
+    _photosButton.userInteractionEnabled = enabled;
+    _photoViewTopToolbar.disclosureButton.userInteractionEnabled = enabled;
+    
+    _photoViewBottomToolbar.userInteractionEnabled = enabled;
+    
+    _photosTableViewToolbar.userInteractionEnabled = enabled;
+    _photosTableViewToolbar.cameraButton.userInteractionEnabled = enabled;
+    _titleLabel.userInteractionEnabled = enabled;
+    
+    GPLogOUT();
+}
+
+// assumtion: transitionContext is always valid here
 - (void)startInteractiveTransition:(id <UIViewControllerContextTransitioning>)transitionContext
 {
     GPLogIN();
     
     GPLog(@"isInteractive: %@", NSStringFromBOOL([self isInteractive]));
-    GPLog(@"_context: %@", _context);
+    GPLog(@"_context: %@", transitionContext);
     
     if (![self isInteractive]) // Caution measure
     {
@@ -493,12 +602,15 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
     [_photosButton moveToView:container];
     [_photoViewTopToolbar.disclosureButton moveToView:container];
     
-    if (GPInterfaceOrientationIsPortrait())
+    if (!_photoToolbarsAreHidden)
     {
-        _titleLabel.center = _photosButtonInitialCenter;
+        if (GPInterfaceOrientationIsPortrait())
+        {
+            _titleLabel.center = _photosButtonInitialCenter;
+        }
+        
+        _titleLabel.alpha = 0;
     }
-    
-    _titleLabel.alpha = 0;
     
     UIImageView *photoView = [[UIImageView alloc] init];
     photoView.contentMode = UIViewContentModeScaleAspectFill;
@@ -535,7 +647,21 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
     self.photoViewController.photoView.hidden = YES;
     
     [_photoViewBottomToolbar moveToView:container];
-    _photoViewBottomToolbar.alpha = 1;
+    
+    if (_photoToolbarsAreHidden)
+    {
+        _photoViewTopToolbar.hidden = YES;
+        _photosButton.hidden = YES;
+        _photoViewTopToolbar.disclosureButton.hidden = YES;
+        
+        _photoViewBottomToolbar.hidden = YES;
+        
+        _photosTableViewToolbar.alpha = 0;
+    }
+    else
+    {
+        _photoViewBottomToolbar.alpha = 1;
+    }
     
     UIView *blackOverlay = [[UIView alloc] init];
     blackOverlay.backgroundColor = [UIColor blackColor];
@@ -550,6 +676,8 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
     
     // TODO: Apply yOffset (status bar height is 40 - red when recording, green during phone call)
 //    CGFloat yOffset = GPInterfaceOrientationIsPortrait() && (RealStatusBarHeight() > StatusBarHeight()) ? StatusBarHeight() : 0;
+    
+    [self setUserInteractionEnabled:NO];
     
     GPLogOUT();
 }
@@ -567,22 +695,29 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
     
     self.photoViewController.view.backgroundColor = [_photoViewControllerInitialColor colorWithAlphaComponent:1 - percent];
     
-    if (GPInterfaceOrientationIsPortrait())
+    if (!_photoToolbarsAreHidden)
     {
-        if (_context)
+        if (GPInterfaceOrientationIsPortrait())
         {
-            _photosButton.center = CGPointMake(_photosButtonInitialCenter.x + percent * (_titleLabelInitialCenter.x - _photosButtonInitialCenter.x),
-                                               _photosButtonInitialCenter.y);
-            _titleLabel.center = _photosButton.center;
+            if (_context)
+            {
+                _photosButton.center = CGPointMake(_photosButtonInitialCenter.x + percent * (_titleLabelInitialCenter.x - _photosButtonInitialCenter.x),
+                                                   _photosButtonInitialCenter.y);
+                _titleLabel.center = _photosButton.center;
+            }
         }
+        
+        _titleLabel.alpha = percent;
+        
+        _photosButton.alpha =  1 - percent;
+        _photoViewTopToolbar.disclosureButton.alpha = 1 - percent;
+        
+        _photoViewBottomToolbar.alpha = 1 - percent;
     }
-    
-    _titleLabel.alpha = percent;
-    
-    _photosButton.alpha =  1 - percent;
-    _photoViewTopToolbar.disclosureButton.alpha = 1 - percent;
-    
-    _photoViewBottomToolbar.alpha = 1 - percent;
+    else
+    {
+        _photosTableViewToolbar.alpha = percent;
+    }
     
     if (_context)
     {
@@ -648,18 +783,25 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
                              
                              self.photoViewController.view.backgroundColor = [_photoViewControllerInitialColor colorWithAlphaComponent:0];
                              
-                             if (GPInterfaceOrientationIsPortrait())
+                             if (!_photoToolbarsAreHidden)
                              {
-                                 _photosButton.center = _titleLabelInitialCenter;
-                                 _titleLabel.center = _titleLabelInitialCenter;
+                                 if (GPInterfaceOrientationIsPortrait())
+                                 {
+                                     _photosButton.center = _titleLabelInitialCenter;
+                                     _titleLabel.center = _titleLabelInitialCenter;
+                                 }
+                                 
+                                 _titleLabel.alpha = 1;
+                                 
+                                 _photosButton.alpha = 0;
+                                 _photoViewTopToolbar.disclosureButton.alpha = 0;
+                                 
+                                 _photoViewBottomToolbar.alpha = 0;
                              }
-                             
-                             _titleLabel.alpha = 1;
-                             
-                             _photosButton.alpha = 0;
-                             _photoViewTopToolbar.disclosureButton.alpha = 0;
-                             
-                             _photoViewBottomToolbar.alpha = 0;
+                             else
+                             {
+                                 _photosTableViewToolbar.alpha = 1;
+                             }
                              
                              _transportedView.frame = _transportedViewToFrame;
                              _photoView.frame = _photoViewToFrame;
@@ -672,6 +814,17 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
                              
                              GPLog(@"transitionFinished and completion finished: %@ and %@",
                                    NSStringFromBOOL(transitionFinished), NSStringFromBOOL(finished));
+                             
+                             [self setUserInteractionEnabled:YES];
+                             
+                             if (_photoToolbarsAreHidden)
+                             {
+                                 _photoViewTopToolbar.hidden = NO;
+                                 _photosButton.hidden = NO;
+                                 _photoViewTopToolbar.disclosureButton.hidden = NO;
+                                 
+                                 _photoViewBottomToolbar.hidden = NO;
+                             }
                              
                              self.photoViewController.activityIndicatorView.hidden = NO;
                              
@@ -715,18 +868,25 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
                              
                              self.photoViewController.view.backgroundColor = _photoViewControllerInitialColor;
                              
-                             if (GPInterfaceOrientationIsPortrait())
+                             if (!_photoToolbarsAreHidden)
                              {
-                                 _photosButton.center = _photosButtonInitialCenter;
-                                 _titleLabel.center = _photosButtonInitialCenter;
+                                 if (GPInterfaceOrientationIsPortrait())
+                                 {
+                                     _photosButton.center = _photosButtonInitialCenter;
+                                     _titleLabel.center = _photosButtonInitialCenter;
+                                 }
+                                 
+                                 _titleLabel.alpha = 0;
+                                 
+                                 _photosButton.alpha = 1;
+                                 _photoViewTopToolbar.disclosureButton.alpha = 1;
+                                 
+                                 _photoViewBottomToolbar.alpha = 1;
                              }
-                             
-                             _titleLabel.alpha = 0;
-                             
-                             _photosButton.alpha = 1;
-                             _photoViewTopToolbar.disclosureButton.alpha = 1;
-                             
-                             _photoViewBottomToolbar.alpha = 1;
+                             else
+                             {
+                                 _photosTableViewToolbar.alpha = 0;
+                             }
                              
                              _transportedView.frame = _transportedViewInitialFrame;
                              _photoView.frame = _photoViewInitialFrame;
@@ -737,6 +897,23 @@ static const CGFloat kPercentThreshold = 0.35f; // 0..1
                              
                              GPLog(@"transitionFinished and completion finished: %@ and %@",
                                    NSStringFromBOOL(transitionFinished), NSStringFromBOOL(finished));
+                             
+                             [self setUserInteractionEnabled:YES];
+                             
+                             if (_photoToolbarsAreHidden)
+                             {
+                                 _photoViewTopToolbar.hidden = NO;
+                                 _photosButton.hidden = NO;
+                                 _photoViewTopToolbar.disclosureButton.hidden = NO;
+                                 
+                                 _photoViewBottomToolbar.hidden = NO;
+                                 
+                                 _photosTableViewToolbar.alpha = 1;
+                             }
+                             else
+                             {
+                                 _titleLabel.alpha = 1;
+                             }
                              
                              self.photoViewController.photoScrollView.hidden = NO;
                              self.photoViewController.photoView.hidden = NO;

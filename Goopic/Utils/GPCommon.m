@@ -92,7 +92,7 @@ UIInterfaceOrientationMask GPInterfaceOrientationMaskForOrientation(UIInterfaceO
     return UIInterfaceOrientationMaskAll;
 }
 
-BOOL CGPointInCGRect(CGPoint point, CGRect rect)
+BOOL CGPointInFrame(CGPoint point, CGRect rect)
 {
     return (point.x >= rect.origin.x) &&
     (point.x <= rect.origin.x + rect.size.width) &&

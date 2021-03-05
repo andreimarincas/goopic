@@ -29,7 +29,8 @@
 
 #pragma mark - Interactive Table to Photo transition
 
-@interface GPInteractiveTableToPhotoTransition : GPTableToPhotoTransition <UIViewControllerInteractiveTransitioning>
+@interface GPInteractiveTableToPhotoTransition : GPTableToPhotoTransition <UIViewControllerInteractiveTransitioning,
+                                                                           UIGestureRecognizerDelegate>
 {
     /* interactive transition */
     
@@ -41,6 +42,8 @@
     id <UIViewControllerContextTransitioning> _context;
     CGFloat _percentCompleted; // [0,1]
     
+    BOOL _shouldDismissPhotoViewControllerWithoutInteraction;
+    
     
     /* ui elements */
     
@@ -49,6 +52,7 @@
     
     GPPhotosTableViewToolbar *_photosTableViewToolbar;
     
+    BOOL         _photoToolbarsAreHidden;
     UIColor     *_photoViewTopToolbarInitialColor;
     UIColor     *_photoViewControllerInitialColor;
     UIView      *_transportedView;

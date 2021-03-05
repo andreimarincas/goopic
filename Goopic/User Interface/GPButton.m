@@ -68,6 +68,7 @@ static const NSTimeInterval kButtonHighlightTransitionDuration = 0.2f;
         self.hitTestEdgeInsets = UIEdgeInsetsZero;
         self.animateHighlightStateChange = YES;
         self.isImageBased = NO;
+        self.shouldUpdateTitleColor = NO;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAppWillResignActive:)
                                                      name:UIApplicationWillResignActiveNotification object:nil];
@@ -235,9 +236,11 @@ static const NSTimeInterval kButtonHighlightTransitionDuration = 0.2f;
 - (void)updateTitleColor
 {
     GPLogIN();
+    GPLog(@"should update title color: %@", NSStringFromBOOL(self.shouldUpdateTitleColor));
     
-    if (self.shouldUpdateTitleColor)
+    if (!self.shouldUpdateTitleColor)
     {
+        GPLogOUT();
         return;
     }
     
