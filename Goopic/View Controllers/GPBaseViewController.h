@@ -33,6 +33,11 @@
 @interface GPBaseViewController : UIViewController
 {
     BOOL _rotatingInterfaceOrientation;
+    
+    UIActivityIndicatorView *_activityIndicatorView;
+    UILabel *_activityLabel;
+    
+    BOOL _activityInProgress;
 }
 
 @property (nonatomic, readonly, getter = isRotatingInterfaceOrientation) BOOL rotatingInterfaceOrientation;
@@ -56,5 +61,24 @@
  * It will be called whenever the view's bounds change, and also before any transition (TO or FROM this view controller).
  */
 - (void)updateUI;
+
+@end
+
+@interface GPBaseViewController (ActivityView)
+
+@property (nonatomic, readonly) UIActivityIndicatorView *activityIndicatorView;
+@property (nonatomic, readonly) UILabel *activityLabel;
+
+@property (nonatomic, readonly) BOOL activityInProgress;
+
+// Override. Default value is view's bounds.
+- (CGRect)preferredFrameForActivityView;
+
+- (void)showActivity:(GPActivity)activity animated:(BOOL)animated;
+
+// Hide the activity currently in progress
+- (void)hideActivityAnimated:(BOOL)animated;
+
+- (void)bringActivityViewToFrontIfActivityInProgress;
 
 @end

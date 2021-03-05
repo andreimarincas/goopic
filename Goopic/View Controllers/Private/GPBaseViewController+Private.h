@@ -1,5 +1,5 @@
 //
-//  GPBaseView+Private.h
+//  GPBaseViewController+Private.h
 //  Goopic
 //
 //  Created by Andrei Marincas on 01/09/14.
@@ -8,8 +8,16 @@
 
 #import "GPBaseViewController.h"
 
+
 @interface GPBaseView (Private)
 
 - (void)setBaseViewController:(GPBaseViewController *)baseViewController;
+
+@end
+
+
+@interface GPBaseViewController (Private)
+
+- (void)updateBaseUI;
 
 @end

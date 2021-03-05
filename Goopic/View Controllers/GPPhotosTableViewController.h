@@ -73,6 +73,9 @@
                                                                UIScrollViewDelegate,
                                                                UIViewControllerTransitioningDelegate,
                                                                GPPhotosTableViewToolbarDelegate>
+{
+    NSInteger _lastPhotosCountPerCell;
+}
 
 @property (nonatomic, strong) GPPhotosTableView *photosTableView;
 
@@ -80,7 +83,7 @@
 
 @property (nonatomic, strong) NSArray *photosSections; // NSArray*'s of GPPhoto*
 
-@property (nonatomic) NSInteger selectedIndex;
+@property (nonatomic) NSInteger selectedPhotoIndex;
 @property (nonatomic) NSIndexPath *selectedIndexPath;
 @property (nonatomic, readonly) UITableViewCell *selectedCell;
 

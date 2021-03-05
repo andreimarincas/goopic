@@ -48,6 +48,7 @@
 @property (nonatomic, strong) GPLine *line;
 
 @property (nonatomic, strong) GPButton *searchButton;
+@property (nonatomic, strong) GPButton *cancelButton;
 
 - (instancetype)init;
 

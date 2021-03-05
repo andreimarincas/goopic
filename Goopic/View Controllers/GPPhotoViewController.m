@@ -31,11 +31,6 @@
         {
             self.automaticallyAdjustsScrollViewInsets = NO;
             self.photo = photo;
-            
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(handleAppDidEnterBackground:)
-                                                         name:UIApplicationDidEnterBackgroundNotification
-                                                       object:nil];
         }
         else
         {
@@ -52,8 +47,6 @@
     GPLogIN();
     
     // Dealloc code
-    
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
     
     GPLogOUT();
 }
@@ -215,9 +208,13 @@
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
+    GPLogIN();
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    
     [self updateUI];
     [self setNeedsStatusBarAppearanceUpdate];
+    
+    GPLogOUT();
 }
 
 #pragma mark - Status Bar
@@ -234,42 +231,43 @@
 
 - (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
 {
-    return UIStatusBarAnimationSlide;
+    return UIStatusBarAnimationFade;
 }
 
 #pragma mark - Toolbar Delegate
 
 - (void)toolbar:(id)toolbar didSelectButton:(UIButton *)button
 {
-    if (button == self.topToolbar.cameraButton)
+    button.enabled = NO;
+    
+    if (toolbar == self.topToolbar)
     {
-        GPCameraViewController *cameraViewController = [[GPCameraViewController alloc] init];
-        cameraViewController.transitioningDelegate = self;
-        
-        button.enabled = NO;
-        
-        [self presentViewController:cameraViewController animated:YES completion:^{
-            button.enabled = YES;
-        }];
-    }
-    else if (button == self.topToolbar.photosButton || button == self.topToolbar.disclosureButton)
-    {
-        button.enabled = NO;
-        
-        [self dismissViewControllerAnimated:YES completion:^{
-            button.enabled = YES;
-        }];
-    }
-    else if (button == self.bottomToolbar.searchButton)
-    {
-        button.enabled = NO;
-        
-        [[GPSearchEngine searchEngine] searchGoogleForPhoto:self.photo completion:^(NSError *error) {
+        if (button == self.topToolbar.cameraButton)
+        {
+            GPCameraViewController *cameraViewController = [[GPCameraViewController alloc] init];
+            cameraViewController.transitioningDelegate = self;
             
-//            button.enabled = YES;
-            
-            // TODO: Handle erorr ?
-        }];
+            [self presentViewController:cameraViewController animated:YES completion:^{
+                button.enabled = YES;
+            }];
+        }
+        else if (button == self.topToolbar.photosButton)
+        {
+            [self dismissViewControllerAnimated:YES completion:^{
+                button.enabled = YES;
+            }];
+        }
+    }
+    else // bottom toolbar
+    {
+        if (button == self.bottomToolbar.searchButton)
+        {
+            [[GPSearchEngine searchEngine] searchGoogleForPhoto:self.photo completion:nil];
+        }
+        else if (button == self.bottomToolbar.cancelButton)
+        {
+            [[GPSearchEngine searchEngine] cancelPhotoSearching];
+        }
     }
 }
 
@@ -298,11 +296,105 @@
     return transition;
 }
 
-#pragma mark - Notifications
+#pragma mark - Activity View
 
-- (void)handleAppDidEnterBackground:(NSNotification *)notification
+- (CGRect)preferredFrameForActivityView
 {
+    return CGRectMake(0, self.topToolbar.frame.size.height,
+                      self.view.bounds.size.width,
+                      self.view.bounds.size.height - self.topToolbar.frame.size.height - self.bottomToolbar.frame.size.height);
+}
+
+#pragma mark - Search Engine Delegate
+
+- (void)searchEngine:(GPSearchEngine *)searchEngine willBeginSearchingForPhoto:(GPPhoto *)photo
+{
+    GPLogIN();
+    
+    [self showActivity:GPActivityProcessingImage animated:YES];
+    
+    [UIView hideView:self.bottomToolbar.searchButton
+       andRevealView:self.bottomToolbar.cancelButton animated:YES];
+    
+    GPLogOUT();
+}
+
+- (void)searchEngine:(GPSearchEngine *)searchEngine didBeginSearchingForPhoto:(GPPhoto *)photo
+{
+    GPLogIN();
+    GPLog(@"Photo: %@", photo);
+    
+    self.bottomToolbar.cancelButton.enabled = YES;
+    
+    GPLogOUT();
+}
+
+- (void)searchEngine:(GPSearchEngine *)searchEngine willBeginSearchingForImageAt:(NSURL *)link
+{
+    GPLogIN();
+    GPLog(@"link: %@", link);
+    
+    // No implementation needed
+    
+    GPLogOUT();
+}
+
+- (void)searchEngine:(GPSearchEngine *)searchEngine searchingCompletedWithError:(NSError *)error
+{
+    GPLogIN();
+    
+    [self hideActivityAnimated:YES];
+    
+    if (error)
+    {
+        GPLogErr(@"%@ %@", error, [error userInfo]);
+        
+        NSString *title = @"Error";
+        NSString *message = @"An error has occurred, please try again.";
+        
+        BOOL showError = YES;
+        
+        switch (error.code)
+        {
+            case GPErrorNoInternetConnection:
+            {
+                title = @"No internet connection";
+                message = @"The Internet connection appears to be offline.";
+            }
+                break;
+            
+            // Do NOT show any error message to the user
+            case GPErrorImageUploadCancelled:
+            default:
+            {
+                showError = NO;
+            }
+                break;
+        }
+        
+        if (showError)
+        {
+            [[[UIAlertView alloc] initWithTitle:title message:message
+                                       delegate:nil
+                              cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+        }
+    }
+    
     self.bottomToolbar.searchButton.enabled = YES;
+    
+    [UIView hideView:self.bottomToolbar.cancelButton
+       andRevealView:self.bottomToolbar.searchButton animated:YES];
+    
+    GPLogOUT();
+}
+
+- (void)searchEngineDidCancelSearching:(GPSearchEngine *)searchEngine
+{
+    GPLogIN();
+    
+    // No implementation needed
+    
+    GPLogOUT();
 }
 
 @end

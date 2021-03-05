@@ -26,7 +26,7 @@ static const CGFloat kHitTestEdgeInset = 60.0f;
     {
         // Custom initialization
         
-        self.backgroundColor = GPCOLOR_TOOLBAR_BLACK;
+        self.backgroundColor = GPCOLOR_TRANSLUCENT_BLACK;
         
         GPLine *line = [[GPLine alloc] init];
         line.lineWidth = 0.25f;
@@ -44,6 +44,7 @@ static const CGFloat kHitTestEdgeInset = 60.0f;
         [photosButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         photosButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
         photosButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+        photosButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
         [self addSubview:photosButton];
         self.photosButton = photosButton;
         
@@ -65,6 +66,7 @@ static const CGFloat kHitTestEdgeInset = 60.0f;
         [cameraButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         cameraButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
         cameraButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+        cameraButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
         [self addSubview:cameraButton];
         self.cameraButton = cameraButton;
     }
@@ -118,6 +120,11 @@ static const CGFloat kHitTestEdgeInset = 60.0f;
     GPLogIN();
     GPLog(@"%@", button);
     
+    if (button == self.disclosureButton)
+    {
+        button = self.disclosureButton.connectedButton; // photos button
+    }
+    
     [self.delegate toolbar:self didSelectButton:button];
     
     GPLogOUT();
@@ -139,7 +146,7 @@ static const CGFloat kHitTestEdgeInset = 60.0f;
     {
         // Custom initialization
         
-        self.backgroundColor = GPCOLOR_TOOLBAR_BLACK;
+        self.backgroundColor = GPCOLOR_TRANSLUCENT_BLACK;
         
         GPLine *line = [[GPLine alloc] init];
         line.lineWidth = 0.25f;
@@ -157,9 +164,23 @@ static const CGFloat kHitTestEdgeInset = 60.0f;
         [searchButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         searchButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
         searchButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+        searchButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
         searchButton.forceHighlight = YES;
         [self addSubview:searchButton];
         self.searchButton = searchButton;
+        
+        GPButton *cancelButton = [[GPButton alloc] init];
+        [cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
+        [cancelButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
+        [cancelButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
+        [cancelButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
+        [cancelButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        cancelButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
+        cancelButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+        cancelButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+        cancelButton.alpha = 0;
+        [self addSubview:cancelButton];
+        self.cancelButton = cancelButton;
     }
     
     return self;
@@ -173,6 +194,12 @@ static const CGFloat kHitTestEdgeInset = 60.0f;
     self.searchButton.frame = self.bounds;
     [self bringSubviewToFront:self.searchButton];
     [self.searchButton setNeedsDisplay];
+    
+    [self.cancelButton sizeToFit];
+    self.cancelButton.center = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2);
+    self.cancelButton.hitTestEdgeInsets = UIEdgeInsetsMake((self.bounds.size.height - self.cancelButton.frame.size.height) / 2, kHitTestEdgeInset,
+                                                           (self.bounds.size.height - self.cancelButton.frame.size.height) / 2, kHitTestEdgeInset);
+    [self.cancelButton setNeedsDisplay];
     
     self.line.frame = self.bounds;
     [self.line setNeedsDisplay];

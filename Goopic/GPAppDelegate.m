@@ -27,6 +27,7 @@
     // Override point for customization after application launch.
     
     IMGSession *imgSession = [IMGSession anonymousSessionWithClientID:IMGUR_CLIENT_ID withDelegate:self];
+    [imgSession.imgurReachability startMonitoring];
     self.imgurSession = imgSession;
     
     GPPhotosTableViewController *photosTableViewController = [[GPPhotosTableViewController alloc] init];
@@ -98,6 +99,9 @@
     
     // Saves changes in the application's managed object context before the application terminates.
     [[GPPersistentStoreManager sharedManager] saveContext];
+    
+    // Stop monitoring network reachability
+    [self.imgurSession.imgurReachability stopMonitoring];
     
     GPLogOUT();
 }

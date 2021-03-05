@@ -27,13 +27,14 @@ static const NSTimeInterval kPhotoImgurExpirationInterval = 30 * kDay; // actual
 
 // Colors
 
-#define GPCOLOR_BLACK           [UIColor colorWithWhite:0.1f alpha:1.0f]
-#define GPCOLOR_DARK_BLACK      [UIColor blackColor]
-#define GPCOLOR_TOOLBAR_BLACK   [GPCOLOR_BLACK colorWithAlphaComponent:0.85]
-#define GPCOLOR_BLUE            [UIColor colorWithRed:75/255.0f green:142/255.0f blue:250/255.0f alpha:1.0f] // (.29,.56,.98)
-#define GPCOLOR_DARK_BLUE       [UIColor colorWithRed:50/255.0f green:95/255.0f blue:167/255.0f alpha:1.0f]
-#define GPCOLOR_BLUE_HIGHLIGHT  [GPCOLOR_BLUE colorWithAlphaComponent:0.3f]
-#define GPCOLOR_ORANGE_SELECTED [UIColor orangeColor]
+#define GPCOLOR_BLACK             [UIColor colorWithWhite:0.1f alpha:1.0f]
+#define GPCOLOR_DARK_BLACK        [UIColor blackColor]
+#define GPCOLOR_TRANSLUCENT_BLACK [GPCOLOR_BLACK colorWithAlphaComponent:0.75]
+#define GPCOLOR_BLUE              [UIColor colorWithRed:75 / 255.0f green:142 / 255.0f blue:250 / 255.0f alpha:1.0f] // (.29,.56,.98)
+#define GPCOLOR_DARK_BLUE         [UIColor colorWithRed:50 / 255.0f green:95 / 255.0f blue:167 / 255.0f alpha:1.0f]
+#define GPCOLOR_BLUE_HIGHLIGHT    [GPCOLOR_BLUE colorWithAlphaComponent:0.3f]
+#define GPCOLOR_ORANGE_SELECTED   [UIColor orangeColor]
+#define GPCOLOR_WHITE_TITLE       [UIColor whiteColor]
 
 
 /* Use ToolbarHeight() instead these constants! */
@@ -95,9 +96,19 @@ typedef enum {
 // Error codes
 typedef NS_ENUM (NSInteger, GPErrorCode)
 {
-    GPErrorLinkIsNil = 1000,
+    GPErrorInvalidLink = 1000,
+    GPErrorBadImage,
+    GPErrorCannotLaunchBrowser,
     
-    /* Imgur error codes */
+    /* Network Errors */
+    
+    // TODO: Use already defined error codes instead?
+    
+    // The Internet connection appears to be offline.
+    GPErrorNoInternetConnection = -1009,
+    GPErrorImageUploadCancelled = -999,
+    
+    /* Imgur Errors */
     
     // This error indicates that a required parameter is missing or a parameter has a value that is out of bounds or otherwise incorrect.
     // This status code is also returned when image uploads fail due to images that are corrupt or do not meet the format requirements.
@@ -118,7 +129,13 @@ typedef NS_ENUM (NSInteger, GPErrorCode)
     
     // Unexpected internal error. What it says. We'll strive NOT to return these but your app should be prepared to see it.
     // It basically means that something is broken with the Imgur service.
-    GPErrorIMGInternal                    = 500
+    GPErrorIMGInternal                    = 500,
+};
+
+// Activity types
+typedef NS_ENUM (NSInteger, GPActivity)
+{
+    GPActivityProcessingImage = 100
 };
 
 

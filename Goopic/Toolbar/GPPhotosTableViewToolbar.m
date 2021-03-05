@@ -16,6 +16,8 @@ static const NSTimeInterval kDateFadingDuration = 0.2f;
 
 static const CGFloat kTitleLabelTapPadding = 80.0f;
 
+static const CGFloat kHitTestEdgeInset = 40.0f;
+
 
 @implementation GPPhotosTableViewToolbar
 
@@ -27,7 +29,7 @@ static const CGFloat kTitleLabelTapPadding = 80.0f;
     {
         // Custom initialization
         
-        self.backgroundColor = GPCOLOR_TOOLBAR_BLACK;
+        self.backgroundColor = GPCOLOR_TRANSLUCENT_BLACK;
         
         GPLine *line = [[GPLine alloc] init];
         line.lineWidth = 0.25f;
@@ -41,7 +43,7 @@ static const CGFloat kTitleLabelTapPadding = 80.0f;
         titleLabel.textAlignment = NSTextAlignmentCenter;
         titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
         titleLabel.text = @"Photos";
-        titleLabel.textColor = [UIColor whiteColor];
+        titleLabel.textColor = GPCOLOR_WHITE_TITLE;
         titleLabel.backgroundColor = [UIColor clearColor];
         [self addSubview:titleLabel];
         self.titleLabel = titleLabel;
@@ -64,7 +66,7 @@ static const CGFloat kTitleLabelTapPadding = 80.0f;
         UILabel *dateLabel = [[UILabel alloc] init];
         dateLabel.textAlignment = NSTextAlignmentCenter;
         dateLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:14.0f];
-        dateLabel.textColor = [UIColor whiteColor];
+        dateLabel.textColor = GPCOLOR_WHITE_TITLE;
         dateLabel.backgroundColor = [UIColor clearColor];
         [self addSubview:dateLabel];
         self.dateLabel = dateLabel;
@@ -105,8 +107,8 @@ static const CGFloat kTitleLabelTapPadding = 80.0f;
                                          yOffset + (self.bounds.size.height - yOffset - self.cameraButton.frame.size.height) / 2,
                                          self.cameraButton.frame.size.width, self.cameraButton.frame.size.height);
     [self bringSubviewToFront:self.cameraButton];
-    self.cameraButton.hitTestEdgeInsets = UIEdgeInsetsMake((self.bounds.size.height - self.cameraButton.frame.size.height) / 2, 40,
-                                                           (self.bounds.size.height - self.cameraButton.frame.size.height) / 2, 40);
+    self.cameraButton.hitTestEdgeInsets = UIEdgeInsetsMake((self.bounds.size.height - self.cameraButton.frame.size.height) / 2, kHitTestEdgeInset,
+                                                           (self.bounds.size.height - self.cameraButton.frame.size.height) / 2, kHitTestEdgeInset);
     
     [self.dateLabel sizeToFit];
     self.dateLabel.center = CGPointMake(kDateLabelMarginLeft + _dateLabel.frame.size.width / 2,

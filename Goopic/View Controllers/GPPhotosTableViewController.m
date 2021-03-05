@@ -367,6 +367,43 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     
     [self setNeedsStatusBarAppearanceUpdate];
     
+    if (self.selectedIndexPath)
+    {
+        if ([GPPhotosTableViewController photosCountPerCell] != _lastPhotosCountPerCell)
+        {
+            NSInteger oldSelectedPhotoIndexInSection = self.selectedIndexPath.row * _lastPhotosCountPerCell + self.selectedPhotoIndex;
+            NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:oldSelectedPhotoIndexInSection / [GPPhotosTableViewController photosCountPerCell]
+                                                           inSection:self.selectedIndexPath.section];
+            self.selectedPhotoIndex = oldSelectedPhotoIndexInSection % [GPPhotosTableViewController photosCountPerCell];
+            self.selectedIndexPath = newIndexPath;
+            
+            [self.photosTableView scrollToRowAtIndexPath:self.selectedIndexPath
+                                        atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
+        }
+    }
+    
+    GPLogOUT();
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    GPLogIN();
+    [super viewDidAppear:animated];
+    
+    // Clear selection
+    self.selectedIndexPath = nil;
+    self.selectedPhotoIndex = 0;
+    
+    GPLogOUT();
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    GPLogIN();
+    [super viewWillDisappear:animated];
+    
+    _lastPhotosCountPerCell = [GPPhotosTableViewController photosCountPerCell];
+    
     GPLogOUT();
 }
 
@@ -384,7 +421,22 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
+    GPLogIN();
     [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    
+    NSArray *visibleIndexPaths = [self.photosTableView indexPathsForVisibleRows];
+    NSIndexPath *middleIndexPath = [visibleIndexPaths middleObject];
+    
+    if (middleIndexPath)
+    {
+        NSInteger photoIndex = [GPPhotosTableViewController photosCountPerCell] / 2;
+        NSInteger indexInSection = middleIndexPath.row * [GPPhotosTableViewController photosCountPerCell] + photoIndex;
+        
+        NSInteger photosCountPerCell = [GPPhotosTableViewController photosCountPerCellForOrientation:toInterfaceOrientation];
+        NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:indexInSection / photosCountPerCell inSection:middleIndexPath.section];
+        
+        middleIndexPath = newIndexPath;
+    }
     
     [UIView animateWithDuration:duration / 2
                           delay:0
@@ -397,6 +449,12 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
                          
                          [self.photosTableView reloadData];
                          
+                         if (middleIndexPath)
+                         {
+                             [self.photosTableView scrollToRowAtIndexPath:middleIndexPath
+                                                         atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
+                         }
+                         
                          [UIView animateWithDuration:duration / 2
                                                delay:0
                                              options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseIn
@@ -406,19 +464,19 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
                                               
                                           } completion:nil];
                      }];
+    
+    GPLogOUT();
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
+    GPLogIN();
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    
     [self updateUI];
     [self setNeedsStatusBarAppearanceUpdate];
-}
-
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
-{
-    [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
-    [self setNeedsStatusBarAppearanceUpdate];
+    
+    GPLogOUT();
 }
 
 #pragma mark - Status Bar
@@ -435,7 +493,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 
 - (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
 {
-    return UIStatusBarAnimationSlide;
+    return UIStatusBarAnimationFade;
 }
 
 #pragma mark - Reload Photos
@@ -554,7 +612,12 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 
 + (NSInteger)photosCountPerCell
 {
-    return GPInterfaceOrientationIsPortrait() ? kPhotosCountPerCell_Portrait : kPhotosCountPerCell_Landscape;
+    return [self photosCountPerCellForOrientation:GPInterfaceOrientation()];
+}
+
++ (NSInteger)photosCountPerCellForOrientation:(UIInterfaceOrientation)orientation
+{
+    return UIInterfaceOrientationIsPortrait(orientation) ? kPhotosCountPerCell_Portrait : kPhotosCountPerCell_Landscape;
 }
 
 - (UITableViewCell *)selectedCell
@@ -571,14 +634,14 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 {
     CGRect photoFrame = CGRectZero;
     
-    if (self.selectedIndexPath)
+    if (indexPath)
     {
-         UITableViewCell *selectedCell = [self.photosTableView cellForRowAtIndexPath:self.selectedIndexPath];
+         UITableViewCell *selectedCell = [self.photosTableView cellForRowAtIndexPath:indexPath];
         
         if ([selectedCell isKindOfClass:[GPPhotoCell class]])
         {
             GPPhotoCell *photoCell = (GPPhotoCell *)selectedCell;
-            photoFrame = [photoCell frameForPhotoAtIndex:self.selectedIndex];
+            photoFrame = [photoCell frameForPhotoAtIndex:self.selectedPhotoIndex];
             photoFrame = [self.view convertRect:photoFrame fromView:photoCell.contentView];
         }
     }
@@ -781,6 +844,8 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         if (photoViewController)
         {
             photoViewController.transitioningDelegate = self;
+            [GPSearchEngine searchEngine].delegate = photoViewController;
+            
             [self presentViewController:photoViewController animated:YES completion:nil];
         }
         else
@@ -813,6 +878,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
             if (photoViewController)
             {
                 photoViewController.transitioningDelegate = self;
+                [GPSearchEngine searchEngine].delegate = photoViewController;
                 
                 [self presentViewController:photoViewController animated:YES completion:^{
                     
@@ -840,7 +906,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         if (photoCell)
         {
             NSInteger index = (posInTableView.x / self.photosTableView.bounds.size.width) * [GPPhotosTableViewController photosCountPerCell];
-            self.selectedIndex = index;
+            self.selectedPhotoIndex = index;
             
             NSArray *photos = [photoCell photos];
             

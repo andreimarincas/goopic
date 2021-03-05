@@ -22,7 +22,7 @@
 
 @property (nonatomic, readonly) NSDate *dateTaken; // TODO: asset's timezone
 
-@property (nonatomic, readonly) NSString *url;
+@property (nonatomic, readonly) NSString *url; // local
 
 @property (nonatomic, readonly) NSString *name;
 

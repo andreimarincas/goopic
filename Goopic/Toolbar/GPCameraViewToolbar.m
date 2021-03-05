@@ -9,12 +9,14 @@
 #import "GPCameraViewToolbar.h"
 
 
+#define FLASH_ICON_MULTIPLE 0
+
 static const CGFloat kFlashIconSize = 20.0f;
 static const CGFloat kFlashMargin = 5.0f;
 static const CGFloat kFlashIconOverlap = 3.0f;
 
 static const CGFloat kFlashButtonsFontSize = 13.0f;
-static const CGFloat kFlashButtonsSpacing = 20.0f;
+static const CGFloat kFlashButtonsSpacing = 22.0f;
 
 static const CGFloat kTakeButtonSize = 50.0f;
 static const CGFloat kButtonHitTestEdgeInset = 40.0f;
@@ -83,6 +85,11 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         flashOffIcon.image = [UIImage imageNamed:@"flash-icon.png"];
         [self addSubview:flashOffIcon];
         self.flashOffIcon = flashOffIcon;
+        
+#if !(FLASH_ICON_MULTIPLE)
+        self.flashOnIcon.hidden = YES;
+        self.flashOffIcon.hidden = YES;
+#endif
     }
     
     return self;

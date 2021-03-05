@@ -10,10 +10,12 @@
 #import "GPPhoto.h"
 #import "GPPhotoViewToolbar.h"
 #import "GPBaseViewController.h"
+#import "GPSearchEngine.h"
 
 @interface GPPhotoViewController : GPBaseViewController <UIScrollViewDelegate,
                                                          UIViewControllerTransitioningDelegate,
-                                                         GPPhotoViewToolbarDelegate>
+                                                         GPPhotoViewToolbarDelegate,
+                                                         GPSearchEngineDelegate>
 
 @property (nonatomic, strong) GPPhotoViewTopToolbar *topToolbar;
 @property (nonatomic, strong) GPPhotoViewBottomToolbar *bottomToolbar;

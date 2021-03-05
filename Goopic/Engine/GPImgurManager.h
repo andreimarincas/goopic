@@ -9,6 +9,9 @@
 #import <Foundation/Foundation.h>
 
 @interface GPImgurManager : NSObject
+{
+    NSURLSessionDataTask *_uploadImageBlock;
+}
 
 + (GPImgurManager *)sharedManager;
 
@@ -16,5 +19,7 @@
 - (void)uploadImageWithName:(NSString *)name completion:(UploadCompletionBlock)completion;
 
 - (void)deleteImageWithHash:(NSString *)deleteHash completion:(CompletionBlock)completion;
+
+- (void)cancelImageUpload;
 
 @end

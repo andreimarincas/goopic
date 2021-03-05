@@ -10,7 +10,9 @@
 
 @interface UIView (Extension)
 
-- (void)setSubviewsHidden:(BOOL)hidden;
 - (void)moveToView:(UIView *)view;
+
+// animated: if YES, cross-fade animation
++ (void)hideView:(UIView *)view1 andRevealView:(UIView *)view2 animated:(BOOL)animated;
 
 @end

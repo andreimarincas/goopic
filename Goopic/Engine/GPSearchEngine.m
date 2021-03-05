@@ -10,6 +10,7 @@
 #import "GPImgurManager.h"
 #import "OpenInChromeController.h"
 #import "GPPersistentStoreManager.h"
+#import "GPAppDelegate.h"
 
 @implementation GPSearchEngine
 
@@ -40,19 +41,26 @@
         GPLog(@"Store photo link: %@", storePhoto.link);
         GPLog(@"Store photo delete hash: %@", storePhoto.deleteHash);
         
+        [self.delegate searchEngine:self willBeginSearchingForImageAt:[NSURL URLWithString:storePhoto.link]];
+        
         NSString *searchURL =  SEARCH_BY_IMAGE_URL(storePhoto.link);
         GPLog(@"Search URL: %@", searchURL);
         
+        NSError *openBrowserError = nil;
+        [self openURLInBrowser:[NSURL URLWithString:searchURL] error:&openBrowserError];
+        
         if (completion)
         {
-            completion(nil);
+            completion(openBrowserError);
         }
         
-        [self openURLInBrowser:[NSURL URLWithString:searchURL]];
+        [self.delegate searchEngine:self searchingCompletedWithError:openBrowserError];
         
         GPLogOUT();
         return;
     }
+    
+    [self.delegate searchEngine:self willBeginSearchingForPhoto:photo];
     
     UIImage *image = [photo imageToUpload];
     NSString *imageName = [photo name];
@@ -61,12 +69,15 @@
     {
         GPLogErr(@"Cannot upload image, image is nil.");
         
-        // TODO: Handle error
+        NSError *error = [NSError errorWithDomain:NSStringFromClass([self class]) code:GPErrorBadImage
+                                         userInfo:@{ NSLocalizedDescriptionKey : @"Cannot upload image." }];
         
         if (completion)
         {
-            completion(nil); // TODO: Forward error ?
+            completion(error);
         }
+        
+        [self.delegate searchEngine:self searchingCompletedWithError:error];
         
         GPLogOUT();
         return;
@@ -106,37 +117,63 @@
                                GPLogWarn(@"Could not save photo in database. url: %@, delete hash: %@", photo.url, deleteHash);
                            }
                            
-                           // Open photo in browser for searching
+                           [self.delegate searchEngine:self willBeginSearchingForImageAt:[NSURL URLWithString:link]];
+                           
+                           // Open browser to search for image
                            NSString *searchURL =  SEARCH_BY_IMAGE_URL(link);
                            GPLog(@"Search URL: %@", searchURL);
                            
+                           NSError *openBrowserError = nil;
+                           [self openURLInBrowser:[NSURL URLWithString:searchURL] error:&openBrowserError];
+                           
                            if (completion)
                            {
-                               completion(nil);
+                               completion(openBrowserError);
                            }
                            
-                           [self openURLInBrowser:[NSURL URLWithString:searchURL]];
+                           [self.delegate searchEngine:self searchingCompletedWithError:openBrowserError];
                        }
-                       else
+                       else // failed / cancelled
                        {
                            GPLogErr(@"%@ %@", error, [error userInfo]);
                            
-                           // TODO: Handle error
-                           
                            if (completion)
                            {
-                               completion(nil); // TODO: Forward error ?
+                               completion(error);
+                           }
+                           
+                           [self.delegate searchEngine:self searchingCompletedWithError:error];
+                           
+                           if (error.code == GPErrorImageUploadCancelled)
+                           {
+                               [self.delegate searchEngineDidCancelSearching:self];
                            }
                        }
                    }];
     
+    [self.delegate searchEngine:self didBeginSearchingForPhoto:photo];
+    
     GPLogOUT();
 }
 
-- (void)openURLInBrowser:(NSURL *)url
+- (void)openURLInBrowser:(NSURL *)url error:(NSError **)error
 {
-    // Try to open in Chrome first
+    GPLogIN();
     
+    GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
+    
+    if (![appDelegate.imgurSession.imgurReachability isReachable])
+    {
+        GPLogErr(@"Network not reachable.");
+        
+        *error = [NSError errorWithDomain:NSStringFromClass([self class]) code:GPErrorNoInternetConnection
+                                 userInfo:@{ NSLocalizedDescriptionKey : @"No internet connection." }];
+        
+        GPLogOUT();
+        return;
+    }
+    
+    // Try to open in Chrome first
     OpenInChromeController *chromeCtrl = [OpenInChromeController sharedInstance];
     
     if ([chromeCtrl isChromeInstalled])
@@ -149,22 +186,38 @@
         if (success)
         {
             GPLog(@"Opened URL in Chrome: %@", url);
+            
+            GPLogOUT();
             return;
         }
         
         GPLog(@"Failed to open URL in Chrome: %@", url); // Fails if app in background
     }
     
-    // Open in Safari (default browser)
-    
+    // Open in default browser (safari)
     if ([[UIApplication sharedApplication] canOpenURL:url])
     {
         [[UIApplication sharedApplication] openURL:url];
+        
+        GPLog(@"Opened URL in default browser (Safari): %@", url);
+        
+        GPLogOUT();
+        return;
     }
-    else
-    {
-        GPLog(@"Cannot open URL: %@", url);
-    }
+    
+    GPLog(@"Cannot open URL: %@", url);
+    
+    *error = [NSError errorWithDomain:NSStringFromClass([self class]) code:GPErrorCannotLaunchBrowser
+                             userInfo:@{ NSLocalizedDescriptionKey : @"Cannot launch browser for searching." }];
+}
+
+- (void)cancelPhotoSearching
+{
+    GPLogIN();
+    
+    [[GPImgurManager sharedManager] cancelImageUpload];
+    
+    GPLogOUT();
 }
 
 @end
