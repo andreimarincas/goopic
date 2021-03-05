@@ -8,8 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
-@interface GPAssetsManager : NSObject
+@class ALAssetsLibrary;
 
-+ (ALAssetsLibrary *)defaultAssetsLibrary;
+@interface GPAssetsManager : NSObject
+{
+    ALAssetsLibrary *_assetsLibrary;
+}
+
+@property (nonatomic, readonly) ALAssetsLibrary *assetsLibrary;
+
++ (GPAssetsManager *)sharedManager;
 
 @end

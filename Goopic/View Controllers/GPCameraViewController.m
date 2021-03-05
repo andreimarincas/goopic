@@ -160,32 +160,82 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 + (ALAssetOrientation)assetOrientationForDeviceOrientation:(UIDeviceOrientation)orientation
 {
+    GPLog(@"device orientation when image was captured: %ld", (long)orientation);
+    
+    ALAssetOrientation assetOrientation = ALAssetOrientationUp;
+    
     switch (orientation)
     {
         case UIDeviceOrientationPortrait:
         case UIDeviceOrientationFaceUp:
         case UIDeviceOrientationFaceDown:
         {
-            return ALAssetOrientationRight;
+            assetOrientation = ALAssetOrientationRight;
         }
+            break;
             
         case UIDeviceOrientationLandscapeRight:
         {
-            return ALAssetOrientationDown;
+            assetOrientation = ALAssetOrientationDown;
         }
+            break;
             
         case UIDeviceOrientationPortraitUpsideDown:
         {
-            return ALAssetOrientationLeft;
+            assetOrientation = ALAssetOrientationLeft;
         }
+            break;
             
         case UIDeviceOrientationLandscapeLeft:
         case UIDeviceOrientationUnknown:
         default:
         {
-            return ALAssetOrientationUp;
+            assetOrientation = ALAssetOrientationUp;
+        }
+            break;
+    }
+    
+    UIDeviceOrientation currentOrientation = [[UIDevice currentDevice] orientation];
+    GPLog(@"current device orientation: %ld", (long)currentOrientation);
+    
+    if (currentOrientation != orientation)
+    {
+        if (orientation == UIDeviceOrientationPortrait)
+        {
+            if (currentOrientation == UIDeviceOrientationLandscapeLeft)
+            {
+                assetOrientation = ALAssetOrientationUp;
+            }
+            else if (currentOrientation == UIDeviceOrientationLandscapeRight)
+            {
+                assetOrientation = ALAssetOrientationDown;
+            }
+        }
+        else if (orientation == UIDeviceOrientationLandscapeLeft)
+        {
+            if (currentOrientation == UIDeviceOrientationPortrait)
+            {
+                assetOrientation = ALAssetOrientationRight;
+            }
+            else if (currentOrientation == UIDeviceOrientationLandscapeRight)
+            {
+                assetOrientation = ALAssetOrientationDown;
+            }
+        }
+        else if (orientation == UIDeviceOrientationLandscapeRight)
+        {
+            if (currentOrientation == UIDeviceOrientationPortrait)
+            {
+                assetOrientation = ALAssetOrientationRight;
+            }
+            else if (currentOrientation == UIDeviceOrientationLandscapeLeft)
+            {
+                assetOrientation = ALAssetOrientationUp;
+            }
         }
     }
+    
+    return assetOrientation;
 }
 
 #pragma mark - Init/Dealloc
@@ -833,13 +883,14 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 {
     GPLogIN();
     
-    ALAssetsLibrary *assetsLibrary = [GPAssetsManager defaultAssetsLibrary];
+    ALAssetsLibrary *assetsLibrary = [[GPAssetsManager sharedManager] assetsLibrary];
     
     UIDeviceOrientation orientation = [_imageMetadata[@"deviceOrientation"] integerValue];
-    GPLog(@"device orientation when image was captured: %ld", (long)orientation);
+    ALAssetOrientation assetOrientation = [GPCameraViewController assetOrientationForDeviceOrientation:orientation];
+    GPLog(@"asset orientation: %ld", (long)assetOrientation);
     
     [assetsLibrary writeImageToSavedPhotosAlbum:[self.capturedImage CGImage]
-                                    orientation:[GPCameraViewController assetOrientationForDeviceOrientation:orientation]
+                                    orientation:assetOrientation
                                 completionBlock:^(NSURL *assetURL, NSError *error) {
                                     
                                     if (!error)

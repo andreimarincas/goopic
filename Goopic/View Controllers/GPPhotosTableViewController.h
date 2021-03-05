@@ -12,6 +12,9 @@
 #import "GPBaseViewController.h"
 
 
+@class ALAssetsGroup;
+
+
 #pragma mark - Photo Cell
 
 @interface GPPhotoCell : UITableViewCell
@@ -94,10 +97,17 @@
 @property (nonatomic) NSIndexPath *selectedIndexPath;
 @property (nonatomic, readonly) UITableViewCell *selectedCell;
 
+@property (nonatomic, strong) ALAssetsGroup *cameraRoll;
+
+// Reload photos from library in this queue
+@property (nonatomic, strong) dispatch_queue_t libraryQueue;
+
 - (instancetype)init;
 
 - (void)updateUI;
 
 - (CGRect)frameForPhotoAtIndexPath:(NSIndexPath *)indexPath photoIndex:(NSInteger)photoIndex;
+
+- (void)reloadPhotosFromLibrary;
 
 @end

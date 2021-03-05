@@ -134,6 +134,9 @@
 {
     GPLogIN();
     
+    GPPhotosTableViewController *photosTableViewController = (GPPhotosTableViewController *)[self rootViewController];
+    [photosTableViewController.photosTableView scrollRectToVisible:CGRectMake(0, 0, 10, 10) animated:NO];
+    
     if ([[cameraViewController presentingViewController] isKindOfClass:[GPPhotoViewController class]])
     {
         GPPhotoViewController *photoViewController = (GPPhotoViewController *)[cameraViewController presentingViewController];
@@ -148,8 +151,6 @@
         self.cameraViewController = cameraViewController;
         
         [cameraViewController dismissViewControllerAnimated:NO completion:^{
-            
-            GPPhotosTableViewController *photosTableViewController = (GPPhotosTableViewController *)[self rootViewController];
             
             GPPhotoViewController *photoViewController = [[GPPhotoViewController alloc] initWithPhoto:photo];
             photoViewController.transitioningDelegate = photosTableViewController;

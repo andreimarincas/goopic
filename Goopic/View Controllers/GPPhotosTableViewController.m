@@ -325,7 +325,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 
 @interface GPPhotosTableViewController ()
 
-@property (atomic) NSMutableArray *photosFromLibrary;
+//@property (atomic) NSMutableArray *photosFromLibrary;
 @property (atomic) NSTimer *hideTitleTimer;
 
 @end
@@ -344,6 +344,9 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         
         self.automaticallyAdjustsScrollViewInsets = NO;
         self.canShowDate = NO;
+        
+        dispatch_queue_t libraryQueue = dispatch_queue_create("LibraryQueue", DISPATCH_QUEUE_SERIAL);
+        self.libraryQueue = libraryQueue;
     }
     
     return self;
@@ -354,6 +357,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     GPLogIN();
     
     // Dealloc code
+    self.libraryQueue = nil;
     
     GPLogOUT();
 }
@@ -378,7 +382,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     [self.view addSubview:toolbar];
     self.toolbar = toolbar;
     
-    [self createPhotosSections];
+    [self createPhotosSectionsWithPhotosFromLibrary:nil];
     [self reloadPhotosFromLibrary];
     
     UITapGestureRecognizer *tapGr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
@@ -560,7 +564,13 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 {
     GPLogIN();
     
-    [self performSelectorInBackground:@selector(doReloadPhotosFromLibrary) withObject:nil];
+    GPLog(@"photos count before reload: %lu", (unsigned long)[self.photosSections[kPhotosSection] count]);
+//    [self performSelectorInBackground:@selector(doReloadPhotosFromLibrary) withObject:nil];
+    
+    dispatch_async(self.libraryQueue, ^{
+        
+        [self doReloadPhotosFromLibrary];
+    });
     
     GPLogOUT();
 }
@@ -569,40 +579,37 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 {
     GPLogIN();
     
-    ALAssetsLibrary *library = [GPAssetsManager defaultAssetsLibrary];
+    ALAssetsLibrary *library = [[GPAssetsManager sharedManager] assetsLibrary];
+    NSMutableArray *libraryPhotos = [NSMutableArray array];
     
-    [library enumerateGroupsWithTypes:ALAssetsGroupSavedPhotos usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+    [library enumerateGroupsWithTypes:ALAssetsGroupAll usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
         
-        if (!group) // last run
+        if (group)
         {
-            [self createPhotosSections];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
+            if ([[group valueForProperty:ALAssetsGroupPropertyType] intValue] == ALAssetsGroupSavedPhotos)
+            {
+                GPLog(@"Enumerating photos in Camera Roll.");
                 
-                [self.photosTableView reloadData];
-            });
-        }
-        else if ([[group valueForProperty:ALAssetsGroupPropertyType] intValue] == ALAssetsGroupSavedPhotos)
-        {
-            GPLog(@"Enumerating photos in Camera Roll.");
-            
-            [group setAssetsFilter:[ALAssetsFilter allPhotos]];
-            self.photosFromLibrary = [NSMutableArray array];
-            
-            [group enumerateAssetsUsingBlock:^(ALAsset *asset, NSUInteger index, BOOL *stop) {
-                
-                if ([[asset valueForProperty:@"ALAssetPropertyType"] isEqualToString:ALAssetTypePhoto])
-                {
-                    NSString *UTI = [[asset defaultRepresentation] UTI];
+                [group setAssetsFilter:[ALAssetsFilter allPhotos]];
+                [group enumerateAssetsUsingBlock:^(ALAsset *asset, NSUInteger index, BOOL *stop) {
                     
-                    if ([[UTI lowercaseString] isEqualToString:@"public.png"] || [[UTI lowercaseString] isEqualToString:@"public.jpeg"])
+                    if ([[asset valueForProperty:@"ALAssetPropertyType"] isEqualToString:ALAssetTypePhoto])
                     {
-                        GPPhoto *photo = [[GPPhoto alloc] init];
-                        photo.asset = asset;
-                        [self.photosFromLibrary addObject:photo];
+                        NSString *UTI = [[asset defaultRepresentation] UTI];
+                        
+                        if ([[UTI lowercaseString] isEqualToString:@"public.png"] || [[UTI lowercaseString] isEqualToString:@"public.jpeg"])
+                        {
+                            GPPhoto *photo = [[GPPhoto alloc] init];
+                            photo.asset = asset;
+                            [libraryPhotos addObject:photo];
+                        }
                     }
-                }
-            }];
+                }];
+            }
+        }
+        else // last run
+        {
+            [self createPhotosSectionsWithPhotosFromLibrary:libraryPhotos];
         }
         
     } failureBlock:^(NSError *error) {
@@ -614,23 +621,53 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     GPLogOUT();
 }
 
-- (void)createPhotosSections
+- (void)createPhotosSectionsWithPhotosFromLibrary:(NSArray *)libraryPhotos
 {
     NSMutableArray *photosSections = [NSMutableArray array];
     
     GPPhoto *dummyPhoto = [[GPPhoto alloc] init];
     [photosSections addObject:@[ dummyPhoto ]]; // Table view header
     
-    if (self.photosFromLibrary)
+    if (libraryPhotos)
     {
-        NSMutableArray *sortedPhotosFromLibrary = [NSMutableArray arrayWithArray:self.photosFromLibrary];
+        NSMutableArray *sortedPhotosFromLibrary = [NSMutableArray arrayWithArray:libraryPhotos];
         [sortedPhotosFromLibrary sortUsingSelector:@selector(compare:)];
         [photosSections addObject:sortedPhotosFromLibrary];
     }
     
     [photosSections addObject:@[ dummyPhoto ]]; // Table view footer
     
-    self.photosSections = photosSections;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        self.photosSections = photosSections;
+        [self updateUI];
+    });
+}
+
+- (void)assetsLibraryChanged:(NSNotification *)notification
+{
+    GPLogIN();
+    GPLog(@"notification: %@", notification);
+    
+    [self reloadPhotosFromLibrary];
+    
+    if ([notification userInfo])
+    {
+        NSSet *insertedGroupURLs = [[notification userInfo] objectForKey:ALAssetLibraryInsertedAssetGroupsKey];
+        NSURL *assetURL = [insertedGroupURLs anyObject];
+        
+        if (assetURL)
+        {
+            [[[GPAssetsManager sharedManager] assetsLibrary] groupForURL:assetURL resultBlock:^(ALAssetsGroup *group) {
+                self.cameraRoll = group;
+                
+            } failureBlock:^(NSError *error) {
+                GPLogErr(@"%@ %@", error, [error userInfo]);
+            }];
+        }
+    }
+    
+    GPLogOUT();
 }
 
 #pragma mark - Update Interface
