@@ -120,6 +120,12 @@
 {
     GPLogIN();
     
+    [self.viewForHighlightState removeFromSuperview];
+    self.viewForHighlightState = nil;
+    
+    [self.viewForNormalState removeFromSuperview];
+    self.viewForNormalState = nil;
+    
     UIControlState highlightState = self.isSelected ? UIControlStateNormal : UIControlStateHighlighted;
     GPButtonStateTransitionView *viewForHighlightState = [[GPButtonStateTransitionView alloc] initWithButton:self state:highlightState];
     [self.superview addSubview:viewForHighlightState];
@@ -168,7 +174,10 @@
             {
                 if ([self isSelected] == wasSelectedWhenHighlighted && [self isEnabled] && ![self isHidden])
                 {
-                    [self animateFromHighlightToNormal];
+                    if (self.alpha > 0)
+                    {
+                        [self animateFromHighlightToNormal];
+                    }
                 }
             }
             else
@@ -297,6 +306,13 @@
     button.connectedButton = self;
     
     GPLogOUT();
+}
+
+- (void)setAlpha:(CGFloat)alpha
+{
+    [super setAlpha:alpha];
+    self.viewForHighlightState.alpha = alpha;
+    self.viewForNormalState.alpha = alpha;
 }
 
 @end

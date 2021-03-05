@@ -81,6 +81,7 @@
     GPLog(@"notification: %@", notification);
     
     GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
+    
     GPPhotosTableViewController *photosTableViewController = (GPPhotosTableViewController *)[appDelegate rootViewController];
     [photosTableViewController.photosTableView scrollRectToVisible:CGRectMake(0, 0, 10, 10) animated:NO]; // scroll to top
     [photosTableViewController reloadPhotosFromLibrary];

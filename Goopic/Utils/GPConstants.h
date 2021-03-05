@@ -32,6 +32,7 @@ static const NSTimeInterval kPhotoImgurExpirationInterval = 30 * kDay; // actual
 #define GPCOLOR_LIGHT_BLACK       [UIColor colorWithWhite:0.1f alpha:1.0f]
 #define GPCOLOR_TRANSLUCENT_BLACK [GPCOLOR_LIGHT_BLACK colorWithAlphaComponent:0.75]
 #define GPCOLOR_DARK_BLACK        [UIColor blackColor]
+#define GPCOLOR_TRANSLUCENT_DARK  [GPCOLOR_DARK_BLACK colorWithAlphaComponent:0.75]
 
 #define GPCOLOR_BLUE              [UIColor colorWithRed:75 / 255.0f green:142 / 255.0f blue:250 / 255.0f alpha:1.0f] // (.29,.56,.98)
 #define GPCOLOR_DARK_BLUE         [UIColor colorWithRed:50 / 255.0f green:95 / 255.0f blue:167 / 255.0f alpha:1.0f]

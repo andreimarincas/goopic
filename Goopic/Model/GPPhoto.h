@@ -31,4 +31,8 @@
 
 - (NSComparisonResult)compare:(id)photo;
 
+- (BOOL)isEqualToPhoto:(GPPhoto *)photo;
+
+- (BOOL)exists;
+
 @end

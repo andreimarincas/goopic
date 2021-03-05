@@ -187,4 +187,25 @@
     return NSOrderedAscending; // default
 }
 
+- (BOOL)isEqualToPhoto:(GPPhoto *)photo
+{
+    if (photo)
+    {
+        NSString *selfURL = [self url];
+        NSString *photoURL = [photo url];
+        
+        if ([selfURL length] > 0 && [photoURL length] > 0)
+        {
+            return [selfURL isEqualToString:photoURL];
+        }
+    }
+    
+    return NO;
+}
+
+- (BOOL)exists
+{
+    return ([self largeImage] != nil);
+}
+
 @end

@@ -92,10 +92,13 @@
 @property (nonatomic) BOOL canShowDate;
 
 @property (nonatomic, strong) NSArray *photosSections; // NSArray*'s of GPPhoto*
+@property (nonatomic, readonly) NSMutableArray *photos;
 
 @property (nonatomic) NSInteger selectedPhotoIndex;
 @property (nonatomic) NSIndexPath *selectedIndexPath;
+
 @property (nonatomic, readonly) UITableViewCell *selectedCell;
+@property (nonatomic, readonly) GPPhoto *selectedPhoto;
 
 @property (nonatomic, strong) ALAssetsGroup *cameraRoll;
 

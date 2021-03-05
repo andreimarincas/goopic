@@ -17,25 +17,27 @@
 #import "GPCameraViewController.h"
 #import "GPCameraToPhotoTransition.h"
 
-static NSString * const kPhotoCellID                    = @"PhotoCell";
-static NSString * const kPhotosHeaderID                 = @"PhotosHeader";
-static NSString * const kPhotosFooterID                 = @"PhotosFooter";
+static NSString * const kPhotoCellID                  = @"PhotoCell";
+static NSString * const kPhotosHeaderID               = @"PhotosHeader";
+static NSString * const kPhotosFooterID               = @"PhotosFooter";
 
-static CGFloat          sThumbnailDimension             = 60.0f;
-static const CGFloat    kPhotosSpacing                  = 2.0f; // 0.0f;
+static CGFloat          sThumbnailDimension           = 60.0f;
+static const CGFloat    kPhotosSpacing                = 2.0f; // 0.0f;
 
-static const NSInteger  kPhotosCountPerCell_Portrait    = 5;
-static const NSInteger  kPhotosCountPerCell_Landscape   = 9;
+static const NSInteger  kPhotosCountPerCell_Portrait  = 5;
+static const NSInteger  kPhotosCountPerCell_Landscape = 9;
 
-static NSString * const kPhotoKey                       = @"photo";
-static NSString * const kThumbnailViewKey               = @"thumbnailView";
+static const NSInteger  kEarlyReloadLimit             = 50;
 
-static const CGFloat    kPhotosHeaderHeight             = 0.1; // 30.0f;
-static const CGFloat    kPhotosFooterHeight             = 0.1;
+static NSString * const kPhotoKey                     = @"photo";
+static NSString * const kThumbnailViewKey             = @"thumbnailView";
 
-static const NSInteger  kPhotosSection = 1;
+static const CGFloat    kPhotosHeaderHeight           = 0.1; // 30.0f;
+static const CGFloat    kPhotosFooterHeight           = 0.1;
 
-static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
+static const NSInteger  kPhotosSection                = 1;
+
+static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
 
 
 #pragma mark -
@@ -413,6 +415,8 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         }
     }
     
+    [self updateSelection];
+    
     GPLogOUT();
 }
 
@@ -422,8 +426,8 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     [super viewDidAppear:animated];
     
     // Clear selection
-    self.selectedIndexPath = nil;
-    self.selectedPhotoIndex = 0;
+//    self.selectedIndexPath = nil;
+//    self.selectedPhotoIndex = 0;
     
     self.canShowDate = YES;
     
@@ -557,7 +561,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 - (void)reloadPhotosFromLibrary
 {
     GPLogIN();
-    GPLog(@"photos count before reload: %lu", (unsigned long)[self.photosSections[kPhotosSection] count]);
+    GPLog(@"photos count before reload: %lu", (unsigned long)[self.photos count]);
     
     dispatch_async(self.libraryQueue, ^{
         
@@ -578,43 +582,67 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         
         if (group)
         {
-            if ([[group valueForProperty:ALAssetsGroupPropertyType] intValue] == ALAssetsGroupSavedPhotos)
+            if ([[group valueForProperty:ALAssetsGroupPropertyType] intValue] == ALAssetsGroupSavedPhotos) // camera roll
             {
                 GPLog(@"Enumerating photos in Camera Roll.");
                 
                 [group setAssetsFilter:[ALAssetsFilter allPhotos]];
-                [group enumerateAssetsUsingBlock:^(ALAsset *asset, NSUInteger index, BOOL *stop) {
-                    
-                    if ([[asset valueForProperty:@"ALAssetPropertyType"] isEqualToString:ALAssetTypePhoto])
+                [group enumerateAssetsWithOptions:NSEnumerationReverse usingBlock:^(ALAsset *asset, NSUInteger index, BOOL *stop) {
+                
+                    if (asset)
                     {
-                        NSString *UTI = [[asset defaultRepresentation] UTI];
-                        
-                        if ([[UTI lowercaseString] isEqualToString:@"public.png"] || [[UTI lowercaseString] isEqualToString:@"public.jpeg"])
+                        if ([[asset valueForProperty:@"ALAssetPropertyType"] isEqualToString:ALAssetTypePhoto])
                         {
-                            GPPhoto *photo = [[GPPhoto alloc] init];
-                            photo.asset = asset;
-                            [libraryPhotos addObject:photo];
+                            NSString *UTI = [[asset defaultRepresentation] UTI];
+                            
+                            if ([[UTI lowercaseString] isEqualToString:@"public.png"] || [[UTI lowercaseString] isEqualToString:@"public.jpeg"])
+                            {
+                                GPPhoto *photo = [[GPPhoto alloc] init];
+                                photo.asset = asset;
+                                [libraryPhotos addObject:photo];
+                            }
                         }
+                    }
+                    
+                    if ([libraryPhotos count] == kEarlyReloadLimit) // early reload
+                    {
+                        NSArray *libraryPhotosSoFar = [NSArray arrayWithArray:libraryPhotos];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            
+                            // load first photos immediately only at the beginning, so that the user doesn't have to wait for the entire camera roll
+                            // to be enumerated before he can see something on the screen
+                            if ([self.photos count] == 0)
+                            {
+                                dispatch_async(self.libraryQueue, ^{
+                                    
+                                    [self createPhotosSectionsWithPhotosFromLibrary:libraryPhotosSoFar];
+                                });
+                            }
+                        });
+                    }
+                    
+                    if (!asset && (index == NSNotFound)) // last run
+                    {
+                        [self createPhotosSectionsWithPhotosFromLibrary:libraryPhotos];
                     }
                 }];
             }
         }
-        else // last run
-        {
-            [self createPhotosSectionsWithPhotosFromLibrary:libraryPhotos];
-        }
         
     } failureBlock:^(NSError *error) {
         
-        GPLog(@"Library failed to enumerate photos group: %@", [error localizedDescription]);
-        // TODO: Handle error
+        GPLog(@"Library failed to enumerate library groups: %@", [error localizedDescription]);
     }];
     
     GPLogOUT();
 }
 
+// Call this on libraryQueue
+// libraryPhotos: NSArray* or nil
 - (void)createPhotosSectionsWithPhotosFromLibrary:(NSArray *)libraryPhotos
 {
+    GPLogIN();
+    
     NSMutableArray *photosSections = [NSMutableArray array];
     
     GPPhoto *dummyPhoto = [[GPPhoto alloc] init];
@@ -626,42 +654,39 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         [sortedPhotosFromLibrary sortUsingSelector:@selector(compare:)];
         [photosSections addObject:sortedPhotosFromLibrary];
     }
+    else
+    {
+        [photosSections addObject:[NSMutableArray array]];
+    }
     
     [photosSections addObject:@[ dummyPhoto ]]; // Table view footer
     
     dispatch_async(dispatch_get_main_queue(), ^{
         
-        self.photosSections = photosSections;
-        GPLog(@"photos count after reload: %lu", (unsigned long)[self.photosSections[kPhotosSection] count]);
-        
-        [self updateUI];
-    });
-}
-
-- (void)assetsLibraryChanged:(NSNotification *)notification
-{
-    GPLogIN();
-    GPLog(@"notification: %@", notification);
-    
-    [self reloadPhotosFromLibrary];
-    
-    if ([notification userInfo])
-    {
-        NSSet *insertedGroupURLs = [[notification userInfo] objectForKey:ALAssetLibraryInsertedAssetGroupsKey];
-        NSURL *assetURL = [insertedGroupURLs anyObject];
-        
-        if (assetURL)
+        if (!self.photos || ![self.photos isEqualToArrayOfPhotos:photosSections[kPhotosSection]])
         {
-            [[[GPAssetsManager sharedManager] assetsLibrary] groupForURL:assetURL resultBlock:^(ALAssetsGroup *group) {
-                self.cameraRoll = group;
-                
-            } failureBlock:^(NSError *error) {
-                GPLogErr(@"%@ %@", error, [error userInfo]);
-            }];
+            self.photosSections = photosSections;
+            GPLog(@"photos count after reload: %lu", (unsigned long)[self.photos count]);
+            
+            [self updateUI]; // will also reload photos in table view
         }
-    }
+        else
+        {
+            GPLog(@"photos are the same, no need to update.");
+        }
+    });
     
     GPLogOUT();
+}
+
+- (NSMutableArray *)photos
+{
+    if (self.photosSections && ([self.photosSections count] > kPhotosSection))
+    {
+        return self.photosSections[kPhotosSection];
+    }
+    
+    return nil;
 }
 
 #pragma mark - Update Interface
@@ -812,6 +837,24 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     return nil;
 }
 
+- (GPPhoto *)selectedPhoto
+{
+    UITableViewCell *selectedCell = [self selectedCell];
+    
+    if (selectedCell && [selectedCell isKindOfClass:[GPPhotoCell class]])
+    {
+        GPPhotoCell *photoCell = (GPPhotoCell *)selectedCell;
+        NSArray *photos = [photoCell photos];
+        
+        if ((self.selectedPhotoIndex >= 0) && (self.selectedPhotoIndex < [photos count]))
+        {
+            return photos[self.selectedPhotoIndex];
+        }
+    }
+    
+    return nil;
+}
+
 - (CGRect)frameForPhotoAtIndexPath:(NSIndexPath *)indexPath photoIndex:(NSInteger)photoIndex
 {
     CGRect photoFrame = CGRectZero;
@@ -873,6 +916,37 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     {
         self.toolbar.date = newDateTitle;
     }
+}
+
+- (void)updateSelection
+{
+    GPLogIN();
+    
+    if ([self.presentedViewController isKindOfClass:[GPPhotoViewController class]])
+    {
+        GPPhotoViewController *photoViewController = (GPPhotoViewController *)self.presentedViewController;
+        
+        if (photoViewController.photo && ![photoViewController.photo isEqualToPhoto:self.selectedPhoto])
+        {
+            NSArray *photos = [self photos];
+            
+            for (int i = 0; i < [photos count]; i++)
+            {
+                GPPhoto *photo = photos[i];
+                
+                if ([photo isEqualToPhoto:photoViewController.photo])
+                {
+                    self.selectedIndexPath = [NSIndexPath indexPathForRow:i / [GPPhotosTableViewController photosCountPerCell] inSection:kPhotosSection];
+                    self.selectedPhotoIndex = i % [GPPhotosTableViewController photosCountPerCell];
+                    
+                    [self.photosTableView scrollToRowAtIndexPath:self.selectedIndexPath
+                                                atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
+                }
+            }
+        }
+    }
+    
+    GPLogOUT();
 }
 
 #pragma mark - Table View Data Source
@@ -1240,17 +1314,15 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     
     if ([dismissedController isKindOfClass:[GPPhotoViewController class]])
     {
-        // TODO: Just create a GPTableToPhotoTransition
-        if (self.selectedIndexPath)
+        GPPhotoViewController *photoViewController = (GPPhotoViewController *)dismissedController;
+        
+        if ([photoViewController.photo exists])
         {
-            // The dismissedController is a GPPhotoViewController initially presented from this GPPhotosTableViewController by selecting a GPPhoto
             transition = [[GPTableToPhotoTransition alloc] init];
         }
-        else
+        else  // image deleted from camera roll from outside the app
         {
-            self.selectedIndexPath = [NSIndexPath indexPathForRow:0 inSection:1];
-            self.selectedPhotoIndex = 0;
-            transition = [[GPTableToPhotoTransition alloc] init];
+            transition = [[GPFadeTransition alloc] init];
         }
     }
     else if ([dismissedController isKindOfClass:[GPCameraViewController class]])

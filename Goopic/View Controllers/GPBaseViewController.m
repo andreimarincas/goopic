@@ -353,7 +353,7 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
 
 - (UIColor *)preferredActivityViewBackgroundColor
 {
-    return GPCOLOR_TRANSLUCENT_BLACK;
+    return GPCOLOR_TRANSLUCENT_DARK;
 }
 
 - (BOOL)activityInProgress

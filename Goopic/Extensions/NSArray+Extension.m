@@ -7,6 +7,7 @@
 //
 
 #import "NSArray+Extension.h"
+#import "GPPhoto.h"
 
 @implementation NSArray (Extension)
 
@@ -26,6 +27,27 @@
     {
         if ([obj isKindOfClass:[UIView class]] && ([obj tag] == tag))
         {
+            return YES;
+        }
+    }
+    
+    return NO;
+}
+
+- (BOOL)isEqualToArrayOfPhotos:(NSArray *)array
+{
+    if (array)
+    {
+        if ([self count] == [array count])
+        {
+            for (int i = 0; i < [self count]; i++)
+            {
+                if (![(GPPhoto *)self[i] isEqualToPhoto:(GPPhoto *)array[i]])
+                {
+                    return NO;
+                }
+            }
+            
             return YES;
         }
     }

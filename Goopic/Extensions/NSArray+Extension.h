@@ -14,4 +14,6 @@
 
 - (BOOL)containsViewWithTag:(NSInteger)tag;
 
+- (BOOL)isEqualToArrayOfPhotos:(NSArray *)array;
+
 @end

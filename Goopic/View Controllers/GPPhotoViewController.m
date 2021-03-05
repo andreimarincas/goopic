@@ -84,7 +84,10 @@
     GPLogIN();
     [super viewWillAppear:animated];
     
-    [self.photoView setImage:[self.photo largeImage]];
+    if ([self.photo exists]) // else the view controller will be dismissed
+    {
+        [self.photoView setImage:[self.photo largeImage]];
+    }
     
     [self setNeedsStatusBarAppearanceUpdate];
     
@@ -97,6 +100,22 @@
     [super viewDidDisappear:animated];
     
     [self.photoView setImage:nil];
+    
+    GPLogOUT();
+}
+
+#pragma mark - Notifications
+
+- (void)appDidBecomeActive
+{
+    GPLogIN();
+    
+    UIImage *image = [self.photo largeImage]; // cached if exists
+    
+    if (!image)
+    {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
     
     GPLogOUT();
 }
@@ -341,6 +360,9 @@
     
     [self showActivity:GPActivityProcessingImage animated:YES];
     
+    self.topToolbar.photosButton.enabled = NO;
+    self.topToolbar.cameraButton.enabled = NO;
+    
     [UIView hideView:self.bottomToolbar.searchButton
        andRevealView:self.bottomToolbar.cancelButton animated:YES];
     
@@ -391,7 +413,7 @@
             }
                 break;
             
-            // Do NOT show any error message to the user
+            // Do NOT show any error message to the user in these cases
             case GPErrorImageUploadCancelled:
             default:
             {
@@ -415,6 +437,9 @@
     
     [UIView hideView:self.bottomToolbar.cancelButton
        andRevealView:self.bottomToolbar.searchButton animated:YES];
+    
+    self.topToolbar.photosButton.enabled = YES;
+    self.topToolbar.cameraButton.enabled = YES;
     
     GPLogOUT();
 }
