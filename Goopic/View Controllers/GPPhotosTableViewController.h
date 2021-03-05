@@ -8,17 +8,14 @@
 
 #import <UIKit/UIKit.h>
 #import "GPPhoto.h"
-#import "GPLine.h"
-
-
-@class GPRootViewController;
+#import "GPPhotosTableViewToolbar.h"
 
 
 #pragma mark - Photo Cell
 
 @interface GPPhotoCell : UITableViewCell
 {
-    NSMutableArray *_photos; // @{ kPhotoKey : GPPhoto *, kThumbnailViewKey : UIImageView* }
+    NSMutableArray *_photos; // @{ kPhotoKey : GPPhoto *, kThumbnailViewKey : UIImageView * }
 }
 
 @property (nonatomic, strong) NSArray *photos; // GPPhoto*
@@ -26,8 +23,6 @@
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier;
 
 - (void)updateUI;
-
-- (void)updatePerspectiveWithPercent:(double)percent;
 
 @end
 
@@ -72,30 +67,20 @@
 
 @interface GPPhotosTableViewController : UIViewController <UITableViewDataSource,
                                                            UITableViewDelegate,
-                                                           UIScrollViewDelegate>
-{
-    GPToolbar *_topToolbar;
-    
-    BOOL _needsReload;
-    BOOL _needsReloadFromLibrary;
-}
+                                                           UIScrollViewDelegate,
+                                                           GPPhotosTableViewToolbarDelegate>
 
 @property (nonatomic, strong) GPPhotosTableView *photosTableView;
 
-@property (nonatomic, strong) NSArray *photosSections; // NSArray*'s of GPPhoto*
+@property (nonatomic, strong) GPPhotosTableViewToolbar *toolbar;
 
-@property (nonatomic, weak) GPRootViewController *rootViewController;
+@property (nonatomic, strong) NSArray *photosSections; // NSArray*'s of GPPhoto*
 
 @property (nonatomic) NSIndexPath *indexPathOfSelectedCell;
 @property (nonatomic, readonly) UITableViewCell *selectedCell;
 
-@property (nonatomic, strong) UIActivityIndicatorView *activityIndicator;
-
 - (instancetype)init;
 
 - (void)updateUI;
-
-- (void)setNeedsReload;
-- (void)setNeedsReloadFromLibrary;
 
 @end

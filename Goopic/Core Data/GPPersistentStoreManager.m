@@ -16,6 +16,7 @@ static const NSTimeInterval kSaveContextDelay = 5.0f;
 
 @interface GPPersistentStoreManager ()
 
+@property (atomic) NSTimer *contextSaveTimer;
 @property (atomic) BOOL purgingInProgress;
 
 @end
@@ -59,7 +60,7 @@ static const NSTimeInterval kSaveContextDelay = 5.0f;
     
     if (![self saveContext])
     {
-        GPLogErr(@"Could not save photo, see previously logged errors.");
+        GPLogErr(@"Could not save photo, see previous logs.");
     }
     
     GPLogOUT();
@@ -204,7 +205,7 @@ static const NSTimeInterval kSaveContextDelay = 5.0f;
                         }
                         else
                         {
-                            GPLogErr(@"Purge incomplete, see previously logged errors.");
+                            GPLogErr(@"Purge incomplete, see previous logs.");
                         }
                     }
                 });
@@ -232,6 +233,9 @@ static const NSTimeInterval kSaveContextDelay = 5.0f;
 {
     GPLogIN();
     
+    [self.contextSaveTimer invalidate];
+    self.contextSaveTimer = nil;
+    
     if (!self.managedObjectContext)
     {
         GPLogErr(@"Context is nil.");
@@ -240,28 +244,39 @@ static const NSTimeInterval kSaveContextDelay = 5.0f;
         return NO;
     }
     
-    NSError *error = nil;
-    BOOL ok = [self.managedObjectContext save:&error];
-    
-    if (!ok || error)
+    if ([self.managedObjectContext hasChanges])
     {
-        if (!ok)
+        NSError *error = nil;
+        BOOL ok = [self.managedObjectContext save:&error];
+        
+        if (!ok || error)
         {
-            GPLogErr(@"Failed to save context.");
+            if (!ok)
+            {
+                GPLogErr(@"Failed to save context.");
+            }
+            
+            if (error)
+            {
+                GPLogErr(@"%@ %@", error, [error userInfo]);
+            }
+            
+            // TODO: Handle context saving failure. abort()?
+            
+            GPLogOUT();
+            return NO;
         }
-        
-        if (error)
+        else
         {
-            GPLogErr(@"%@ %@", error, [error userInfo]);
+            GPLog(@"Context saved successfully.");
         }
-        
-        // TODO: Handle context saving failure
-        
-        return NO;
     }
     else
     {
-        GPLog(@"Context saved successfully.");
+        GPLog(@"No changes in the context.");
+        
+        GPLogOUT();
+        return NO;
     }
     
     return YES;
@@ -272,9 +287,9 @@ static const NSTimeInterval kSaveContextDelay = 5.0f;
 {
     GPLogIN();
     
-    [_contextSaveTimer invalidate];
-    _contextSaveTimer = [NSTimer scheduledTimerWithTimeInterval:kSaveContextDelay target:self
-                                                       selector:@selector(saveContext) userInfo:nil repeats:NO];
+    [self.contextSaveTimer invalidate];
+    self.contextSaveTimer = [NSTimer scheduledTimerWithTimeInterval:kSaveContextDelay target:self
+                                                           selector:@selector(saveContext) userInfo:nil repeats:NO];
     
     GPLogOUT();
 }

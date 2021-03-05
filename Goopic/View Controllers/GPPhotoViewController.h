@@ -8,23 +8,19 @@
 
 #import <UIKit/UIKit.h>
 #import "GPPhoto.h"
+#import "GPPhotoViewToolbar.h"
 
-@class GPRootViewController;
+@interface GPPhotoViewController : UIViewController <UIScrollViewDelegate, GPPhotoViewToolbarDelegate>
 
-@interface GPPhotoViewController : UIViewController <UIScrollViewDelegate>
-{
-    GPToolbar *_topToolbar;
-    GPToolbar *_bottomToolbar;
-}
-
-@property (nonatomic, weak) GPRootViewController *rootViewController;
+@property (nonatomic, strong) GPPhotoViewTopToolbar *topToolbar;
+@property (nonatomic, strong) GPPhotoViewBottomToolbar *bottomToolbar;
 
 @property (nonatomic, strong) GPPhoto *photo;
 
 @property (nonatomic, strong) UIImageView *photoView;
 @property (nonatomic, strong) UIScrollView *photoScrollView;
 
-- (instancetype)init;
+- (instancetype)initWithPhoto:(GPPhoto *)photo;
 
 - (void)updateUI;
 

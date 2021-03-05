@@ -8,14 +8,14 @@
 
 #import <UIKit/UIKit.h>
 #import "ImgurSession.h"
-#import "GPRootViewController.h"
+#import "GPPhotosTableViewController.h"
 
 @interface GPAppDelegate : UIResponder <UIApplicationDelegate, IMGSessionDelegate>
 
 @property (nonatomic, strong) UIWindow *window;
 
 @property (nonatomic, strong) IMGSession *imgurSession;
-@property (nonatomic, strong) GPRootViewController *rootViewController;
+@property (nonatomic, strong) GPPhotosTableViewController *photosTableViewController;
 
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 @property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;

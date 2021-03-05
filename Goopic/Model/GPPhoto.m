@@ -56,14 +56,14 @@
     return nil;
 }
 
-- (UIImage *)fullResolutionImage
+- (UIImage *)largeImage
 {
     if (self.asset)
     {
         ALAssetRepresentation *defaultRep = [self.asset defaultRepresentation];
-        GPLog(@"asset orientation: %ld", [defaultRep orientation]);
+        GPLog(@"asset orientation: %ld", (long int)[defaultRep orientation]);
         
-        UIImage *image = [UIImage imageWithCGImage:[defaultRep fullResolutionImage]
+        UIImage *image = [UIImage imageWithCGImage:[defaultRep fullResolutionImage] // ? fullScreenImage
                                              scale:[defaultRep scale]
                                        orientation:(UIImageOrientation)[defaultRep orientation]];
         
@@ -80,7 +80,7 @@
     if (self.asset)
     {
         ALAssetRepresentation *defaultRep = [self.asset defaultRepresentation];
-        GPLog(@"asset orientation: %ld", [defaultRep orientation]);
+        GPLog(@"asset orientation: %ld", (long int)[defaultRep orientation]);
         
         UIImage *image = [UIImage imageWithCGImage:[defaultRep fullScreenImage]
                                              scale:[defaultRep scale]

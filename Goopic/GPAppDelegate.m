@@ -7,8 +7,8 @@
 //
 
 #import "GPAppDelegate.h"
-#import "GPViewController.h"
 #import "GPPersistentStoreManager.h"
+#import "GPPhotosTableViewController.h"
 
 @implementation GPAppDelegate
 
@@ -20,19 +20,24 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    // Store the initial status bar height (status bar is visible on launch) because the height is 0 when the status bar is hidden
+    StatusBarHeight();
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
-    
-//    self.window.rootViewController = [[GPViewController alloc] init];
     
     IMGSession *imgSession = [IMGSession anonymousSessionWithClientID:IMGUR_CLIENT_ID withDelegate:self];
     self.imgurSession = imgSession;
     
-    GPRootViewController *rootViewController = [GPRootViewController rootViewController];
-    self.window.rootViewController = rootViewController;
+    GPPhotosTableViewController *photosTableViewController = [[GPPhotosTableViewController alloc] init];
+    self.photosTableViewController = photosTableViewController;
     
-    self.window.backgroundColor = COLOR_BLACK;
+    self.window.rootViewController = self.photosTableViewController;
+    self.window.backgroundColor = GPCOLOR_BLACK;
     [self.window makeKeyAndVisible];
+    
+    // Purge photos store
+    [[GPPersistentStoreManager sharedManager] purgeStore];
     
     return YES;
 }
@@ -63,19 +68,26 @@
 {
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    
+    // Saves changes in the application's managed object context before the user quits the application.
+    [[GPPersistentStoreManager sharedManager] saveContext];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
+    GPLogIN();
+    
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+    
+    // Purge photos store
+    [[GPPersistentStoreManager sharedManager] purgeStore];
+    
+    GPLogOUT();
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-    
-    // Purge photos store
-    [[GPPersistentStoreManager sharedManager] purgeStore];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
@@ -85,7 +97,7 @@
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     
     // Saves changes in the application's managed object context before the application terminates.
-    [self saveContext];
+    [[GPPersistentStoreManager sharedManager] saveContext];
     
     GPLogOUT();
 }

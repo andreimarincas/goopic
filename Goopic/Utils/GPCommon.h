@@ -11,9 +11,10 @@
 
 NSString * NSStringFromGPToolbarButtonType(GPToolbarButtonType buttonType);
 
-BOOL AppIsInFullScreenMode();
-
 CGFloat StatusBarHeight();
+
+CGFloat StatusBarHeightForToolbar();
+CGFloat ToolbarHeight();
 
 NSString * NSStringFromBOOL(BOOL b);
 
@@ -22,8 +23,13 @@ UIInterfaceOrientation GPInterfaceOrientation();
 BOOL GPInterfaceOrientationIsPortrait();
 BOOL GPInterfaceOrientationIsLandscape();
 
+UIInterfaceOrientationMask GPInterfaceOrientationMaskForOrientation(UIInterfaceOrientation orientation);
+
 BOOL CGPointInCGRect(CGPoint point, CGRect rect);
 
 CGFloat ScaleFactorForUploadingImageWithSize(CGSize size);
 
 CGSize CGSizeIntegral(CGSize size);
+
+UIEdgeInsets GPEdgeInsetsNegate(UIEdgeInsets insets);
+UIEdgeInsets GPEdgeInsetsMake(CGFloat inset);

@@ -10,9 +10,6 @@
 #import "GPStorePhoto.h"
 
 @interface GPPersistentStoreManager : NSObject
-{
-    NSTimer *_contextSaveTimer;
-}
 
 @property (nonatomic, readonly) NSManagedObjectContext *managedObjectContext;
 
@@ -23,6 +20,8 @@
 
 - (GPStorePhoto *)photoWithAssetURL:(NSString *)url name:(NSString *)name
                               width:(NSInteger)width height:(NSInteger)height;
+
+- (BOOL)saveContext;
 
 - (void)purgeStore;
 

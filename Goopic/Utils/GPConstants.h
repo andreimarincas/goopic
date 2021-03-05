@@ -27,18 +27,26 @@ static const NSTimeInterval kPhotoImgurExpirationInterval = 30 * kDay; // actual
 
 // Colors
 
-#define COLOR_BLUE       [UIColor colorWithRed:75/255.0f green:142/255.0f blue:250/255.0f alpha:1.0f]
-#define COLOR_DARK_BLUE  [UIColor colorWithRed:50/255.0f green:95/255.0f blue:167/255.0f alpha:1.0f]
-#define COLOR_BLACK      [UIColor colorWithWhite:0.1f alpha:1.0f]
-#define COLOR_DARK_BLACK [UIColor blackColor]
+#define GPCOLOR_BLACK           [UIColor colorWithWhite:0.1f alpha:1.0f]
+#define GPCOLOR_DARK_BLACK      [UIColor blackColor]
+#define GPCOLOR_TOOLBAR_BLACK   [GPCOLOR_BLACK colorWithAlphaComponent:0.85]
+#define GPCOLOR_BLUE            [UIColor colorWithRed:75/255.0f green:142/255.0f blue:250/255.0f alpha:1.0f] // (.29,.56,.98)
+#define GPCOLOR_DARK_BLUE       [UIColor colorWithRed:50/255.0f green:95/255.0f blue:167/255.0f alpha:1.0f]
+#define GPCOLOR_BLUE_HIGHLIGHT  [GPCOLOR_BLUE colorWithAlphaComponent:0.3f]
+#define GPCOLOR_ORANGE_SELECTED [UIColor orangeColor]
 
 
-static const CGFloat kToolbarHeight = 43.6f;
+/* Use ToolbarHeight() instead these constants! */
+static const CGFloat kToolbarHeight_Portrait  = 50.0f; // 43.6f;
+static const CGFloat kToolbarHeight_Landscape = 30.0f;
+
+static const CGFloat kToolbarButtonFontSize   = 19.0f;
+static const CGFloat kToolbarButtonsMargin    = 10.0f;
 
 
 // Image Upload
 
-static const CGFloat    kMaxImageUploadSize        = 100000; // w * h
+static const CGFloat    kMaxImageUploadSize        = 20000; // 100000; // w * h
 static NSString * const kPhotoDefaultNameForUpload = @"Photo";
 
 
@@ -117,6 +125,15 @@ typedef NS_ENUM (NSInteger, GPErrorCode)
 // Search Google For This Image
 
 static NSString * const kSearchByImageURL = @"http://images.google.com/searchbyimage?image_url=%@";
+
+
+// User Defaults
+
+static NSString * const kCameraFlashKey = @"camera-flash";
+
+static NSString * const kCameraFlashAutoValue = @"auto";
+static NSString * const kCameraFlashOnValue   = @"on";
+static NSString * const kCameraFlashOffValue  = @"off";
 
 
 // Macros

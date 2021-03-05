@@ -17,7 +17,7 @@
 @property (nonatomic, strong) ALAsset *asset;
 
 @property (nonatomic, readonly) UIImage *thumbnailImage;
-@property (nonatomic, readonly) UIImage *fullResolutionImage;
+@property (nonatomic, readonly) UIImage *largeImage;
 @property (nonatomic, readonly) UIImage *imageToUpload;
 
 @property (nonatomic, readonly) NSDate *dateTaken; // TODO: asset's timezone

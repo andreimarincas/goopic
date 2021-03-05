@@ -7,7 +7,6 @@
 //
 
 #import "GPCommon.h"
-#import "GPRootViewController.h"
 
 NSString * NSStringFromGPToolbarButtonType(GPToolbarButtonType buttonType)
 {
@@ -16,7 +15,7 @@ NSString * NSStringFromGPToolbarButtonType(GPToolbarButtonType buttonType)
     switch (buttonType)
     {
         case GPToolbarButtonCamera:
-            buttonTypeStr = @"CAM";
+            buttonTypeStr = @"Camera";
             break;
             
         case GPToolbarButtonSearchGoogleForThisImage:
@@ -34,21 +33,27 @@ NSString * NSStringFromGPToolbarButtonType(GPToolbarButtonType buttonType)
     return buttonTypeStr;
 }
 
-BOOL AppIsInFullScreenMode()
-{
-    CGRect screenBounds = [[UIScreen mainScreen] bounds];
-    GPLog(@"screen bounds: %@", NSStringFromCGRect(screenBounds));
-    
-    GPRootViewController *rootViewController = [GPRootViewController rootViewController];
-    GPLog(@"root frame: %@", NSStringFromCGRect(rootViewController.view.frame));
-    
-    return (screenBounds.size.height == rootViewController.view.frame.size.height);
-}
-
 CGFloat StatusBarHeight()
 {
-    CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
-    return fminf(statusFrame.size.width, statusFrame.size.height);
+    static CGFloat _statusBarHeight = 0;
+    
+    if (_statusBarHeight == 0)
+    {
+        CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
+        _statusBarHeight = fminf(statusFrame.size.width, statusFrame.size.height); // depending on the orientation
+    }
+    
+    return _statusBarHeight;
+}
+
+CGFloat StatusBarHeightForToolbar()
+{
+    return GPInterfaceOrientationIsPortrait() ? StatusBarHeight() : 0;
+}
+
+CGFloat ToolbarHeight()
+{
+    return (GPInterfaceOrientationIsPortrait() ? kToolbarHeight_Portrait : kToolbarHeight_Landscape) + 20;
 }
 
 NSString * NSStringFromBOOL(BOOL b)
@@ -69,6 +74,16 @@ BOOL GPInterfaceOrientationIsPortrait()
 BOOL GPInterfaceOrientationIsLandscape()
 {
     return UIInterfaceOrientationIsLandscape(GPInterfaceOrientation());
+}
+
+UIInterfaceOrientationMask GPInterfaceOrientationMaskForOrientation(UIInterfaceOrientation orientation)
+{
+    if (orientation == UIInterfaceOrientationPortrait)           return UIInterfaceOrientationMaskPortrait;
+    if (orientation == UIInterfaceOrientationPortraitUpsideDown) return UIInterfaceOrientationMaskPortraitUpsideDown;
+    if (orientation == UIInterfaceOrientationLandscapeLeft)      return UIInterfaceOrientationMaskLandscapeLeft;
+    if (orientation == UIInterfaceOrientationLandscapeRight)     return UIInterfaceOrientationMaskLandscapeRight;
+    
+    return UIInterfaceOrientationMaskAll;
 }
 
 BOOL CGPointInCGRect(CGPoint point, CGRect rect)
@@ -95,4 +110,14 @@ CGFloat ScaleFactorForUploadingImageWithSize(CGSize size)
 CGSize CGSizeIntegral(CGSize size)
 {
     return CGSizeMake((int)size.width, (int)size.height);
+}
+
+UIEdgeInsets GPEdgeInsetsNegate(UIEdgeInsets insets)
+{
+    return UIEdgeInsetsMake(-insets.top, -insets.left, -insets.bottom, -insets.right);
+}
+
+UIEdgeInsets GPEdgeInsetsMake(CGFloat inset)
+{
+    return UIEdgeInsetsMake(inset, inset, inset, inset);
 }
