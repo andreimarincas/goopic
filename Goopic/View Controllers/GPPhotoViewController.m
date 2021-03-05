@@ -32,6 +32,7 @@
         {
             self.automaticallyAdjustsScrollViewInsets = NO;
             self.photo = photo;
+//            self.transformOnViewDidAppear = CGAffineTransformIdentity;
         }
         else
         {
@@ -103,6 +104,30 @@
     
     GPLogOUT();
 }
+
+//- (void)viewDidAppear:(BOOL)animated
+//{
+//    [super viewDidAppear:animated];
+//    
+//    CGAffineTransform t = self.view.transform;
+//    GPLog(@"self.photoViewController.view.transform: %@, is identity: %@", NSStringFromCGAffineTransform(t), NSStringFromBOOL(CGAffineTransformIsIdentity(t)));
+//    t = self.topToolbar.transform;
+//    GPLog(@"_photoViewTopToolbar.transform: %@, is identity: %@", NSStringFromCGAffineTransform(t), NSStringFromBOOL(CGAffineTransformIsIdentity(t)));
+//    
+//    GPLog(@"self.frame: %@", NSStringFromCGRect(self.view.frame));
+//    
+//    self.transformOnViewDidAppear = self.view.transform;
+//}
+//
+//- (void)viewWillDisappear:(BOOL)animated
+//{
+//    [super viewWillDisappear:animated];
+//    
+//    CGAffineTransform t = self.view.transform;
+//    GPLog(@"self.photoViewController.view.transform: %@, is identity: %@", NSStringFromCGAffineTransform(t), NSStringFromBOOL(CGAffineTransformIsIdentity(t)));
+//    t = self.topToolbar.transform;
+//    GPLog(@"_photoViewTopToolbar.transform: %@, is identity: %@", NSStringFromCGAffineTransform(t), NSStringFromBOOL(CGAffineTransformIsIdentity(t)));
+//}
 
 #pragma mark - Notifications
 

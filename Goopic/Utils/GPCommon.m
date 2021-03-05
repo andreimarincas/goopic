@@ -100,6 +100,22 @@ BOOL CGPointInCGRect(CGPoint point, CGRect rect)
     (point.y <= rect.origin.y + rect.size.height);
 }
 
+CGFloat CGPointDistanceToCGPoint(CGPoint p1, CGPoint p2)
+{
+    return sqrtl(sqr(p1.x - p2.x) + sqr(p1.y - p2.y));
+}
+
+double sqr(double x)
+{
+    return x * x;
+}
+
+CGPoint CenterOfFrame(CGRect frame)
+{
+    return CGPointMake(frame.origin.x + frame.size.width / 2,
+                       frame.origin.y + frame.size.height / 2);
+}
+
 CGFloat ScaleFactorForUploadingImageWithSize(CGSize size)
 {
     if (size.width * size.height <= kMaxImageUploadSize)

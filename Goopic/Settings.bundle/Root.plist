@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PreferenceSpecifiers</key>
+	<array>
+		<dict>
+			<key>Titles</key>
+			<array>
+				<string>Use Chrome if installed</string>
+				<string>Always use Safari</string>
+			</array>
+			<key>Values</key>
+			<array>
+				<string>Chrome</string>
+				<string>Safari</string>
+			</array>
+			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Title</key>
+			<string>Browser</string>
+			<key>Key</key>
+			<string>browser-for-searching</string>
+			<key>DefaultValue</key>
+			<string>Chrome</string>
+		</dict>
+		<dict>
+			<key>DefaultValue</key>
+			<true/>
+			<key>Key</key>
+			<string>open-in-new-tab</string>
+			<key>Title</key>
+			<string>Open in new tab</string>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+		</dict>
+		<dict>
+			<key>Title</key>
+			<string>Note: Safari will always open a new image searching in a new tab.</string>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+		</dict>
+	</array>
+	<key>StringsTable</key>
+	<string>Root</string>
+</dict>
+</plist>

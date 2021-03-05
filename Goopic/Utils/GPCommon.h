@@ -27,6 +27,10 @@ BOOL GPInterfaceOrientationIsLandscape();
 UIInterfaceOrientationMask GPInterfaceOrientationMaskForOrientation(UIInterfaceOrientation orientation);
 
 BOOL CGPointInCGRect(CGPoint point, CGRect rect);
+CGFloat CGPointDistanceToCGPoint(CGPoint p1, CGPoint p2);
+CGPoint CenterOfFrame(CGRect frame);
+
+double sqr(double x);
 
 CGFloat ScaleFactorForUploadingImageWithSize(CGSize size);
 

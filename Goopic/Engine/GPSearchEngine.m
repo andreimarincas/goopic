@@ -173,36 +173,47 @@
         return;
     }
     
-    // Try to open in Chrome first
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *browser = [userDefaults stringForKey:kBrowserForSearchingKey];
+    
     OpenInChromeController *chromeCtrl = [OpenInChromeController sharedInstance];
     
-    if ([chromeCtrl isChromeInstalled])
+    if ([browser isEqualToString:kBrowserForSearchingChrome])
     {
-        NSURL *callbackURL = [NSURL URLWithString:GOOPIC_URL_SCHEME];
+        // Try to open in Chrome first
         
-        BOOL success = [[OpenInChromeController sharedInstance] openInChrome:url
-                                                             withCallbackURL:callbackURL
-                                                                createNewTab:YES];
-        if (success)
+        if ([chromeCtrl isChromeInstalled])
         {
-            GPLog(@"Opened URL in Chrome: %@", url);
+            NSURL *callbackURL = [NSURL URLWithString:GOOPIC_URL_SCHEME];
+            BOOL openInNewTab = [userDefaults boolForKey:kOpenInNewTabKey];
+            
+            BOOL success = [[OpenInChromeController sharedInstance] openInChrome: url
+                                                                 withCallbackURL: callbackURL
+                                                                    createNewTab: openInNewTab];
+            if (success)
+            {
+                GPLog(@"Opened URL in Chrome: %@", url);
+                
+                GPLogOUT();
+                return;
+            }
+            
+            GPLog(@"Failed to open URL in Chrome: %@", url); // Fails if app in background
+        }
+    }
+    
+    if ([browser isEqualToString:kBrowserForSearchingSafari] || ![chromeCtrl isChromeInstalled])
+    {
+        // Open in default browser (Safari)
+        if ([[UIApplication sharedApplication] canOpenURL:url])
+        {
+            [[UIApplication sharedApplication] openURL:url];
+            
+            GPLog(@"Opened URL in default browser (Safari): %@", url);
             
             GPLogOUT();
             return;
         }
-        
-        GPLog(@"Failed to open URL in Chrome: %@", url); // Fails if app in background
-    }
-    
-    // Open in default browser (safari)
-    if ([[UIApplication sharedApplication] canOpenURL:url])
-    {
-        [[UIApplication sharedApplication] openURL:url];
-        
-        GPLog(@"Opened URL in default browser (Safari): %@", url);
-        
-        GPLogOUT();
-        return;
     }
     
     GPLog(@"Cannot open URL: %@", url);

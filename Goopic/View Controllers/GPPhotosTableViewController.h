@@ -10,6 +10,7 @@
 #import "GPPhoto.h"
 #import "GPPhotosTableViewToolbar.h"
 #import "GPBaseViewController.h"
+#import "GPTableToPhotoTransition.h"
 
 
 @class ALAssetsGroup;
@@ -104,6 +105,8 @@
 
 // Reload photos from library in this queue
 @property (nonatomic, strong) dispatch_queue_t libraryQueue;
+
+@property (nonatomic, strong) GPInteractiveTableToPhotoTransition *interactiveTransition;
 
 - (instancetype)init;
 

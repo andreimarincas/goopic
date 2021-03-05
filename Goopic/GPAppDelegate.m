@@ -28,6 +28,12 @@
     [[GPPermissionsManager sharedManager] requestAccessToAssetsLibrary:nil];
     [[GPPermissionsManager sharedManager] requestAccessToCamera:nil];
     
+    NSDictionary *appDefaults = @{ kCameraFlashKey         : kCameraFlashAutoValue,
+                                   kBrowserForSearchingKey : kBrowserForSearchingChrome,
+                                   kOpenInNewTabKey        : @(YES) };
+    
+    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     
@@ -49,6 +55,7 @@
   sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
 {
     GPLogIN();
+    
     GPLog(@"openURL: %@", url);
     
     GPLogOUT();
@@ -143,20 +150,25 @@
         [photoViewController setPhoto:photo];
         [cameraViewController dismissViewControllerAnimated:YES completion:nil];
     }
-    else if ([cameraViewController presentingViewController] == [self rootViewController])
+    else if ([cameraViewController presentingViewController] == photosTableViewController)
     {
+        self.cameraViewController = cameraViewController;
+        
         UIView *snapshot = [cameraViewController.view snapshotViewAfterScreenUpdates:NO];
         [self.window addSubview:snapshot];
         self.cameraViewSnapshot = snapshot;
-        self.cameraViewController = cameraViewController;
         
         [cameraViewController dismissViewControllerAnimated:NO completion:^{
             
             GPPhotoViewController *photoViewController = [[GPPhotoViewController alloc] initWithPhoto:photo];
             photoViewController.transitioningDelegate = photosTableViewController;
+            photosTableViewController.interactiveTransition.photoViewController = photoViewController;
+            
             [[GPSearchEngine searchEngine] setDelegate:photoViewController];
             
             [photosTableViewController presentViewController:photoViewController animated:YES completion:^{
+                
+                photosTableViewController.interactiveTransition.viewForInteraction = photoViewController.view;
                 
                 [self.cameraViewSnapshot removeFromSuperview];
                 self.cameraViewSnapshot = nil;

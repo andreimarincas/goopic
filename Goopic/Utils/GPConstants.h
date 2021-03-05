@@ -157,11 +157,16 @@ static NSString * const kSearchByImageURL = @"http://images.google.com/searchbyi
 
 // User Defaults
 
-static NSString * const kCameraFlashKey = @"camera-flash";
-
+static NSString * const kCameraFlashKey       = @"camera-flash";
 static NSString * const kCameraFlashAutoValue = @"auto";
 static NSString * const kCameraFlashOnValue   = @"on";
 static NSString * const kCameraFlashOffValue  = @"off";
+
+static NSString * const kBrowserForSearchingKey    = @"browser-for-searching";
+static NSString * const kBrowserForSearchingChrome = @"Chrome";
+static NSString * const kBrowserForSearchingSafari = @"Safari";
+
+static NSString * const kOpenInNewTabKey = @"open-in-new-tab"; // bool value
 
 
 // Macros

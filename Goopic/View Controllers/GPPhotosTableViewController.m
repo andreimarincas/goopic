@@ -393,6 +393,10 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     
     UILongPressGestureRecognizer *longPressGr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
     [self.photosTableView addGestureRecognizer:longPressGr];
+    
+    GPInteractiveTableToPhotoTransition *interactiveTransition = [[GPInteractiveTableToPhotoTransition alloc] init];
+    interactiveTransition.photosTableViewController = self;
+    self.interactiveTransition = interactiveTransition;
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -1127,9 +1131,15 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         if (photoViewController)
         {
             photoViewController.transitioningDelegate = self;
+            self.interactiveTransition.photoViewController = photoViewController;
+            
             [GPSearchEngine searchEngine].delegate = photoViewController;
             
-            [self presentViewController:photoViewController animated:YES completion:nil];
+            [self presentViewController:photoViewController animated:YES completion:^{
+                
+                self.interactiveTransition.viewForInteraction = photoViewController.view;
+//                self.interactiveTransition.viewForInteraction = [[[UIApplication sharedApplication] delegate] window];
+            }];
             
             GPLogOUT();
             return;
@@ -1165,10 +1175,13 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
             if (photoViewController)
             {
                 photoViewController.transitioningDelegate = self;
+                self.interactiveTransition.photoViewController = photoViewController;
+                
                 [GPSearchEngine searchEngine].delegate = photoViewController;
                 
                 [self presentViewController:photoViewController animated:YES completion:^{
                     
+                    self.interactiveTransition.viewForInteraction = photoViewController.view;
                     [[GPSearchEngine searchEngine] searchGoogleForPhoto:selectedPhoto completion:nil];
                 }];
                 
@@ -1287,6 +1300,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         button.enabled = NO;
         
         [self presentViewController:cameraViewController animated:YES completion:^{
+            
             button.enabled = YES;
         }];
     }
@@ -1301,6 +1315,18 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         [self.photosTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]
                                     atScrollPosition:UITableViewScrollPositionTop animated:YES];
     }
+}
+
+#pragma mark - Notifications
+
+- (void)appWillEnterForeground
+{
+    GPLogIN();
+    [super appWillEnterForeground];
+    
+    [self requestAccessToAssetsLibrary];
+    
+    GPLogOUT();
 }
 
 #pragma mark - Transitioning Delegate
@@ -1325,14 +1351,15 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         else
         {
             // Presented from this GPPhotosTableViewController by selecting a GPPhoto
-            transition = [[GPTableToPhotoTransition alloc] init];
-            
+            transition = self.interactiveTransition;
         }
     }
     else if ([presentedController isKindOfClass:[GPCameraViewController class]])
     {
         transition = [[GPFadeTransition alloc] init];
     }
+    
+    transition.reverse = NO;
     
     GPLogOUT();
     return transition;
@@ -1350,7 +1377,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         
         if ([photoViewController.photo exists])
         {
-            transition = [[GPTableToPhotoTransition alloc] init];
+            transition = self.interactiveTransition;
         }
         else  // Image was deleted from camera roll from outside the app
         {
@@ -1369,16 +1396,19 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     return transition;
 }
 
-#pragma mark - Notifications
-
-- (void)appWillEnterForeground
+- (id <UIViewControllerInteractiveTransitioning>)interactionControllerForDismissal:(id <UIViewControllerAnimatedTransitioning>)animator
 {
-    GPLogIN();
-    [super appWillEnterForeground];
+    if ([animator isKindOfClass:[GPInteractiveTableToPhotoTransition class]])
+    {
+        GPInteractiveTableToPhotoTransition *interactiveTransition = (GPInteractiveTableToPhotoTransition *)animator;
+        
+        if ([interactiveTransition isInteractive])
+        {
+            return interactiveTransition;
+        }
+    }
     
-    [self requestAccessToAssetsLibrary];
-    
-    GPLogOUT();
+    return nil;
 }
 
 @end

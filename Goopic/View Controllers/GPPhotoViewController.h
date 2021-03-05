@@ -25,6 +25,8 @@
 @property (nonatomic, strong) UIImageView *photoView;
 @property (nonatomic, strong) UIScrollView *photoScrollView;
 
+//@property (nonatomic) CGAffineTransform transformOnViewDidAppear;
+
 - (instancetype)initWithPhoto:(GPPhoto *)photo;
 
 - (void)updateUI;

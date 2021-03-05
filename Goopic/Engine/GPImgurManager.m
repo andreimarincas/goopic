@@ -53,9 +53,11 @@ static const CGFloat kCompressionQuality = 0.3f;
         }
     };
     
-    _uploadImageBlock = [imgurSession POST:uploadURL
-                                parameters:nil
-                 constructingBodyWithBlock:appendImageBlock
+    // TODO: Use the Imgur APi for upload without constructing body with block by setting the 'image' directly
+    
+    _uploadImageBlock = [imgurSession POST: uploadURL
+                                parameters: nil
+                 constructingBodyWithBlock: appendImageBlock
                          
                                    success:^(NSURLSessionDataTask *task, id responseObject) {
                                        
