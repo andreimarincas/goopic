@@ -27,6 +27,9 @@
 @property (nonatomic, strong) UIImageView *photoView;
 @property (nonatomic, strong) UIScrollView *photoScrollView;
 
+// Set before dismissing the view controller. This will decide what kind of dismissal transition to use.
+@property (nonatomic) BOOL photoExistsOnDisk;
+
 - (instancetype)initWithPhoto:(GPPhoto *)photo;
 
 - (void)updateUI;

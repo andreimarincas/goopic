@@ -33,6 +33,6 @@
 
 - (BOOL)isEqualToPhoto:(GPPhoto *)photo;
 
-- (BOOL)exists;
+- (void)checkIfExists:(AssetExistsBlock)completion;
 
 @end

@@ -79,19 +79,19 @@
     CGFloat initialAnimationPercent = 0.25f; // (0,1)
     CGFloat scale = 1.1f;
     
-    [UIView animateWithDuration:initialAnimationPercent * self.dismissalDuration
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseOut
-                     animations:^{
+    [UIView animateWithDuration: initialAnimationPercent * self.dismissalDuration
+                          delay: 0
+                        options: UIViewAnimationOptionCurveEaseOut
+                     animations: ^{
                          
                          transportedImageView.transform = CGAffineTransformMakeScale(scale, scale);
                          
                      } completion:nil];
     
-    [UIView animateWithDuration:(1 - initialAnimationPercent) * self.dismissalDuration
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseIn
-                     animations:^{
+    [UIView animateWithDuration: (1 - initialAnimationPercent) * self.dismissalDuration
+                          delay: 0
+                        options: UIViewAnimationOptionCurveEaseIn
+                     animations: ^{
                          
                          cameraViewController.view.alpha = 0;
                          transportedImageView.frame = toFrame;
@@ -149,39 +149,22 @@
     topToolbar.alpha = 0;
     bottomToolbar.alpha = 0;
     
-    if (toViewController.interfaceOrientation == UIInterfaceOrientationLandscapeRight)
-    {
-        topToolbar.center = CGPointMake(container.bounds.size.width - topToolbar.frame.size.height / 2, container.bounds.size.height / 2);
-        topToolbar.transform = CGAffineTransformMakeRotation(M_PI_2);
-        
-        bottomToolbar.center = CGPointMake(bottomToolbar.frame.size.height / 2, container.bounds.size.height / 2);
-        bottomToolbar.transform = CGAffineTransformMakeRotation(M_PI_2);
-    }
-    else if (toViewController.interfaceOrientation == UIInterfaceOrientationLandscapeLeft)
-    {
-        topToolbar.center = CGPointMake(bottomToolbar.frame.size.height / 2, container.bounds.size.height / 2);
-        topToolbar.transform = CGAffineTransformMakeRotation(-M_PI_2);
-        
-        bottomToolbar.center = CGPointMake(container.bounds.size.width - bottomToolbar.frame.size.height / 2, container.bounds.size.height / 2);
-        bottomToolbar.transform = CGAffineTransformMakeRotation(-M_PI_2);
-    }
-    
     CGFloat initialAnimationPercent = 0.25f; // (0,1)
     CGFloat scale = 1.1f;
     
-    [UIView animateWithDuration:initialAnimationPercent * self.dismissalDuration
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseOut
-                     animations:^{
+    [UIView animateWithDuration: initialAnimationPercent * self.dismissalDuration
+                          delay: 0
+                        options: UIViewAnimationOptionCurveEaseOut
+                     animations: ^{
                          
                          transportedImageView.transform = CGAffineTransformMakeScale(scale, scale);
                          
                      } completion:nil];
     
-    [UIView animateWithDuration:(1 - initialAnimationPercent) * self.dismissalDuration
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseIn
-                     animations:^{
+    [UIView animateWithDuration: (1 - initialAnimationPercent) * self.dismissalDuration
+                          delay: 0
+                        options: UIViewAnimationOptionCurveEaseIn
+                     animations: ^{
                          
                          fromViewController.view.alpha = 0;
                          transportedImageView.frame = toFrame;

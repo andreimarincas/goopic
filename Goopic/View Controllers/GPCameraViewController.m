@@ -38,6 +38,7 @@ static const CGFloat kFlashBulbAnimationDuration = 0.25f;
 
 // used for KVO observation of the @"capturingStillImage" property to perform flash bulb animation
 static void * CapturingStillImageContext = &CapturingStillImageContext;
+
 static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDeviceAuthorizedContext;
 
 
@@ -449,13 +450,16 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 {
     GPLogIN();
     
-    GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
-    
-    if ([appDelegate isPresentingPhotoViewControllerFromCameraViewController])
+    if (!iOS_8_or_higher()) // iOS 7.1
     {
-        GPLog(@"Camera setup not allowed anymore.");
-        GPLogOUT();
-        return;
+        GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
+        
+        if ([appDelegate isPresentingPhotoViewControllerFromCameraViewController])
+        {
+            GPLog(@"Camera setup not allowed anymore.");
+            GPLogOUT();
+            return;
+        }
     }
     
     [super viewDidDisappear:animated];
@@ -469,29 +473,31 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
                                                   object: nil];
     
     [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+    
     [[NSNotificationCenter defaultCenter] removeObserver: self
                                                     name: UIDeviceOrientationDidChangeNotification
                                                   object: nil];
     
     // Stop the camera session
-	dispatch_async(self.sessionQueue, ^{
+    
+    dispatch_async(self.sessionQueue, ^{
         
-        [self.session stopRunning];
-		
-		[[NSNotificationCenter defaultCenter] removeObserver: self
+        [[NSNotificationCenter defaultCenter] removeObserver: self
                                                         name: AVCaptureDeviceSubjectAreaDidChangeNotification
                                                       object: [self.cameraDeviceInput device]];
         
-		[[NSNotificationCenter defaultCenter] removeObserver:self.runtimeErrorHandlingObserver];
-		
-		[self removeObserver: self
+        [[NSNotificationCenter defaultCenter] removeObserver:self.runtimeErrorHandlingObserver];
+        
+        [self removeObserver: self
                   forKeyPath: @"sessionRunningAndDeviceAuthorized"
                      context: SessionRunningAndDeviceAuthorizedContext];
         
-		[self removeObserver: self
+        [self removeObserver: self
                   forKeyPath: @"stillImageOutput.capturingStillImage"
                      context: CapturingStillImageContext];
-	});
+        
+        [self.session stopRunning];
+    });
     
     GPLogOUT();
 }
@@ -551,8 +557,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
             
 			dispatch_async(dispatch_get_main_queue(), ^{
                 
-                // The backing layer for camera view and the view can only be manipulated on main thread.
-                [[self.cameraView.videoLayer connection] setVideoOrientation:(AVCaptureVideoOrientation)[self interfaceOrientation]];
+                // The backing layer for camera view and the view can only be manipulated on the main thread.
+                [[self.cameraView.videoLayer connection] setVideoOrientation:(AVCaptureVideoOrientation)UIInterfaceOrientationPortrait];
                 
                 [self updateFlash];
 			});
@@ -606,7 +612,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 - (NSUInteger)supportedInterfaceOrientations
 {
-    return UIInterfaceOrientationMaskAllButUpsideDown;
+    return UIInterfaceOrientationMaskPortrait;
 }
 
 - (BOOL)shouldAutorotate
@@ -633,12 +639,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 - (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
 {
-    if (self.isBeingDismissed && self.capturedImage)
-    {
-        return UIStatusBarAnimationFade;
-    }
-    
-    return UIStatusBarAnimationSlide;
+    return UIStatusBarAnimationFade;
 }
 
 #pragma mark - Update UI

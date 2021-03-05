@@ -32,6 +32,7 @@
         {
             self.automaticallyAdjustsScrollViewInsets = NO;
             self.photo = photo;
+            self.photoExistsOnDisk = YES; // assumed
         }
         else
         {
@@ -84,10 +85,13 @@
     GPLogIN();
     [super viewWillAppear:animated];
     
-    if ([self.photo exists]) // otherwise the view controller will be dismissed
-    {
-        [self.photoView setImage:[self.photo largeImage]];
-    }
+    [self.photo checkIfExists:^(BOOL exists) {
+        
+        if (exists)
+        {
+            [self.photoView setImage:[self.photo largeImage]];
+        }
+    }];
     
     [self setNeedsStatusBarAppearanceUpdate];
     
@@ -111,13 +115,26 @@
     GPLogIN();
     [super appDidBecomeActive];
     
-    if (![self.photo exists]) // image was deleted from camera roll from outside the app
+    if (iOS_8_or_higher())
     {
-        [self dismissViewControllerAnimated:YES completion:nil];
-    }
-    else // the image might have been edited
-    {
-        [self.photoView setImage:[self.photo largeImage]];
+        [self.view setUserInteractionEnabled:NO applyToSubviews:YES];
+        
+        [self.photo checkIfExists:^(BOOL exists) {
+            
+            if (!exists)
+            {
+                [[GPSearchEngine searchEngine] cancelPhotoSearching];
+                self.photoExistsOnDisk = NO;
+                
+                [self dismissViewControllerAnimated:YES completion:nil];
+            }
+            else
+            {
+                [self.photoView setImage:[self.photo largeImage]];
+                
+                [self.view setUserInteractionEnabled:YES applyToSubviews:YES];
+            }
+        }];
     }
     
     GPLogOUT();
@@ -268,7 +285,7 @@
 
 - (NSUInteger)supportedInterfaceOrientations
 {
-    return UIInterfaceOrientationMaskAllButUpsideDown;
+    return UIInterfaceOrientationMaskPortrait;
 }
 
 - (BOOL)shouldAutorotate

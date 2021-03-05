@@ -15,4 +15,6 @@
 // animated: if YES, cross-fade animation
 + (void)hideView:(UIView *)view1 andRevealView:(UIView *)view2 animated:(BOOL)animated;
 
+- (void)setUserInteractionEnabled:(BOOL)enabled applyToSubviews:(BOOL)apply;
+
 @end

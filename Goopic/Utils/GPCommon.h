@@ -44,3 +44,5 @@ UIEdgeInsets GPEdgeInsetsMake(CGFloat inset);
 CGFloat DegreesToRadians(CGFloat degrees);
 
 CGFloat FloorValueWithTwoDecimals(CGFloat value);
+
+BOOL iOS_8_or_higher();

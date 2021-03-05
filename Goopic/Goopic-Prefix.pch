@@ -20,6 +20,7 @@
     #import "GPCommon.h"
     #import "NSArray+Extension.h"
     #import "NSDate+Extension.h"
+    #import "NSNull+Extension.h"
     #import "UIView+Extension.h"
     #import "UIViewController+Extension.h"
     #import "UIImage+Extension.h"

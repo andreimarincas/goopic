@@ -77,17 +77,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     for (GPPhoto *photo in photos)
     {
         UIImageView *thumbnailView = [[UIImageView alloc] init];
-        __weak UIImageView *weakThumbnailView = thumbnailView;
-        
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-            UIImage *thumbnailImage = [photo thumbnailImage];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                __strong UIImageView *strongThumbnailView = weakThumbnailView;
-                strongThumbnailView.image = thumbnailImage;
-            });
-        });
-        
+        thumbnailView.image = [photo thumbnailImage];
         thumbnailView.userInteractionEnabled = NO;
         thumbnailView.backgroundColor = PHOTOS_TABLE_BACKGROUND_COLOR;
         [self.contentView addSubview:thumbnailView];
@@ -454,7 +444,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
 
 - (NSUInteger)supportedInterfaceOrientations
 {
-    return UIInterfaceOrientationMaskAllButUpsideDown;
+    return UIInterfaceOrientationMaskPortrait;
 }
 
 - (BOOL)shouldAutorotate
@@ -1380,7 +1370,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     {
         GPPhotoViewController *photoViewController = (GPPhotoViewController *)dismissedController;
         
-        if ([photoViewController.photo exists])
+        if (photoViewController.photoExistsOnDisk)
         {
             transition = self.interactiveTransition;
         }

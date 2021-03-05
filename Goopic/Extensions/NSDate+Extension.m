@@ -17,9 +17,9 @@
 
 - (NSDate *)dateWithYearMonthAndDayOnly
 {
-    unsigned int flags = NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit;
-    NSCalendar *calendar = [NSCalendar currentCalendar];
+    unsigned int flags = NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay;
     
+    NSCalendar *calendar = [NSCalendar currentCalendar];
     NSDateComponents *components = [calendar components:flags fromDate:self];
     
     return [calendar dateFromComponents:components];

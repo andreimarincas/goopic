@@ -47,4 +47,17 @@ static const NSTimeInterval kTransitionAnimationDuration = 0.1f;
     }
 }
 
+- (void)setUserInteractionEnabled:(BOOL)enabled applyToSubviews:(BOOL)apply
+{
+    self.userInteractionEnabled = enabled;
+    
+    if (apply)
+    {
+        for (UIView *view in [self subviews])
+        {
+            [view setUserInteractionEnabled:enabled applyToSubviews:apply];
+        }
+    }
+}
+
 @end

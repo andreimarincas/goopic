@@ -73,7 +73,7 @@ static const CGFloat kToolbarButtonsMargin    = 10.0f;
 
 // Image Upload
 
-static const CGFloat    kMaxImageUploadSize        = 20000; // 100000; // w * h
+static const CGFloat    kMaxImageUploadSize        = 100000; // w * h
 static NSString * const kPhotoDefaultNameForUpload = @"Photo";
 
 
@@ -104,6 +104,7 @@ typedef void (^BodyConstructionBlock)       (id <AFMultipartFormData>);
 typedef void (^CaptureStillImageBlock)      (CMSampleBufferRef sampleBuffer, NSError *error);
 typedef void (^CaptureImageCompletionBlock) (NSData *jpegData, id metadata);
 typedef void (^PermissionBlock)             (BOOL granted);
+typedef void (^AssetExistsBlock)            (BOOL exists);
 
 
 // Enums

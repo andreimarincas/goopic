@@ -153,3 +153,8 @@ CGFloat FloorValueWithTwoDecimals(CGFloat value)
 {
     return floorf(100 * value) / 100;
 }
+
+BOOL iOS_8_or_higher()
+{
+    return (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_7_1);
+}

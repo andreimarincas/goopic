@@ -90,6 +90,7 @@
 		75D1BFB719AA346E00FDA569 /* OpenInChromeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 75D1BFB619AA346E00FDA569 /* OpenInChromeController.m */; };
 		75E6BEA119BA674A004DB6BF /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75E6BEA019BA674A004DB6BF /* CoreImage.framework */; };
 		75E6BEA719BA6AE9004DB6BF /* GPCameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 75E6BEA619BA6AE9004DB6BF /* GPCameraViewController.m */; };
+		75EDA04719CC873300971301 /* NSNull+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 75EDA04619CC873300971301 /* NSNull+Extension.m */; };
 		75F89DFC19CB7B1E00D8C2C7 /* Icon-60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 75F89DFB19CB7B1E00D8C2C7 /* Icon-60@2x.png */; };
 		75F89DFE19CB7B2800D8C2C7 /* Launch-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 75F89DFD19CB7B2800D8C2C7 /* Launch-568h@2x.png */; };
 		75F89E0F19CB7F4C00D8C2C7 /* camera-button-pressed.png in Resources */ = {isa = PBXBuildFile; fileRef = 75F89DFF19CB7F4C00D8C2C7 /* camera-button-pressed.png */; };
@@ -282,6 +283,8 @@
 		75E6BEA019BA674A004DB6BF /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		75E6BEA519BA6AE9004DB6BF /* GPCameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPCameraViewController.h; sourceTree = "<group>"; };
 		75E6BEA619BA6AE9004DB6BF /* GPCameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPCameraViewController.m; sourceTree = "<group>"; };
+		75EDA04519CC873300971301 /* NSNull+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNull+Extension.h"; sourceTree = "<group>"; };
+		75EDA04619CC873300971301 /* NSNull+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNull+Extension.m"; sourceTree = "<group>"; };
 		75F89DF819CB755C00D8C2C7 /* black_theme.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = black_theme.h; sourceTree = "<group>"; };
 		75F89DF919CB75A100D8C2C7 /* white_theme.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = white_theme.h; path = Goopic/Utils/themes/white_theme.h; sourceTree = SOURCE_ROOT; };
 		75F89DFA19CB78E300D8C2C7 /* blue_theme.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = blue_theme.h; path = Goopic/Utils/themes/blue_theme.h; sourceTree = SOURCE_ROOT; };
@@ -354,6 +357,8 @@
 				757BEC2F19B67D5C00043028 /* NSArray+Extension.m */,
 				7529C94619ADCD2E00655FC1 /* NSDate+Extension.h */,
 				7529C94719ADCD2E00655FC1 /* NSDate+Extension.m */,
+				75EDA04519CC873300971301 /* NSNull+Extension.h */,
+				75EDA04619CC873300971301 /* NSNull+Extension.m */,
 				7529C95519AE202200655FC1 /* UIImage+Extension.h */,
 				7529C95619AE202200655FC1 /* UIImage+Extension.m */,
 				757BEC2B19B53AB400043028 /* UIImageView+Extension.h */,
@@ -878,6 +883,7 @@
 				75CE7E5F19BE1AAD0060FE9C /* GPCameraToPhotoTransition.m in Sources */,
 				75D1BF4219A9EEC600FDA569 /* AFURLSessionManager.m in Sources */,
 				75D1BFB719AA346E00FDA569 /* OpenInChromeController.m in Sources */,
+				75EDA04719CC873300971301 /* NSNull+Extension.m in Sources */,
 				757F72D219B27E3A00F59B8D /* GPLine.m in Sources */,
 				75D1BFA119AA0C7C00FDA569 /* IMGMessage.m in Sources */,
 				75D1BFA719AA0C7C00FDA569 /* IMGAccountRequest.m in Sources */,
@@ -1042,6 +1048,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Goopic/Goopic-Prefix.pch";
 				INFOPLIST_FILE = "Goopic/Goopic-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "17490ad5-31ff-4022-935f-37c0e74cd3f1";
 				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/AFNetworking/";
@@ -1056,6 +1063,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Goopic/Goopic-Prefix.pch";
 				INFOPLIST_FILE = "Goopic/Goopic-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "17490ad5-31ff-4022-935f-37c0e74cd3f1";
 				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/AFNetworking/";

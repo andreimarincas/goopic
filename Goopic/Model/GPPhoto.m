@@ -8,6 +8,7 @@
 
 #import <AssetsLibrary/AssetsLibrary.h>
 #import "GPPhoto.h"
+#import "GPAssetsManager.h"
 
 @implementation GPPhoto
 
@@ -35,19 +36,6 @@
 
 - (UIImage *)thumbnailImage
 {
-//    UIImage *image = nil;
-//    
-//    if (self.name)
-//    {
-//        image = [UIImage imageNamed:self.name];
-//    }
-//    else if (self.asset)
-//    {
-//        image = [UIImage imageWithCGImage:[self.asset thumbnail]];
-//    }
-//    
-//    return image;
-    
     if (self.asset)
     {
         return [UIImage imageWithCGImage:[self.asset thumbnail]];
@@ -62,13 +50,22 @@
     {
         ALAssetRepresentation *defaultRep = [self.asset defaultRepresentation];
         GPLog(@"asset orientation: %ld", (long int)[defaultRep orientation]);
+        GPLog(@"[defaultRep scale]: %f", [defaultRep scale]);
         
-//        UIImage *image = [UIImage imageWithCGImage:[defaultRep fullResolutionImage]
-//                                             scale:[defaultRep scale]
-//                                       orientation:(UIImageOrientation)[defaultRep orientation]];
+        UIImage *image = nil;
         
-        UIImage *image = [UIImage imageWithCGImage:[defaultRep fullScreenImage]
-                                             scale:[defaultRep scale] orientation:UIImageOrientationUp];
+        if (iOS_8_or_higher())
+        {
+            image = [UIImage imageWithCGImage: [defaultRep fullResolutionImage]
+                                        scale: [defaultRep scale]
+                                  orientation: (UIImageOrientation)[defaultRep orientation]];
+        }
+        else // iOS 7.1
+        {
+            image = [UIImage imageWithCGImage: [defaultRep fullScreenImage]
+                                        scale: [defaultRep scale]
+                                  orientation: UIImageOrientationUp];
+        }
         
         GPLog(@"full resolution image size: %@", NSStringFromCGSize(image.size));
         
@@ -203,9 +200,24 @@
     return NO;
 }
 
-- (BOOL)exists
+- (void)checkIfExists:(AssetExistsBlock)completion
 {
-    return ([self largeImage] != nil); // large image would have been cached already if exists
+    ALAssetsLibrary *assetsLibrary = [[GPAssetsManager sharedManager] assetsLibrary];
+    
+    [assetsLibrary assetForURL:[NSURL URLWithString:[self url]] resultBlock:^(ALAsset *asset) {
+        
+        if (completion)
+        {
+            completion(asset != nil);
+        }
+        
+    } failureBlock:^(NSError *error) {
+        
+        if (completion)
+        {
+            completion(NO);
+        }
+    }];
 }
 
 @end

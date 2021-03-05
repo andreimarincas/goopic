@@ -220,12 +220,25 @@ static CGFloat _lastStatusBarHeightWhenVisible;
 {
     GPLogIN();
     GPLog(@"%@", [self description]);
+    [super viewWillAppear:animated];
     
     // Ensure the updateUI is called because view's bounds may never change.
     // Also an assurance before any view controller transition.
     [self updateBaseUI];
     
     GPLogOUT();
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    // No implementation needed
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    // No implementation needed
 }
 
 - (void)viewDidDisappear:(BOOL)animated
