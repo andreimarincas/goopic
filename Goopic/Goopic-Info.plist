@@ -14,10 +14,9 @@
 		<dict>
 			<key>CFBundleIconFiles</key>
 			<array>
-				<string>goopic-icon-120-000-01</string>
-				<string>Goopic-Icon</string>
-				<string>goopic-icon-120 work6-02-01</string>
 				<string>Icon-60</string>
+				<string>Icon-40</string>
+				<string>Icon-58</string>
 			</array>
 		</dict>
 	</dict>
@@ -57,46 +56,6 @@
 			<string>7.0</string>
 			<key>UILaunchImageName</key>
 			<string>Launch</string>
-			<key>UILaunchImageOrientation</key>
-			<string>Portrait</string>
-			<key>UILaunchImageSize</key>
-			<string>{320, 568}</string>
-		</dict>
-		<dict>
-			<key>UILaunchImageMinimumOSVersion</key>
-			<string>7.0</string>
-			<key>UILaunchImageName</key>
-			<string>goopic launch-568h@2x-004-01</string>
-			<key>UILaunchImageOrientation</key>
-			<string>Portrait</string>
-			<key>UILaunchImageSize</key>
-			<string>{320, 568}</string>
-		</dict>
-		<dict>
-			<key>UILaunchImageMinimumOSVersion</key>
-			<string>7.0</string>
-			<key>UILaunchImageName</key>
-			<string>goopic launch-568h@2x-002-01</string>
-			<key>UILaunchImageOrientation</key>
-			<string>Portrait</string>
-			<key>UILaunchImageSize</key>
-			<string>{320, 568}</string>
-		</dict>
-		<dict>
-			<key>UILaunchImageMinimumOSVersion</key>
-			<string>7.0</string>
-			<key>UILaunchImageName</key>
-			<string>goopic launch-568h@2x-001-01</string>
-			<key>UILaunchImageOrientation</key>
-			<string>Portrait</string>
-			<key>UILaunchImageSize</key>
-			<string>{320, 568}</string>
-		</dict>
-		<dict>
-			<key>UILaunchImageMinimumOSVersion</key>
-			<string>7.0</string>
-			<key>UILaunchImageName</key>
-			<string>goopic launch-568h@2x-01</string>
 			<key>UILaunchImageOrientation</key>
 			<string>Portrait</string>
 			<key>UILaunchImageSize</key>

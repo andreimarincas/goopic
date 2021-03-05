@@ -29,7 +29,7 @@ static const CGFloat    kPhotosSpacing                = PHOTOS_SPACING;
 static const NSInteger  kPhotosCountPerCell_Portrait  = 5;
 static const NSInteger  kPhotosCountPerCell_Landscape = 9;
 
-static const NSInteger  kEarlyReloadLimit             = 50;
+//static const NSInteger  kEarlyReloadLimit             = 50;
 
 static NSString * const kPhotoKey                     = @"photo";
 static NSString * const kThumbnailViewKey             = @"thumbnailView";
@@ -609,22 +609,22 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
                         }
                     }
                     
-                    if ([libraryPhotos count] == kEarlyReloadLimit) // early reload
-                    {
-                        NSArray *libraryPhotosSoFar = [NSArray arrayWithArray:libraryPhotos];
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            
-                            // load first photos immediately only at the beginning, so that the user doesn't have to wait for the entire camera roll
-                            // to be enumerated before he can see something on the screen
-                            if ([self.photos count] == 0)
-                            {
-                                dispatch_async(self.libraryQueue, ^{
-                                    
-                                    [self createPhotosSectionsWithPhotosFromLibrary:libraryPhotosSoFar];
-                                });
-                            }
-                        });
-                    }
+//                    if ([libraryPhotos count] == kEarlyReloadLimit) // early reload
+//                    {
+//                        NSArray *libraryPhotosSoFar = [NSArray arrayWithArray:libraryPhotos];
+//                        dispatch_async(dispatch_get_main_queue(), ^{
+//                            
+//                            // load first photos immediately only at the beginning, so that the user doesn't have to wait for the entire camera roll
+//                            // to be enumerated before he can see something on the screen
+//                            if ([self.photos count] == 0)
+//                            {
+//                                dispatch_async(self.libraryQueue, ^{
+//                                    
+//                                    [self createPhotosSectionsWithPhotosFromLibrary:libraryPhotosSoFar];
+//                                });
+//                            }
+//                        });
+//                    }
                     
                     if (!asset && (index == NSNotFound)) // last run
                     {

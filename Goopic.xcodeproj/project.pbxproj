@@ -108,6 +108,8 @@
 		75F89E1C19CB7F4C00D8C2C7 /* take-button-pressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 75F89E0C19CB7F4C00D8C2C7 /* take-button-pressed@2x.png */; };
 		75F89E1D19CB7F4C00D8C2C7 /* take-button.png in Resources */ = {isa = PBXBuildFile; fileRef = 75F89E0D19CB7F4C00D8C2C7 /* take-button.png */; };
 		75F89E1E19CB7F4C00D8C2C7 /* take-button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 75F89E0E19CB7F4C00D8C2C7 /* take-button@2x.png */; };
+		75F89E2119CC412700D8C2C7 /* Icon-40@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 75F89E2019CC412700D8C2C7 /* Icon-40@2x.png */; };
+		75F89E2319CC448D00D8C2C7 /* Icon-58.png in Resources */ = {isa = PBXBuildFile; fileRef = 75F89E2219CC448D00D8C2C7 /* Icon-58.png */; };
 		F240EEAE19B475E800A88F94 /* GPBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F240EEAD19B475E800A88F94 /* GPBaseViewController.m */; };
 		F240EEB919B47E4500A88F94 /* GPBaseTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = F240EEB819B47E4500A88F94 /* GPBaseTransition.m */; };
 		F240EEBC19B47ECA00A88F94 /* GPFadeTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = F240EEBB19B47ECA00A88F94 /* GPFadeTransition.m */; };
@@ -301,6 +303,8 @@
 		75F89E0C19CB7F4C00D8C2C7 /* take-button-pressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "take-button-pressed@2x.png"; path = "Resources/_themes/_blue_theme/take-button-pressed@2x.png"; sourceTree = SOURCE_ROOT; };
 		75F89E0D19CB7F4C00D8C2C7 /* take-button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "take-button.png"; path = "Resources/_themes/_blue_theme/take-button.png"; sourceTree = SOURCE_ROOT; };
 		75F89E0E19CB7F4C00D8C2C7 /* take-button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "take-button@2x.png"; path = "Resources/_themes/_blue_theme/take-button@2x.png"; sourceTree = SOURCE_ROOT; };
+		75F89E2019CC412700D8C2C7 /* Icon-40@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-40@2x.png"; path = "Resources/_themes/_blue_theme/_icons/Icon-40@2x.png"; sourceTree = SOURCE_ROOT; };
+		75F89E2219CC448D00D8C2C7 /* Icon-58.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-58.png"; path = "Resources/_themes/_blue_theme/_icons/Icon-58.png"; sourceTree = SOURCE_ROOT; };
 		F240EEAC19B475E800A88F94 /* GPBaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GPBaseViewController.h; path = "goopic/View Controllers/GPBaseViewController.h"; sourceTree = SOURCE_ROOT; };
 		F240EEAD19B475E800A88F94 /* GPBaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GPBaseViewController.m; path = "goopic/View Controllers/GPBaseViewController.m"; sourceTree = SOURCE_ROOT; };
 		F240EEB719B47E4500A88F94 /* GPBaseTransition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPBaseTransition.h; sourceTree = "<group>"; };
@@ -406,6 +410,8 @@
 		7570B2CF19CA036F00EA99BD /* Icons */ = {
 			isa = PBXGroup;
 			children = (
+				75F89E2019CC412700D8C2C7 /* Icon-40@2x.png */,
+				75F89E2219CC448D00D8C2C7 /* Icon-58.png */,
 				75F89DFB19CB7B1E00D8C2C7 /* Icon-60@2x.png */,
 			);
 			path = Icons;
@@ -814,6 +820,7 @@
 				75F89E1019CB7F4C00D8C2C7 /* camera-button-pressed@2x.png in Resources */,
 				75F89E1E19CB7F4C00D8C2C7 /* take-button@2x.png in Resources */,
 				75F89E1719CB7F4C00D8C2C7 /* flash-highlight.png in Resources */,
+				75F89E2319CC448D00D8C2C7 /* Icon-58.png in Resources */,
 				75F89E1419CB7F4C00D8C2C7 /* disclosure-button-pressed@2x.png in Resources */,
 				75F89E1A19CB7F4C00D8C2C7 /* flash@2x.png in Resources */,
 				75F89E1219CB7F4C00D8C2C7 /* camera-button@2x.png in Resources */,
@@ -825,6 +832,7 @@
 				75F89E1119CB7F4C00D8C2C7 /* camera-button.png in Resources */,
 				75F89E1C19CB7F4C00D8C2C7 /* take-button-pressed@2x.png in Resources */,
 				75F89DFC19CB7B1E00D8C2C7 /* Icon-60@2x.png in Resources */,
+				75F89E2119CC412700D8C2C7 /* Icon-40@2x.png in Resources */,
 				75F89E1819CB7F4C00D8C2C7 /* flash-highlight@2x.png in Resources */,
 				75F89E1619CB7F4C00D8C2C7 /* disclosure-button@2x.png in Resources */,
 			);
@@ -1030,10 +1038,12 @@
 		75D1BF1F19A9ED5300FDA569 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Goopic/Goopic-Prefix.pch";
 				INFOPLIST_FILE = "Goopic/Goopic-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "17490ad5-31ff-4022-935f-37c0e74cd3f1";
 				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/AFNetworking/";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1042,10 +1052,12 @@
 		75D1BF2019A9ED5300FDA569 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Goopic/Goopic-Prefix.pch";
 				INFOPLIST_FILE = "Goopic/Goopic-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "17490ad5-31ff-4022-935f-37c0e74cd3f1";
 				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/AFNetworking/";
 				WRAPPER_EXTENSION = app;
 			};

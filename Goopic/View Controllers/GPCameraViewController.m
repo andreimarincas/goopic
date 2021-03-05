@@ -775,8 +775,9 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
             [self.bottomToolbar.cancelButton setAlpha:1];
             [self.bottomToolbar.retakeButton setAlpha:0];
             [self.bottomToolbar.useButton setAlpha:0];
-            [self.bottomToolbar.takeButton setEnabled:self.cameraRunning ||
-                [[UIApplication sharedApplication] applicationState] != UIApplicationStateActive];
+            
+            [self.bottomToolbar.takeButton setEnabled:YES];
+            [self.bottomToolbar.takeButton setUserInteractionEnabled:self.cameraRunning];
         }
         
         if (![[GPPermissionsManager sharedManager] canAccessAssetsLibrary])

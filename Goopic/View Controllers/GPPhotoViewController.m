@@ -115,6 +115,10 @@
     {
         [self dismissViewControllerAnimated:YES completion:nil];
     }
+    else // the image might have been edited
+    {
+        [self.photoView setImage:[self.photo largeImage]];
+    }
     
     GPLogOUT();
 }
@@ -428,8 +432,7 @@
     
     [self showActivity:GPActivityProcessingImage animated:YES];
     
-    self.topToolbar.photosButton.enabled = NO;
-    self.topToolbar.cameraButton.enabled = NO;
+    self.topToolbar.userInteractionEnabled = NO;
     
     [UIView hideView:self.bottomToolbar.searchButton
        andRevealView:self.bottomToolbar.cancelButton animated:YES];
@@ -510,8 +513,7 @@
     [UIView hideView:self.bottomToolbar.cancelButton
        andRevealView:self.bottomToolbar.searchButton animated:YES];
     
-    self.topToolbar.photosButton.enabled = YES;
-    self.topToolbar.cameraButton.enabled = YES;
+    self.topToolbar.userInteractionEnabled = YES;
     
     GPLogOUT();
 }
