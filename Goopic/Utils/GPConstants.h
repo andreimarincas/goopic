@@ -112,10 +112,6 @@ static const NSTimeInterval kPhotoImgurExpirationInterval = 30 * kDay; // actual
 #define PHOTO_VIEW_BACKGROUND_COLOR       [UIColor whiteColor]
 #define PHOTO_VIEW_FULLSCREEN_COLOR       [UIColor whiteColor]
 
-//#define ACTIVITY_VIEW_BACKGROUND_COLOR    [UIColor colorWithWhite:0.88f alpha:0.75f]
-//#define ACTIVITY_VIEW_TEXT_COLOR          GPCOLOR_DARK_BLACK
-//#define ACTIVITY_VIEW_STYLE               UIActivityIndicatorViewStyleGray
-
 #define ACTIVITY_VIEW_BACKGROUND_COLOR    GPCOLOR_TRANSLUCENT_DARK
 #define ACTIVITY_VIEW_TEXT_COLOR          GPCOLOR_WHITE
 #define ACTIVITY_VIEW_STYLE               UIActivityIndicatorViewStyleWhite
@@ -263,7 +259,7 @@ static NSString * const kOpenInNewTabKey = @"open-in-new-tab"; // bool value
 
 #define CAMERA_BLUR_ENABLED       0
 
-#define IMGUR_RATE_LIMITS_ENABLED 0 // TODO: Set to 1 use it
+#define IMGUR_RATE_LIMITS_ENABLED 0 // TODO: Set to 1 and use it (? white-list)
 
 
 #define IMGUR_CLIENT_ID           @"1a9340753c693df"

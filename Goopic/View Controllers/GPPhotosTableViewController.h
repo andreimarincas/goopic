@@ -23,8 +23,6 @@
     NSMutableArray *_photos; // @{ kPhotoKey : GPPhoto *, kThumbnailViewKey : UIImageView * }
 }
 
-//@property (nonatomic, strong) UIView *backgroundView;
-
 @property (nonatomic, strong) NSArray *photos; // GPPhoto*
 
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier;

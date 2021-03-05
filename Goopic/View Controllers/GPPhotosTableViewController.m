@@ -59,11 +59,6 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
         
         _photos = [NSMutableArray array];
-        
-//        UIView *bgView = [[UIView alloc] init];
-//        bgView.backgroundColor = PHOTOS_TABLE_BORDER_COLOR;
-//        [self.contentView addSubview:bgView];
-//        self.backgroundView = bgView;
     }
     
     return self;
@@ -82,7 +77,17 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     for (GPPhoto *photo in photos)
     {
         UIImageView *thumbnailView = [[UIImageView alloc] init];
-        thumbnailView.image = [photo thumbnailImage];
+        __weak UIImageView *weakThumbnailView = thumbnailView;
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            UIImage *thumbnailImage = [photo thumbnailImage];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                __strong UIImageView *strongThumbnailView = weakThumbnailView;
+                strongThumbnailView.image = thumbnailImage;
+            });
+        });
+        
         thumbnailView.userInteractionEnabled = NO;
         thumbnailView.backgroundColor = PHOTOS_TABLE_BACKGROUND_COLOR;
         [self.contentView addSubview:thumbnailView];
@@ -131,13 +136,6 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         [thumbnailView setNeedsDisplay];
     }
     
-//    self.backgroundView.frame = CGRectMake(0, 0,
-//                                           kPhotosSpacing + [_photos count] * (sThumbnailDimension + kPhotosSpacing) ,
-//                                           self.contentView.bounds.size.height);
-//    [self.backgroundView removeFromSuperview];
-//    [self.contentView insertSubview:self.backgroundView atIndex:0];
-//    [self.backgroundView setNeedsDisplay];
-    
     [self setNeedsDisplay];
 }
 
@@ -161,16 +159,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     {
         id photoData = _photos[index];
         UIImageView *thumbnailView = photoData[kThumbnailViewKey];
-        
-        if (hidden)
-        {
-            [thumbnailView setImage:nil];
-        }
-        else
-        {
-            GPPhoto *photo = photoData[kPhotoKey];
-            [thumbnailView setImage:[photo thumbnailImage]];
-        }
+        thumbnailView.hidden = hidden;
     }
 }
 
@@ -1017,22 +1006,27 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         photoCell = [[GPPhotoCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:kPhotoCellID];
     }
     
-    NSInteger photosCountPerCell = [GPPhotosTableViewController photosCountPerCell];
-    
-    NSArray *photos = self.photosSections[indexPath.section];
-    NSMutableArray *cellPhotos = [NSMutableArray arrayWithCapacity:photosCountPerCell];
-    
-    for (NSInteger i = 0; i < photosCountPerCell; i++)
+    if (indexPath.section == kPhotosSection)
     {
-        if (indexPath.row * photosCountPerCell + i < [photos count])
+        NSInteger photosCountPerCell = [GPPhotosTableViewController photosCountPerCell];
+        
+        NSArray *photos = self.photosSections[indexPath.section];
+        NSMutableArray *cellPhotos = [NSMutableArray arrayWithCapacity:photosCountPerCell];
+        
+        for (NSInteger i = 0; i < photosCountPerCell; i++)
         {
-            [cellPhotos addObject:photos[indexPath.row * photosCountPerCell + i]];
+            if (indexPath.row * photosCountPerCell + i < [photos count])
+            {
+                [cellPhotos addObject:photos[indexPath.row * photosCountPerCell + i]];
+            }
         }
+        
+        photoCell.photos = cellPhotos;
     }
-    
-    photoCell.photos = cellPhotos;
-    
-    photoCell.backgroundView.backgroundColor = (indexPath.section == kPhotosSection) ? PHOTOS_TABLE_BORDER_COLOR : PHOTOS_TABLE_BACKGROUND_COLOR;
+    else
+    {
+        photoCell.photos = @[]; // table header & footer
+    }
     
     return photoCell;
 }
@@ -1150,7 +1144,6 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
             [self presentViewController:photoViewController animated:YES completion:^{
                 
                 self.interactiveTransition.viewForInteraction = photoViewController.view;
-//                self.interactiveTransition.viewForInteraction = [[[UIApplication sharedApplication] delegate] window];
             }];
             
             GPLogOUT();
