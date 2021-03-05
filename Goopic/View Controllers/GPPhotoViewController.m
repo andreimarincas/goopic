@@ -455,8 +455,8 @@
     {
         GPLogErr(@"%@ %@", error, [error userInfo]);
         
-        NSString *title = @"Error";
-        NSString *message = @"An error has occurred, please try again.";
+        NSString *title;
+        NSString *message;
         
         BOOL showError = YES;
         
@@ -471,9 +471,15 @@
             
             // Do NOT show any error message to the user in these cases
             case GPErrorImageUploadCancelled:
-            default:
             {
                 showError = NO;
+            }
+                break;
+                
+            default:
+            {
+                title = @"Error";
+                message = @"An error has occurred, please try again.";
             }
                 break;
         }
