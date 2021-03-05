@@ -132,3 +132,8 @@ CGFloat DegreesToRadians(CGFloat degrees)
 {
     return degrees * M_PI / 180;
 }
+
+CGFloat FloorValueWithTwoDecimals(CGFloat value)
+{
+    return floorf(100 * value) / 100;
+}

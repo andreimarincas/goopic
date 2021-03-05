@@ -90,6 +90,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 @synthesize capturedImage = _capturedImage;
 
+@synthesize canUpdateButtons = _canUpdateButtons;
+
 #pragma mark - Utils
 
 + (AVCaptureDevice *)deviceWithMediaType:(NSString *)mediaType preferringPosition:(AVCaptureDevicePosition)position
@@ -300,7 +302,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     [self.view addSubview:bottomToolbar];
     self.bottomToolbar = bottomToolbar;
     
-    [self rotateControlsToOrientation:_deviceOrientation animated:NO];
+    [self rotateControlsToOrientation:_deviceOrientation animated:NO withDelay:0];
     
     // Flash
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
@@ -688,7 +690,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogOUT();
 }
 
-- (void)rotateControlsToOrientation:(UIDeviceOrientation)toDeviceOrientation animated:(BOOL)animated
+- (void)rotateControlsToOrientation:(UIDeviceOrientation)toDeviceOrientation animated:(BOOL)animated withDelay:(NSTimeInterval)delay
 {
     GPLogIN();
     
@@ -703,8 +705,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
         angle = -M_PI_2;
     }
     
-    [self.topToolbar setButtonsRotation:angle animated:animated];
-    [self.bottomToolbar setButtonsRotation:angle animated:animated];
+    [self.topToolbar setButtonsRotation:angle animated:animated withDelay:delay];
+    [self.bottomToolbar setButtonsRotation:angle animated:animated withDelay:delay];
     
     GPLogOUT();
 }
@@ -713,7 +715,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 {
     GPLogIN();
     
-    if (!_canUpdateButtons)
+    if (!self.canUpdateButtons)
     {
         GPLogOUT();
         return;
@@ -764,6 +766,21 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     }
     
     GPLogOUT();
+}
+
+- (void)setCanUpdateButtons:(BOOL)canUpdateButtons
+{
+    if (_canUpdateButtons != canUpdateButtons)
+    {
+        _canUpdateButtons = canUpdateButtons;
+        
+        if (canUpdateButtons)
+        {
+            // Force buttons rotation update because you never know which notification will come first,
+            // appDidBecomeActive (where canUpdateButtons is set to YES) or deviceOrientationChanged
+            [self updateButtonsRotationAnimated:YES withDelay:0.5];
+        }
+    }
 }
 
 #pragma mark - Flash
@@ -903,7 +920,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
                                             GPPhoto *photo = [[GPPhoto alloc] init];
                                             photo.asset = asset;
                                             
-                                            _canUpdateButtons = NO;
+                                            self.canUpdateButtons = NO;
                                             
                                             GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
                                             [appDelegate dismissCameraViewController:self withPhoto:photo];
@@ -1057,7 +1074,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogIN();
     [super appWillResignActive];
     
-    _canUpdateButtons = NO;
+    self.canUpdateButtons = NO;
     
 #if (CAMERA_BLUR_ENABLED)
     
@@ -1102,8 +1119,8 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     GPLogIN();
     [super appDidBecomeActive];
     
-    _canUpdateButtons = YES;
-    [self updateButtonsAnimated:NO];
+    self.canUpdateButtons = YES;
+    [self updateButtonsAnimated:YES];
     
 #if (CAMERA_BLUR_ENABLED)
     
@@ -1129,17 +1146,33 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 
 - (void)deviceOrientationChanged:(NSNotification *)notification
 {
+    GPLogIN();
+    
+    [self updateButtonsRotationAnimated:YES withDelay:0];
+    
+    GPLogOUT();
+}
+
+// updates buttons rotation based on current device orientation
+- (void)updateButtonsRotationAnimated:(BOOL)animated withDelay:(NSTimeInterval)delay
+{
+    GPLogIN();
+    
     UIDeviceOrientation deviceOrientation = [UIDevice currentDevice].orientation;
     
     if ((deviceOrientation != _deviceOrientation) && [self isOrientationSupported:(UIInterfaceOrientation)deviceOrientation])
     {
-        if (_canUpdateButtons)
+        if (self.canUpdateButtons)
         {
-            [self rotateControlsToOrientation:deviceOrientation animated:YES];
+            [self rotateControlsToOrientation:deviceOrientation animated:animated withDelay:delay];
+            
+            // save the new device orientation only if used, otherwise the conditions
+            // will prevent buttons from being rotated when they actually need to
+            _deviceOrientation = deviceOrientation;
         }
-        
-        _deviceOrientation = deviceOrientation;
     }
+    
+    GPLogOUT();
 }
 
 #pragma mark - Camera Running
@@ -1366,7 +1399,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
         
         if (button == self.bottomToolbar.cancelButton)
         {
-            _canUpdateButtons = NO;
+            self.canUpdateButtons = NO;
             
             [self dismissViewControllerAnimated:YES completion:^{
                 button.enabled = YES;

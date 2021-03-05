@@ -23,7 +23,7 @@ static const CGFloat kFlashButtonEdgeInset   = 20.0f;
 static const CGFloat kTakeButtonSize         = 50.0f;
 static const CGFloat kButtonHitTestEdgeInset = 40.0f;
 
-//static const CGFloat kMinButtonWidth         = 50.0f;
+static const CGFloat kButtonsRotationAnimationDuration = 0.3f;
 
 
 #pragma mark -
@@ -200,12 +200,19 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
     GPLogOUT();
 }
 
-- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated
+- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated withDelay:(NSTimeInterval)delay
 {
     GPLogIN();
     
     if (angle != _buttonsRotationAngle)
     {
+        NSTimeInterval duration = kButtonsRotationAnimationDuration;
+        
+        if (FloorValueWithTwoDecimals(fabsf(angle - _buttonsRotationAngle)) > M_PI_2)
+        {
+            duration = 2 * kButtonsRotationAnimationDuration;
+        }
+        
         _buttonsRotationAngle = angle;
         
         CGAffineTransform rotation = CGAffineTransformMakeRotation(angle);
@@ -222,7 +229,12 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
         if (animated)
         {
             UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut;
-            [UIView animateWithDuration:0.3f delay:0 options:options animations:rotateButtons completion:nil];
+            
+            [UIView animateWithDuration:duration
+                                  delay:delay
+                                options:options
+                             animations:rotateButtons
+                             completion:nil];
         }
         else
         {
@@ -366,32 +378,44 @@ static const CGFloat kButtonHitTestEdgeInset = 40.0f;
     GPLogOUT();
 }
 
-- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated
+- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated withDelay:(NSTimeInterval)delay
 {
     GPLogIN();
     
-    CGAffineTransform rotation = CGAffineTransformMakeRotation(angle);
-    
-    Block rotateButtons = ^{
-        
-        self.cancelButton.transform = rotation;
-        self.retakeButton.transform = rotation;
-        self.useButton.transform = rotation;
-    };
-    
-    if (animated)
+    if (angle != _buttonsRotationAngle)
     {
-        UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut;
+        NSTimeInterval duration = kButtonsRotationAnimationDuration;
         
-        [UIView animateWithDuration:0.3f
-                              delay:0
-                            options:options
-                         animations:rotateButtons
-                         completion:nil];
-    }
-    else
-    {
-        [UIView performWithoutAnimation:rotateButtons];
+        if (FloorValueWithTwoDecimals(fabsf(angle - _buttonsRotationAngle)) > M_PI_2)
+        {
+            duration = 2 * kButtonsRotationAnimationDuration;
+        }
+        
+        _buttonsRotationAngle = angle;
+        
+        CGAffineTransform rotation = CGAffineTransformMakeRotation(angle);
+        
+        Block rotateButtons = ^{
+            
+            self.cancelButton.transform = rotation;
+            self.retakeButton.transform = rotation;
+            self.useButton.transform = rotation;
+        };
+        
+        if (animated)
+        {
+            UIViewAnimationOptions options = UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseInOut;
+            
+            [UIView animateWithDuration:duration
+                                  delay:delay
+                                options:options
+                             animations:rotateButtons
+                             completion:nil];
+        }
+        else
+        {
+            [UIView performWithoutAnimation:rotateButtons];
+        }
     }
     
     GPLogOUT();

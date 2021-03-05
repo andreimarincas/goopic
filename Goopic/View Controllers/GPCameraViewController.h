@@ -92,6 +92,8 @@
 @property (nonatomic, strong) GPCameraViewTopToolbar *topToolbar;
 @property (nonatomic, strong) GPCameraViewBottomToolbar *bottomToolbar;
 
+@property (nonatomic) BOOL canUpdateButtons;
+
 
 // Designated initializer
 - (instancetype)init;

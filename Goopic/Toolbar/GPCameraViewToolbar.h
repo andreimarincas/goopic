@@ -42,7 +42,7 @@
 
 - (void)selectFlashButtonForValue:(NSString *)value;
 
-- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated;
+- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated withDelay:(NSTimeInterval)delay;
 
 @end
 
@@ -50,6 +50,9 @@
 #pragma mark - Bottom Toolbar
 
 @interface GPCameraViewBottomToolbar : UIView
+{
+    CGFloat _buttonsRotationAngle;
+}
 
 @property (nonatomic, weak) id <GPCameraViewToolbarDelegate> delegate;
 
@@ -63,6 +66,6 @@
 - (void)updateUI;
 
 // angle: radians
-- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated;
+- (void)setButtonsRotation:(CGFloat)angle animated:(BOOL)animated withDelay:(NSTimeInterval)delay;
 
 @end

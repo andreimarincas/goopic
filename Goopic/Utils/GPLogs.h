@@ -21,7 +21,7 @@
 #else
 
     #define GPLogIN()
-    #define GpLogOUT()
+    #define GPLogOUT()
     #define GPLog(format,...)
     #define GPLogWarn(format,...)
     #define GPLogErr(format,...)
