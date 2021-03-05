@@ -80,6 +80,8 @@
     
     [container addSubview:transportedView];
     
+    CGRect transportedViewFrame = [toPhotoView frameThatFitsImageSize:originalSize];
+    
     GPPhotoViewBottomToolbar *toBottomToolbar = toViewController.bottomToolbar;
     [toBottomToolbar moveToView:container];
     toBottomToolbar.alpha = 0;
@@ -92,6 +94,15 @@
     NSInteger selectedPhotoIndex = fromViewController.selectedPhotoIndex;
     
     [selectedCell setThumbnailHidden:YES atIndex:selectedPhotoIndex];
+    
+    // Apply yOffset
+    CGFloat yOffset = GPInterfaceOrientationIsPortrait() && (RealStatusBarHeight() > StatusBarHeight()) ? StatusBarHeight() : 0;
+    
+    fromToolbar.center = CGPointMake(fromToolbar.center.x, fromToolbar.center.y + yOffset);
+    toBottomToolbar.center = CGPointMake(toBottomToolbar.center.x, toBottomToolbar.center.y + yOffset);
+    transportedView.center = CGPointMake(transportedView.center.x, transportedView.center.y + yOffset);
+    transportedViewFrame = CGRectMake(transportedViewFrame.origin.x, transportedViewFrame.origin.y + yOffset,
+                                      transportedViewFrame.size.width, transportedViewFrame.size.height);
     
     [UIView animateWithDuration:self.presentationDuration
                           delay:0
@@ -111,7 +122,7 @@
                          toDisclosureButton.alpha = 1;
                          toBottomToolbar.alpha = 1;
                          
-                         transportedView.frame = [toPhotoView frameThatFitsImageSize:originalSize];
+                         transportedView.frame = transportedViewFrame;
                          photoView.frame = transportedView.bounds;
                          
                      } completion:^(BOOL finished) {
@@ -123,6 +134,7 @@
                          toPhotoView.hidden = NO;
                          
                          [toBottomToolbar moveToView:toViewController.view];
+                         toBottomToolbar.center = CGPointMake(toBottomToolbar.center.x, toBottomToolbar.center.y - yOffset);
                          
                          [fromToolbar moveToView:fromViewController.view];
                          fromTitleLabel.alpha = 1;
@@ -207,6 +219,16 @@
     NSInteger selectedPhotoIndex = toViewController.selectedPhotoIndex;
     
     [selectedCell setThumbnailHidden:YES atIndex:selectedPhotoIndex];
+    
+    // Apply yOffset (status bar height is 40 - red when recording, green during phone call)
+    CGFloat yOffset = GPInterfaceOrientationIsPortrait() && (RealStatusBarHeight() > StatusBarHeight()) ? StatusBarHeight() : 0;
+    
+    fromViewController.view.center = CGPointMake(fromViewController.view.center.x, fromViewController.view.center.y + yOffset);
+    fromTopToolbar.center = CGPointMake(fromTopToolbar.center.x, fromTopToolbar.center.y + yOffset);
+    fromBottomToolbar.center = CGPointMake(fromBottomToolbar.center.x, fromBottomToolbar.center.y + yOffset);
+    transportedView.center = CGPointMake(transportedView.center.x, transportedView.center.y + yOffset);
+    transportedViewFrame = CGRectMake(transportedViewFrame.origin.x, transportedViewFrame.origin.y + yOffset,
+                                      transportedViewFrame.size.width, transportedViewFrame.size.height);
     
     [UIView animateWithDuration:self.dismissalDuration
                           delay:0

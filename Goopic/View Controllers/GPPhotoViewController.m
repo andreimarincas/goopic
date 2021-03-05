@@ -145,12 +145,12 @@
     self.photoView.frame = self.photoScrollView.bounds;
     [self.photoView setNeedsDisplay];
     
-    self.topToolbar.frame = CGRectMake(0, 0, self.view.bounds.size.width, ToolbarHeight());
+    self.topToolbar.frame = CGRectMake(0, 0, self.view.bounds.size.width, ToolbarHeight(YES));
     [self.view bringSubviewToFront:self.topToolbar];
     [self.topToolbar updateUI];
     
-    self.bottomToolbar.frame = CGRectMake(0, self.view.bounds.size.height - ToolbarHeight(),
-                                          self.view.bounds.size.width, ToolbarHeight());
+    self.bottomToolbar.frame = CGRectMake(0, self.view.bounds.size.height - ToolbarHeight(NO),
+                                          self.view.bounds.size.width, ToolbarHeight(NO));
     
     [self.view bringSubviewToFront:self.bottomToolbar];
     [self.bottomToolbar updateUI];
@@ -222,20 +222,15 @@
     return YES;
 }
 
-- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
-{
-    GPLogIN();
-    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
-    
-    [self setNeedsStatusBarAppearanceUpdate];
-    
-    GPLogOUT();
-}
-
 #pragma mark - Status Bar
 
 - (BOOL)prefersStatusBarHidden
 {
+    if ([super prefersStatusBarHidden])
+    {
+        return YES;
+    }
+    
     return GPInterfaceOrientationIsLandscape();
 }
 

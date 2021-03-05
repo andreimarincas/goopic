@@ -9,14 +9,16 @@
 #import "GPPhotosTableViewToolbar.h"
 
 
-static const CGFloat kDateLabelMarginLeft = 5.0f;
-static const CGFloat kDateLabelMarginBottom = 1.0f;
+static const CGFloat kDateLabelMarginLeft       = 5.0f;
+static const CGFloat kDateLabelMarginBottom     = 1.0f;
 
 static const NSTimeInterval kDateFadingDuration = 0.2f;
 
-static const CGFloat kTitleLabelTapPadding = 80.0f;
+static const CGFloat kTitleLabelTapPadding      = 80.0f;
 
-static const CGFloat kHitTestEdgeInset = 40.0f;
+static const CGFloat kHitTestEdgeInset          = 40.0f;
+
+static const CGFloat kCameraButtonSize          = 30.0f;
 
 
 @implementation GPPhotosTableViewToolbar
@@ -53,13 +55,10 @@ static const CGFloat kHitTestEdgeInset = 40.0f;
         self.titleLabel.userInteractionEnabled = YES;
         
         GPButton *cameraButton = [[GPButton alloc] init];
-        [cameraButton setTitle:@"Camera" forState:UIControlStateNormal];
-        [cameraButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [cameraButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [cameraButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
+        [cameraButton setImage:[UIImage imageNamed:@"camera-button.png"] forState:UIControlStateNormal];
+        [cameraButton setImage:[UIImage imageNamed:@"camera-button-highlight.png"] forState:UIControlStateHighlighted];
+        [cameraButton setImage:[UIImage imageNamed:@"camera-button-highlight.png"] forState:UIControlStateDisabled];
         [cameraButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        cameraButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
-        cameraButton.titleLabel.textAlignment = NSTextAlignmentCenter;
         [self addSubview:cameraButton];
         self.cameraButton = cameraButton;
         
@@ -102,10 +101,9 @@ static const CGFloat kHitTestEdgeInset = 40.0f;
     
     CGFloat yOffset = StatusBarHeightForToolbar();
     
-    [self.cameraButton sizeToFit];
-    self.cameraButton.frame = CGRectMake(self.bounds.size.width - self.cameraButton.frame.size.width - kToolbarButtonsMargin,
-                                         yOffset + (self.bounds.size.height - yOffset - self.cameraButton.frame.size.height) / 2,
-                                         self.cameraButton.frame.size.width, self.cameraButton.frame.size.height);
+    self.cameraButton.frame = CGRectMake(self.bounds.size.width - kCameraButtonSize - kToolbarButtonsMargin,
+                                         yOffset + (self.bounds.size.height - yOffset - kCameraButtonSize) / 2,
+                                         kCameraButtonSize, kCameraButtonSize);
     [self bringSubviewToFront:self.cameraButton];
     self.cameraButton.hitTestEdgeInsets = UIEdgeInsetsMake((self.bounds.size.height - self.cameraButton.frame.size.height) / 2, kHitTestEdgeInset,
                                                            (self.bounds.size.height - self.cameraButton.frame.size.height) / 2, kHitTestEdgeInset);

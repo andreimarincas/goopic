@@ -35,15 +35,13 @@ NSString * NSStringFromGPToolbarButtonType(GPToolbarButtonType buttonType)
 
 CGFloat StatusBarHeight()
 {
-    static CGFloat _statusBarHeight = 0;
-    
-    if (_statusBarHeight == 0)
-    {
-        CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
-        _statusBarHeight = fminf(statusFrame.size.width, statusFrame.size.height); // depending on the orientation
-    }
-    
-    return _statusBarHeight;
+    return 20.0f; // I need this to be the same also when the status bar is hidden
+}
+
+CGFloat RealStatusBarHeight()
+{
+    CGRect statusFrame = [[UIApplication sharedApplication] statusBarFrame];
+    return fminf(statusFrame.size.width, statusFrame.size.height); // depending on interface orientation
 }
 
 CGFloat StatusBarHeightForToolbar()
@@ -51,8 +49,16 @@ CGFloat StatusBarHeightForToolbar()
     return GPInterfaceOrientationIsPortrait() ? StatusBarHeight() : 0;
 }
 
-CGFloat ToolbarHeight()
+CGFloat ToolbarHeight(BOOL top)
 {
+    if (top && GPInterfaceOrientationIsPortrait())
+    {
+        if (RealStatusBarHeight() > StatusBarHeight()) // status bar height is 40 (red when recording, green during phone call)
+        {
+            return kToolbarHeight_Portrait + StatusBarHeight();
+        }
+    }
+    
     return (GPInterfaceOrientationIsPortrait() ? kToolbarHeight_Portrait : kToolbarHeight_Landscape);
 }
 

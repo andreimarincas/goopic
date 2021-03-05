@@ -22,8 +22,8 @@ static const NSTimeInterval kMinute = 60 * kSecond;
 static const NSTimeInterval kHour   = 60 * kMinute;
 static const NSTimeInterval kDay    = 24 * kHour;
 
-static const NSTimeInterval kPhotoLocalExpirationInterval = 1 * kMinute; // 1 * kDay;
-static const NSTimeInterval kPhotoImgurExpirationInterval = 30 * kDay; // actually 6 months, but that's too much for this app's purpose
+static const NSTimeInterval kPhotoLocalExpirationInterval = 1 * kDay;
+static const NSTimeInterval kPhotoImgurExpirationInterval = 30 * kDay; // actually 6 months, but that's too much for this app's purpose anyway
 
 
 // Colors
@@ -144,8 +144,7 @@ typedef NS_ENUM (NSInteger, GPErrorCode)
 // Activity types
 typedef NS_ENUM (NSInteger, GPActivity)
 {
-    GPActivityProcessingImage = 100,
-    GPActivityStartingCamera
+    GPActivityProcessingImage = 100
 };
 
 
@@ -167,7 +166,7 @@ static NSString * const kCameraFlashOffValue  = @"off";
 
 #define LOGS_ENABLED              1
 
-#define CAMERA_BLUR_ENABLED       1
+#define CAMERA_BLUR_ENABLED       0
 
 #define IMGUR_RATE_LIMITS_ENABLED 0 // TODO: Set to 1 use it
 

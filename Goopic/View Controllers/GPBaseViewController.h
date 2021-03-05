@@ -57,8 +57,9 @@
  *
  * NOTES:
  *
- * Override this method to set the subviews geometry. Not intended for heavy duty as this gets called pretty often, so don't reload resources and stuff like that, keep it light.
- * If you want to reload/unload resources to refresh the UI then do it in viewWillAppear:/viewDidDisappear: methods, not here.
+ * Override this method to set the subviews geometry. Not intended for heavy duty as this gets called pretty often, 
+ * so don't reload resources and stuff like that, keep it light. If you want to reload/unload resources to refresh the UI 
+ * then do it in viewWillAppear:/viewDidDisappear: methods, not here.
  *
  * It will be called whenever the view's bounds change, and also before any transition (TO or FROM this view controller).
  */

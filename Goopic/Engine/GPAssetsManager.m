@@ -80,23 +80,10 @@
     GPLogIN();
     GPLog(@"notification: %@", notification);
     
-    NSSet *groups = notification.userInfo[ALAssetLibraryUpdatedAssetGroupsKey];
-    
-    for (NSURL *groupURL in groups)
-    {
-        [_assetsLibrary groupForURL:groupURL
-                        resultBlock:^(ALAssetsGroup *group) {
-                            
-                            if ([[group valueForProperty:ALAssetsGroupPropertyType] intValue] == ALAssetsGroupSavedPhotos)
-                            {
-                                GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
-                                GPPhotosTableViewController *photosTableViewController = (GPPhotosTableViewController *)[appDelegate rootViewController];
-                                
-                                [photosTableViewController reloadPhotosFromLibrary];
-                            }
-                            
-                        } failureBlock:nil];
-    }
+    GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
+    GPPhotosTableViewController *photosTableViewController = (GPPhotosTableViewController *)[appDelegate rootViewController];
+    [photosTableViewController.photosTableView scrollRectToVisible:CGRectMake(0, 0, 10, 10) animated:NO]; // scroll to top
+    [photosTableViewController reloadPhotosFromLibrary];
     
     GPLogOUT();
 }

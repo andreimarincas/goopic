@@ -12,9 +12,10 @@
 NSString * NSStringFromGPToolbarButtonType(GPToolbarButtonType buttonType);
 
 CGFloat StatusBarHeight();
+CGFloat RealStatusBarHeight();
 
 CGFloat StatusBarHeightForToolbar();
-CGFloat ToolbarHeight();
+CGFloat ToolbarHeight(BOOL top);
 
 NSString * NSStringFromBOOL(BOOL b);
 

@@ -48,8 +48,6 @@
         cameraViewController.view.transform = CGAffineTransformMakeRotation(M_PI_2);
     }
     
-    [photoViewController updateUI];
-    
     photoViewController.view.hidden = NO;
     photoViewController.view.alpha = 1;
     

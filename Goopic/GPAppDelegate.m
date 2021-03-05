@@ -25,7 +25,9 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Store the initial status bar height (status bar is visible on launch) because the height is 0 when the status bar is hidden
-    StatusBarHeight();
+//    StatusBarHeight();
+    
+//    [NSThread sleepForTimeInterval:2];
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
@@ -134,9 +136,6 @@
 {
     GPLogIN();
     
-    GPPhotosTableViewController *photosTableViewController = (GPPhotosTableViewController *)[self rootViewController];
-    [photosTableViewController.photosTableView scrollRectToVisible:CGRectMake(0, 0, 10, 10) animated:NO];
-    
     if ([[cameraViewController presentingViewController] isKindOfClass:[GPPhotoViewController class]])
     {
         GPPhotoViewController *photoViewController = (GPPhotoViewController *)[cameraViewController presentingViewController];
@@ -151,6 +150,8 @@
         self.cameraViewController = cameraViewController;
         
         [cameraViewController dismissViewControllerAnimated:NO completion:^{
+            
+            GPPhotosTableViewController *photosTableViewController = (GPPhotosTableViewController *)[self rootViewController];
             
             GPPhotoViewController *photoViewController = [[GPPhotoViewController alloc] initWithPhoto:photo];
             photoViewController.transitioningDelegate = photosTableViewController;

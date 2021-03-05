@@ -325,7 +325,6 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 
 @interface GPPhotosTableViewController ()
 
-//@property (atomic) NSMutableArray *photosFromLibrary;
 @property (atomic) NSTimer *hideTitleTimer;
 
 @end
@@ -501,16 +500,6 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     GPLogOUT();
 }
 
-- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
-{
-    GPLogIN();
-    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
-    
-    [self setNeedsStatusBarAppearanceUpdate];
-    
-    GPLogOUT();
-}
-
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
     GPLogIN();
@@ -545,6 +534,11 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 
 - (BOOL)prefersStatusBarHidden
 {
+    if ([super prefersStatusBarHidden])
+    {
+        return YES;
+    }
+    
     return GPInterfaceOrientationIsLandscape();
 }
 
@@ -679,7 +673,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     
     GPLog(@"self view: %@", self.view);
     
-    self.toolbar.frame = CGRectMake(0, 0, self.view.bounds.size.width, ToolbarHeight());
+    self.toolbar.frame = CGRectMake(0, 0, self.view.bounds.size.width, ToolbarHeight(YES));
     [self.toolbar updateUI];
     
     static UIInterfaceOrientation _lastOrientation = (UIInterfaceOrientation)UIDeviceOrientationUnknown;

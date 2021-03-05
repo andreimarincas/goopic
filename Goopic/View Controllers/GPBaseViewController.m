@@ -9,6 +9,11 @@
 #import "GPBaseViewController.h"
 
 
+static const NSTimeInterval kStatusBarUpdateAnimationDuration = 0.2f;
+
+static CGFloat _lastStatusBarHeightWhenVisible;
+
+
 @interface GPBaseView (Private)
 
 - (void)setBaseViewController:(GPBaseViewController *)baseViewController;
@@ -95,12 +100,20 @@
 - (void)setBounds:(CGRect)bounds
 {
     GPLogIN();
-    [super setBounds:bounds];
     
-    // Call updateUI if NOT rotating interface orientation, otherwise let the base view controller updateUI in the animation block
-    if (!self.baseViewController.isRotatingInterfaceOrientation)
+    if ([self.baseViewController isRotatingInterfaceOrientation])
     {
-        [self.baseViewController updateBaseUI];
+        [super setBounds:bounds];
+    }
+    else
+    {
+        [UIView performWithoutAnimation:^{
+            [super setBounds:bounds];
+            
+            // Call updateUI only if NOT rotating interface orientation,
+            // otherwise let the base view controller updateUI in the animation block for interface orientation change
+            [self.baseViewController updateBaseUI];
+        }];
     }
     
     GPLogOUT();
@@ -109,12 +122,20 @@
 - (void)setFrame:(CGRect)frame
 {
     GPLogIN();
-    [super setFrame:frame];
     
-    // Call updateUI if NOT rotating interface orientation, otherwise let the base view controller updateUI in the animation block
-    if (!self.baseViewController.isRotatingInterfaceOrientation)
+    if ([self.baseViewController isRotatingInterfaceOrientation])
     {
-        [self.baseViewController updateBaseUI];
+        [super setFrame:frame];
+    }
+    else
+    {
+        [UIView performWithoutAnimation:^{
+            [super setFrame:frame];
+            
+            // Call updateUI only if NOT rotating interface orientation,
+            // otherwise let the base view controller updateUI in the animation block for interface orientation change
+            [self.baseViewController updateBaseUI];
+        }];
     }
     
     GPLogOUT();
@@ -198,20 +219,57 @@
 {
     [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
     _rotatingInterfaceOrientation = YES;
+    
+    if (![[UIApplication sharedApplication] isStatusBarHidden])
+    {
+        _lastStatusBarHeightWhenVisible = RealStatusBarHeight();
+    }
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
                                          duration:(NSTimeInterval)duration
 {
+    GPLogIN();
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
     
     [self updateBaseUI];
+    
+    if (_lastStatusBarHeightWhenVisible == StatusBarHeight())
+    {
+        [self setNeedsStatusBarAppearanceUpdate];
+    }
+    
+    GPLogOUT();
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
     [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
     _rotatingInterfaceOrientation = NO;
+    
+    if (_lastStatusBarHeightWhenVisible > StatusBarHeight()) // status bar height is 40 (red when recording, green during phone call)
+    {
+        [UIView animateWithDuration:kStatusBarUpdateAnimationDuration
+                              delay:0
+                            options:UIViewAnimationOptionBeginFromCurrentState
+                         animations:^{
+                             
+                             [self setNeedsStatusBarAppearanceUpdate];
+                             
+                         } completion:nil];
+    }
+}
+
+#pragma mark - Status Bar
+
+- (BOOL)prefersStatusBarHidden
+{
+    if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateBackground)
+    {
+        return YES;
+    }
+    
+    return NO;
 }
 
 #pragma mark - Base View
@@ -352,9 +410,6 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
         case GPActivityProcessingImage:
             self.activityLabel.text = @"Processing image..."; break;
             
-        case GPActivityStartingCamera:
-//            self.activityLabel.text = @"Starting camera..."; break;
-            
         default:
         {
             self.activityLabel.text = @"";
@@ -446,6 +501,15 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
     {
         [(GPBaseViewController *)self.presentedViewController appDidBecomeActive];
     }
+    
+    [UIView animateWithDuration:kStatusBarUpdateAnimationDuration
+                          delay:0
+                        options:UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
+                         
+                         [self setNeedsStatusBarAppearanceUpdate];
+                         
+                     } completion:nil];
 }
 
 - (void)appDidEnterBackground
@@ -454,6 +518,8 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
     {
         [(GPBaseViewController *)self.presentedViewController appDidEnterBackground];
     }
+    
+    [self setNeedsStatusBarAppearanceUpdate];
 }
 
 - (void)appWillEnterForeground

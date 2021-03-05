@@ -8,7 +8,7 @@
 
 #import "UIView+Extension.h"
 
-static const NSTimeInterval kTransitionAnimation = 0.2f;
+static const NSTimeInterval kTransitionAnimation = 0.15f;
 
 @implementation UIView (Extension)
 
