@@ -158,3 +158,8 @@ BOOL iOS_8_or_higher()
 {
     return (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_7_1);
 }
+
+BOOL iPhone_5()
+{
+    return ([UIScreen mainScreen].scale == 2.0f && [UIScreen mainScreen].bounds.size.height == 568);
+}

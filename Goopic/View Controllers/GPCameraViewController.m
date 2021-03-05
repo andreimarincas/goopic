@@ -21,8 +21,8 @@
 
 // Constants
 
-static const CGFloat kTopToolbarSize    = 41.33f;
-static const CGFloat kBottomToolbarSize = 100.0f;
+static CGFloat kTopToolbarSize    = 41.33f;
+static CGFloat kBottomToolbarSize = 100.0f;
 
 #if (CAMERA_BLUR_ENABLED)
 
@@ -510,7 +510,17 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     // Create the capture session
 	AVCaptureSession *session = [[AVCaptureSession alloc] init];
-    session.sessionPreset = AVCaptureSessionPreset640x480;
+    
+    if (iPhone_5())
+    {
+        session.sessionPreset = AVCaptureSessionPreset640x480;
+    }
+    else
+    {
+        session.sessionPreset = AVCaptureSessionPreset352x288;
+        kBottomToolbarSize = 80.0f;
+    }
+    
 	self.session = session;
     
     // Setup the camera view

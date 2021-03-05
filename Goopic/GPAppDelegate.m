@@ -42,7 +42,8 @@
     self.imgurSession = imgSession;
     
     self.window.rootViewController = self.rootViewController;
-    self.window.backgroundColor = GPCOLOR_BLACK;
+    
+    self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     
     // Purge photos store
