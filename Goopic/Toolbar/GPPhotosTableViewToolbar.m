@@ -31,21 +31,21 @@ static const CGFloat kCameraButtonSize          = 30.0f;
     {
         // Custom initialization
         
-        self.backgroundColor = GPCOLOR_TRANSLUCENT_BLACK;
+        self.backgroundColor = GPTOOLBAR_BACKGROUND_COLOR;
         
         GPLine *line = [[GPLine alloc] init];
         line.lineWidth = 0.25f;
-        line.linePosition = LinePositionTop;
+        line.linePosition = LinePositionBottom;
         line.lineStyle = LineStyleContinuous;
-        line.lineColor = GPCOLOR_BLACK;
+        line.lineColor = GPTOOLBAR_LINE_COLOR;
         [self insertSubview:line atIndex:0];
         self.line = line;
         
         UILabel *titleLabel = [[UILabel alloc] init];
         titleLabel.textAlignment = NSTextAlignmentCenter;
-        titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
+        titleLabel.font = [UIFont fontWithName:GPTOOLBAR_TITLE_FONT size:kToolbarButtonFontSize];
         titleLabel.text = @"Photos";
-        titleLabel.textColor = GPCOLOR_WHITE_TITLE;
+        titleLabel.textColor = GPTOOLBAR_TITLE_COLOR;
         titleLabel.backgroundColor = [UIColor clearColor];
         [self addSubview:titleLabel];
         self.titleLabel = titleLabel;
@@ -54,19 +54,14 @@ static const CGFloat kCameraButtonSize          = 30.0f;
         [self.titleLabel addGestureRecognizer:tapGr];
         self.titleLabel.userInteractionEnabled = YES;
         
-        GPButton *cameraButton = [[GPButton alloc] init];
-        [cameraButton setImage:[UIImage imageNamed:@"camera-button.png"] forState:UIControlStateNormal];
-        [cameraButton setImage:[UIImage imageNamed:@"camera-button-highlight.png"] forState:UIControlStateHighlighted];
-        [cameraButton setImage:[UIImage imageNamed:@"camera-button-highlight.png"] forState:UIControlStateDisabled];
-        [cameraButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        cameraButton.isImageBased = YES;
+        GPButton *cameraButton = [GPButton buttonWithImageName:@"camera-button.png" target:self action:@selector(buttonTapped:)];
         [self addSubview:cameraButton];
         self.cameraButton = cameraButton;
         
         UILabel *dateLabel = [[UILabel alloc] init];
         dateLabel.textAlignment = NSTextAlignmentCenter;
-        dateLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:13.0f];
-        dateLabel.textColor = GPCOLOR_WHITE_TITLE;
+        dateLabel.font = DATE_FONT;
+        dateLabel.textColor = DATE_COLOR;
         dateLabel.backgroundColor = [UIColor clearColor];
         [self addSubview:dateLabel];
         self.dateLabel = dateLabel;

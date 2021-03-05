@@ -291,10 +291,11 @@ static CGFloat _lastStatusBarHeightWhenVisible;
 
 - (BOOL)prefersStatusBarHidden
 {
-    if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateBackground)
-    {
-        return YES;
-    }
+    // Commented because the launch image doesn't have any artwork in the middle that would otherwise be ruined
+//    if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateBackground)
+//    {
+//        return YES;
+//    }
     
     return NO;
 }
@@ -311,7 +312,7 @@ static CGFloat _lastStatusBarHeightWhenVisible;
 - (void)updateUI
 {
     self.activityIndicatorView.frame = [self preferredActivityViewFrame];
-    self.activityIndicatorView.backgroundColor = [self preferredActivityViewBackgroundColor];
+    self.activityIndicatorView.backgroundColor = ACTIVITY_VIEW_BACKGROUND_COLOR;
     [self.activityIndicatorView setNeedsDisplay];
     
     [self.activityLabel sizeToFit];
@@ -344,8 +345,8 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
 {
     if (!_activityIndicatorView)
     {
-        UIActivityIndicatorView *activityIndicatorView = [[UIActivityIndicatorView alloc]
-                                                          initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+        UIActivityIndicatorView *activityIndicatorView =
+            [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:ACTIVITY_VIEW_STYLE];
         activityIndicatorView.hidesWhenStopped = NO;
         activityIndicatorView.userInteractionEnabled = NO;
         activityIndicatorView.alpha = 0;
@@ -363,7 +364,7 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
         UILabel *activityLabel = [[UILabel alloc] init];
         activityLabel.userInteractionEnabled = NO;
         activityLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:16.0f];
-        activityLabel.textColor = GPCOLOR_WHITE_TITLE;
+        activityLabel.textColor = ACTIVITY_VIEW_TEXT_COLOR;
         activityLabel.textAlignment = NSTextAlignmentCenter;
         activityLabel.alpha = 0;
         [self.view addSubview:activityLabel];
@@ -376,11 +377,6 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
 - (CGRect)preferredActivityViewFrame
 {
     return self.view.bounds;
-}
-
-- (UIColor *)preferredActivityViewBackgroundColor
-{
-    return GPCOLOR_TRANSLUCENT_DARK;
 }
 
 - (BOOL)activityInProgress
@@ -529,14 +525,15 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
         [(GPBaseViewController *)self.presentedViewController appDidBecomeActive];
     }
     
-    [UIView animateWithDuration:kStatusBarUpdateAnimationDuration
-                          delay:0
-                        options:UIViewAnimationOptionBeginFromCurrentState
-                     animations:^{
-                         
-                         [self setNeedsStatusBarAppearanceUpdate];
-                         
-                     } completion:nil];
+    // Commented because the launch image doesn't have any artwork in the middle that would otherwise be ruined
+//    [UIView animateWithDuration:kStatusBarUpdateAnimationDuration
+//                          delay:0
+//                        options:UIViewAnimationOptionBeginFromCurrentState
+//                     animations:^{
+//                         
+//                         [self setNeedsStatusBarAppearanceUpdate];
+//                         
+//                     } completion:nil];
 }
 
 - (void)appDidEnterBackground
@@ -546,7 +543,8 @@ static const NSTimeInterval kActivityViewAnimationDuration = 0.2f;
         [(GPBaseViewController *)self.presentedViewController appDidEnterBackground];
     }
     
-    [self setNeedsStatusBarAppearanceUpdate];
+    // Commented because the launch image doesn't have any artwork in the middle that would otherwise be ruined
+//    [self setNeedsStatusBarAppearanceUpdate];
 }
 
 - (void)appWillEnterForeground

@@ -28,45 +28,27 @@ static const CGFloat kCameraButtonSize     = 30.0f;
     {
         // Custom initialization
         
-        self.backgroundColor = GPCOLOR_TRANSLUCENT_BLACK;
+        self.backgroundColor = GPTOOLBAR_BACKGROUND_COLOR;
         
         GPLine *line = [[GPLine alloc] init];
         line.lineWidth = 0.25f;
-        line.linePosition = LinePositionTop;
+        line.linePosition = LinePositionBottom;
         line.lineStyle = LineStyleContinuous;
-        line.lineColor = GPCOLOR_BLACK;
+        line.lineColor = GPTOOLBAR_LINE_COLOR;
         [self insertSubview:line atIndex:0];
         self.line = line;
         
-        GPButton *photosButton = [[GPButton alloc] init];
-        [photosButton setTitle:@"Photos" forState:UIControlStateNormal];
-        [photosButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [photosButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [photosButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
-        [photosButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        photosButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
-        photosButton.titleLabel.textAlignment = NSTextAlignmentCenter;
-        photosButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+        GPButton *photosButton = [GPButton buttonWithTitle:@"Photos" target:self action:@selector(buttonTapped:)];
         [self addSubview:photosButton];
         self.photosButton = photosButton;
         
-        GPButton *disclosureButton = [[GPButton alloc] init];
-        [disclosureButton setImage:[UIImage imageNamed:@"disclosure-button.png"] forState:UIControlStateNormal];
-        [disclosureButton setImage:[UIImage imageNamed:@"disclosure-button-highlight.png"] forState:UIControlStateHighlighted];
-        [disclosureButton setImage:[UIImage imageNamed:@"disclosure-button-highlight.png"] forState:UIControlStateDisabled];
-        [disclosureButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        disclosureButton.isImageBased = YES;
+        GPButton *disclosureButton = [GPButton buttonWithImageName:@"disclosure-button.png" target:self action:@selector(buttonTapped:)];
         [self addSubview:disclosureButton];
         self.disclosureButton = disclosureButton;
         
         [self.disclosureButton connectTo:self.photosButton];
         
-        GPButton *cameraButton = [[GPButton alloc] init];
-        [cameraButton setImage:[UIImage imageNamed:@"camera-button.png"] forState:UIControlStateNormal];
-        [cameraButton setImage:[UIImage imageNamed:@"camera-button-highlight.png"] forState:UIControlStateHighlighted];
-        [cameraButton setImage:[UIImage imageNamed:@"camera-button-highlight.png"] forState:UIControlStateDisabled];
-        [cameraButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        cameraButton.isImageBased = YES;
+        GPButton *cameraButton = [GPButton buttonWithImageName:@"camera-button.png" target:self action:@selector(buttonTapped:)];
         [self addSubview:cameraButton];
         self.cameraButton = cameraButton;
     }
@@ -145,38 +127,22 @@ static const CGFloat kCameraButtonSize     = 30.0f;
     {
         // Custom initialization
         
-        self.backgroundColor = GPCOLOR_TRANSLUCENT_BLACK;
+        self.backgroundColor = GPTOOLBAR_BACKGROUND_COLOR;
         
         GPLine *line = [[GPLine alloc] init];
         line.lineWidth = 0.25f;
-        line.linePosition = LinePositionBottom;
+        line.linePosition = LinePositionTop;
         line.lineStyle = LineStyleContinuous;
-        line.lineColor = GPCOLOR_BLACK;
+        line.lineColor = GPTOOLBAR_LINE_COLOR;
         [self insertSubview:line atIndex:0];
         self.line = line;
         
-        GPButton *searchButton = [[GPButton alloc] init];
-        [searchButton setTitle:@"Search Google For This Image" forState:UIControlStateNormal];
-        [searchButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [searchButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [searchButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
-        [searchButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        searchButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
-        searchButton.titleLabel.textAlignment = NSTextAlignmentCenter;
-        searchButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+        GPButton *searchButton = [GPButton buttonWithTitle:@"Search Google For This Image" target:self action:@selector(buttonTapped:)];
         searchButton.forceHighlight = YES;
         [self addSubview:searchButton];
         self.searchButton = searchButton;
         
-        GPButton *cancelButton = [[GPButton alloc] init];
-        [cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
-        [cancelButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [cancelButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [cancelButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
-        [cancelButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        cancelButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
-        cancelButton.titleLabel.textAlignment = NSTextAlignmentCenter;
-        cancelButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+        GPButton *cancelButton = [GPButton buttonWithTitle:@"Cancel" target:self action:@selector(buttonTapped:)];
         cancelButton.forceHighlight = YES;
         cancelButton.alpha = 0;
         [self addSubview:cancelButton];

@@ -80,9 +80,6 @@
 // Override. Default value is view's bounds.
 - (CGRect)preferredActivityViewFrame;
 
-// Override. Default is translucent black.
-- (UIColor *)preferredActivityViewBackgroundColor;
-
 - (void)showActivity:(GPActivity)activity animated:(BOOL)animated;
 
 // Hide the activity currently in progress

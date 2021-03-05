@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "GPButton.h"
+#import "GPLine.h"
 
 
 #pragma mark - Toolbar Delegate
@@ -27,6 +28,8 @@
 }
 
 @property (nonatomic, weak) id <GPCameraViewToolbarDelegate> delegate;
+
+@property (nonatomic, strong) GPLine *line;
 
 @property (nonatomic, strong) UIImageView *flashIcon;
 
@@ -55,6 +58,8 @@
 }
 
 @property (nonatomic, weak) id <GPCameraViewToolbarDelegate> delegate;
+
+@property (nonatomic, strong) GPLine *line;
 
 @property (nonatomic, strong) GPButton *cancelButton;
 @property (nonatomic, strong) GPButton *takeButton;

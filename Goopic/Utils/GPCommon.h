@@ -15,6 +15,8 @@ CGFloat StatusBarHeight();
 CGFloat RealStatusBarHeight();
 
 CGFloat StatusBarHeightForToolbar();
+
+// if the toolbar is on top of the screen then the status bar height will be added
 CGFloat ToolbarHeight(BOOL top);
 
 NSString * NSStringFromBOOL(BOOL b);

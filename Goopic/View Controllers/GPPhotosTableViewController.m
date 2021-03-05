@@ -24,7 +24,7 @@ static NSString * const kPhotosHeaderID               = @"PhotosHeader";
 static NSString * const kPhotosFooterID               = @"PhotosFooter";
 
 static CGFloat          sThumbnailDimension           = 60.0f;
-static const CGFloat    kPhotosSpacing                = 2.0f; // 0.0f;
+static const CGFloat    kPhotosSpacing                = PHOTOS_SPACING;
 
 static const NSInteger  kPhotosCountPerCell_Portrait  = 5;
 static const NSInteger  kPhotosCountPerCell_Landscape = 9;
@@ -55,15 +55,15 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     {
         // Custom initialization
         
-        self.contentView.backgroundColor = GPCOLOR_BLACK;
+        self.contentView.backgroundColor = PHOTOS_TABLE_BACKGROUND_COLOR;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
         
         _photos = [NSMutableArray array];
         
-        UIView *bgView = [[UIView alloc] init];
-        bgView.backgroundColor = GPCOLOR_LIGHT_BLACK;
-        [self.contentView addSubview:bgView];
-        self.backgroundView = bgView;
+//        UIView *bgView = [[UIView alloc] init];
+//        bgView.backgroundColor = PHOTOS_TABLE_BORDER_COLOR;
+//        [self.contentView addSubview:bgView];
+//        self.backgroundView = bgView;
     }
     
     return self;
@@ -84,7 +84,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         UIImageView *thumbnailView = [[UIImageView alloc] init];
         thumbnailView.image = [photo thumbnailImage];
         thumbnailView.userInteractionEnabled = NO;
-        thumbnailView.backgroundColor = [UIColor blackColor];
+        thumbnailView.backgroundColor = PHOTOS_TABLE_BACKGROUND_COLOR;
         [self.contentView addSubview:thumbnailView];
         
         id photoData = @{ kPhotoKey         : photo,
@@ -131,12 +131,12 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
         [thumbnailView setNeedsDisplay];
     }
     
-    self.backgroundView.frame = CGRectMake(0, 0,
-                                           kPhotosSpacing + [_photos count] * (sThumbnailDimension + kPhotosSpacing) ,
-                                           self.contentView.bounds.size.height);
-    [self.backgroundView removeFromSuperview];
-    [self.contentView insertSubview:self.backgroundView atIndex:0];
-    [self.backgroundView setNeedsDisplay];
+//    self.backgroundView.frame = CGRectMake(0, 0,
+//                                           kPhotosSpacing + [_photos count] * (sThumbnailDimension + kPhotosSpacing) ,
+//                                           self.contentView.bounds.size.height);
+//    [self.backgroundView removeFromSuperview];
+//    [self.contentView insertSubview:self.backgroundView atIndex:0];
+//    [self.backgroundView setNeedsDisplay];
     
     [self setNeedsDisplay];
 }
@@ -190,7 +190,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     {
         // Custom initialization
         
-        self.contentView.backgroundColor = GPCOLOR_BLACK;
+        self.contentView.backgroundColor = PHOTOS_TABLE_BACKGROUND_COLOR;
         
         UILabel *titleLabel = [[UILabel alloc] init];
         titleLabel.textAlignment = NSTextAlignmentRight;
@@ -271,7 +271,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     if (self)
     {
         // Custom initialization
-        self.contentView.backgroundColor = GPCOLOR_BLACK;
+        self.contentView.backgroundColor = PHOTOS_TABLE_BACKGROUND_COLOR;
     }
     
     return self;
@@ -306,7 +306,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     {
         // Custom initialization
         
-        self.backgroundColor = GPCOLOR_BLACK;
+        self.backgroundColor = PHOTOS_TABLE_BACKGROUND_COLOR;
         self.showsHorizontalScrollIndicator = NO;
         self.showsVerticalScrollIndicator = YES;
         self.allowsSelection = NO; // YES;
@@ -383,7 +383,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
 {
     [super viewDidLoad];
     
-    self.view.backgroundColor = GPCOLOR_BLACK;
+    self.view.backgroundColor = PHOTOS_TABLE_BACKGROUND_COLOR;
     
     GPPhotosTableView *photosTableView = [[GPPhotosTableView alloc] init];
     photosTableView.dataSource = self;
@@ -564,7 +564,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
 
 - (UIStatusBarStyle)preferredStatusBarStyle
 {
-    return UIStatusBarStyleLightContent;
+    return STATUS_BAR_STYLE;
 }
 
 - (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
@@ -1032,7 +1032,7 @@ static const NSTimeInterval kTitleVisibilityTimeout   = 0.1f;
     
     photoCell.photos = cellPhotos;
     
-    photoCell.backgroundView.backgroundColor = (indexPath.section == kPhotosSection) ? GPCOLOR_LIGHT_BLACK : GPCOLOR_BLACK;
+    photoCell.backgroundView.backgroundColor = (indexPath.section == kPhotosSection) ? PHOTOS_TABLE_BORDER_COLOR : PHOTOS_TABLE_BACKGROUND_COLOR;
     
     return photoCell;
 }

@@ -126,7 +126,7 @@
     if (!_photoScrollView)
     {
         UIScrollView *photoScrollView = [[UIScrollView alloc] init];
-        photoScrollView.backgroundColor = GPCOLOR_DARK_BLACK;
+        photoScrollView.backgroundColor = PHOTO_VIEW_BACKGROUND_COLOR;
         photoScrollView.showsHorizontalScrollIndicator = NO;
         photoScrollView.showsVerticalScrollIndicator = NO;
         photoScrollView.minimumZoomScale = 0.9999;
@@ -147,7 +147,7 @@
     {
         UIImageView *photoView = [[UIImageView alloc] init];
         photoView.contentMode = UIViewContentModeScaleAspectFit;
-        photoView.backgroundColor = GPCOLOR_DARK_BLACK;
+        photoView.backgroundColor = PHOTO_VIEW_BACKGROUND_COLOR;
         [self.photoScrollView addSubview:photoView];
         _photoView = photoView;
     }
@@ -199,7 +199,27 @@
 {
     GPLogIN();
     
-    CGFloat alpha = [self toolbarsAreHidden] ? 1 : 0;
+    BOOL toolbarsAreHidden = [self toolbarsAreHidden];
+    
+    Block toggle = ^{
+        
+        if (toolbarsAreHidden)
+        {
+            self.topToolbar.alpha = 1;
+            self.bottomToolbar.alpha = 1;
+            
+            self.photoScrollView.backgroundColor = PHOTO_VIEW_BACKGROUND_COLOR;
+            self.photoView.backgroundColor = PHOTO_VIEW_BACKGROUND_COLOR;
+        }
+        else
+        {
+            self.topToolbar.alpha = 0;
+            self.bottomToolbar.alpha = 0;
+            
+            self.photoScrollView.backgroundColor = PHOTO_VIEW_FULLSCREEN_COLOR;
+            self.photoView.backgroundColor = PHOTO_VIEW_FULLSCREEN_COLOR;
+        }
+    };
     
     if (animated)
     {
@@ -209,20 +229,12 @@
         [UIView animateWithDuration: 0.2
                               delay: 0
                             options: options
-                         animations: ^{
-                             
-                             self.topToolbar.alpha = alpha;
-                             self.bottomToolbar.alpha = alpha;
-                             
-                         } completion:nil];
+                         animations: toggle
+                         completion: nil];
     }
     else
     {
-        [UIView performWithoutAnimation:^{
-            
-            self.topToolbar.alpha = alpha;
-            self.bottomToolbar.alpha = alpha;
-        }];
+        [UIView performWithoutAnimation:toggle];
     }
     
     GPLogOUT();
@@ -274,7 +286,7 @@
 
 - (UIStatusBarStyle)preferredStatusBarStyle
 {
-    return UIStatusBarStyleLightContent;
+    return STATUS_BAR_STYLE;
 }
 
 - (UIStatusBarAnimation)preferredStatusBarUpdateAnimation
@@ -458,8 +470,6 @@
         NSString *title;
         NSString *message;
         
-        BOOL showError = YES;
-        
         switch (error.code)
         {
             case GPErrorNoInternetConnection:
@@ -472,19 +482,19 @@
             // Do NOT show any error message to the user in these cases
             case GPErrorImageUploadCancelled:
             {
-                showError = NO;
+                // No implementation needed
             }
                 break;
                 
             default:
             {
                 title = @"Error";
-                message = @"An error has occurred, please try again.";
+                message = @"Oops! An error has occurred, please try again.";
             }
                 break;
         }
         
-        if (showError)
+        if ([message length] > 0)
         {
             UIAlertView *alertView = [[UIAlertView alloc] initWithTitle: title
                                                                 message: message

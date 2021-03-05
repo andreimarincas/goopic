@@ -668,7 +668,7 @@ static const CGFloat kPercentThreshold = 0.3f; // 0..1
     }
     
     UIView *blackOverlay = [[UIView alloc] init];
-    blackOverlay.backgroundColor = [UIColor blackColor];
+    blackOverlay.backgroundColor = _photoToolbarsAreHidden ? PHOTO_VIEW_FULLSCREEN_COLOR : PHOTO_VIEW_BACKGROUND_COLOR;
     blackOverlay.frame = container.bounds;
     [_transportedView.superview insertSubview:blackOverlay belowSubview:_transportedView];
     _blackOverlay = blackOverlay;

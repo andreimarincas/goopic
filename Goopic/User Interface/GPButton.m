@@ -56,6 +56,39 @@ static const NSTimeInterval kButtonHighlightTransitionDuration = 0.2f;
 
 @implementation GPButton
 
++ (GPButton *)buttonWithTitle:(NSString *)title target:(NSObject *)target action:(SEL)action
+{
+    GPButton *button = [[GPButton alloc] init];
+    [button setTitle:title forState:UIControlStateNormal];
+    [button setTitleColor:GPBUTTON_COLOR forState:UIControlStateNormal];
+    [button setTitleColor:GPBUTTON_COLOR_PRESSED forState:UIControlStateHighlighted];
+    [button setTitleColor:GPBUTTON_COLOR_PRESSED forState:UIControlStateDisabled];
+    [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+    button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
+    button.titleLabel.textAlignment = NSTextAlignmentCenter;
+    button.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+    
+    return button;
+}
+
++ (GPButton *)buttonWithImageName:(NSString *)imageName target:(NSObject *)target action:(SEL)action
+{
+    UIImage *normalImage = [UIImage imageNamed:imageName];
+    
+    NSString *ext = [imageName pathExtension];
+    NSString *highlightImageName = [[NSString stringWithFormat:@"%@-pressed", [imageName stringByDeletingPathExtension]] stringByAppendingPathExtension:ext];
+    UIImage *highlightedImage = [UIImage imageNamed:highlightImageName];
+    
+    GPButton *button = [[GPButton alloc] init];
+    [button setImage:normalImage forState:UIControlStateNormal];
+    [button setImage:highlightedImage forState:UIControlStateHighlighted];
+    [button setImage:highlightedImage forState:UIControlStateDisabled];
+    [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+    button.isImageBased = YES;
+    
+    return button;
+}
+
 - (instancetype)init
 {
     self = [super init];

@@ -57,7 +57,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     
     if (self)
     {
-        self.backgroundColor = [UIColor blackColor];
+        self.backgroundColor = CAMERA_VIEW_BACKGROUND_COLOR;
         
         [self.videoLayer setBackgroundColor:[[UIColor blackColor] CGColor]];
         [self.videoLayer setVideoGravity:AVLayerVideoGravityResizeAspect];
@@ -290,7 +290,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     
-    self.view.backgroundColor = GPCOLOR_DARK_BLACK;
+    self.view.backgroundColor = CAMERA_VIEW_BACKGROUND_COLOR;
     self.edgesForExtendedLayout = UIRectEdgeNone;
     
     // Toolbars
@@ -316,7 +316,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 	[self setupCamera];
     
     UIImageView *capturedImageView = [[UIImageView alloc] init];
-    capturedImageView.backgroundColor = [UIColor blackColor];
+    capturedImageView.backgroundColor = CAMERA_VIEW_BACKGROUND_COLOR;
     capturedImageView.userInteractionEnabled = NO;
     capturedImageView.hidden = YES;
     capturedImageView.contentMode = UIViewContentModeScaleAspectFit;
@@ -328,7 +328,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     // Blur
     CALayer *blurLayer = [CALayer layer];
     blurLayer.masksToBounds = YES;
-    blurLayer.backgroundColor = [[UIColor blackColor] CGColor];
+    blurLayer.backgroundColor = [CAMERA_VIEW_BACKGROUND_COLOR CGColor];
     blurLayer.opacity = 0;
     [self.view.layer addSublayer:blurLayer];
     self.blurLayer = blurLayer;

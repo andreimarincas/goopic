@@ -39,54 +39,48 @@ static const CGFloat kButtonsRotationAnimationDuration = 0.3f;
     {
         // Custom initialization
         
-        self.backgroundColor = GPCOLOR_DARK_BLACK;
+        self.backgroundColor = CAMERA_VIEW_BACKGROUND_COLOR;
+        
+        GPLine *line = [[GPLine alloc] init];
+        line.lineWidth = 0.25f;
+        line.linePosition = LinePositionBottom;
+        line.lineStyle = LineStyleContinuous;
+        line.lineColor = CAMERA_TOOLBAR_LINE_COLOR;
+        [self insertSubview:line atIndex:0];
+        self.line = line;
         
         UIImageView *flashIcon = [[UIImageView alloc] init];
         flashIcon.image = [UIImage imageNamed:@"flash.png"];
         [self addSubview:flashIcon];
         self.flashIcon = flashIcon;
         
-        GPButton *flashAutoButton = [[GPButton alloc] init];
-        [flashAutoButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [flashAutoButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [flashAutoButton setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
-        [flashAutoButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        flashAutoButton.delegate = self;
-        [flashAutoButton setTitle:@"Auto" forState:UIControlStateNormal];
-        flashAutoButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
-        flashAutoButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
-        flashAutoButton.forceHighlight = YES;
+        GPButton *flashAutoButton = [self createButtonWithTitle:@"Auto"];
         [self addSubview:flashAutoButton];
         self.flashAutoButton = flashAutoButton;
         
-        GPButton *flashOnButton = [[GPButton alloc] init];
-        [flashOnButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [flashOnButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [flashOnButton setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
-        [flashOnButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        flashOnButton.delegate = self;
-        [flashOnButton setTitle:@"On" forState:UIControlStateNormal];
-        flashOnButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
-        flashOnButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
-        flashOnButton.forceHighlight = YES;
+        GPButton *flashOnButton = [self createButtonWithTitle:@"On"];
         [self addSubview:flashOnButton];
         self.flashOnButton = flashOnButton;
         
-        GPButton *flashOffButton = [[GPButton alloc] init];
-        [flashOffButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [flashOffButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [flashOffButton setTitleColor:GPCOLOR_ORANGE_SELECTED forState:UIControlStateSelected];
-        [flashOffButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        flashOffButton.delegate = self;
-        [flashOffButton setTitle:@"Off" forState:UIControlStateNormal];
-        flashOffButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
-        flashOffButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
-        flashOffButton.forceHighlight = YES;
+        GPButton *flashOffButton = [self createButtonWithTitle:@"Off"];
         [self addSubview:flashOffButton];
         self.flashOffButton = flashOffButton;
     }
     
     return self;
+}
+
+- (GPButton *)createButtonWithTitle:(NSString *)title
+{
+    GPButton *button = [GPButton buttonWithTitle:title target:self action:@selector(buttonTapped:)];
+    [button setTitleColor:CAMERA_VIEW_BUTTON_COLOR forState:UIControlStateNormal];
+    [button setTitleColor:CAMERA_VIEW_BUTTON_COLOR_PRESSED forState:UIControlStateHighlighted];
+    [button setTitleColor:CAMERA_VIEW_FLASH_SELECTION_COLOR forState:UIControlStateSelected];
+    button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kFlashButtonsFontSize];
+    button.delegate = self;
+    button.forceHighlight = YES;
+    
+    return button;
 }
 
 - (void)selectFlashButtonForValue:(NSString *)value
@@ -165,6 +159,9 @@ static const CGFloat kButtonsRotationAnimationDuration = 0.3f;
     self.flashOffButton.hitTestEdgeInsets = UIEdgeInsetsMake(kFlashButtonEdgeInset, 0, kFlashButtonEdgeInset, 0);
     self.flashOffButton.transform = t;
     [self.flashOffButton setNeedsDisplay];
+    
+    self.line.frame = self.bounds;
+    [self.line setNeedsDisplay];
     
     [self setNeedsDisplay];
     
@@ -280,52 +277,43 @@ static const CGFloat kButtonsRotationAnimationDuration = 0.3f;
     {
         // Custom initialization
         
-        self.backgroundColor = GPCOLOR_DARK_BLACK;
+        self.backgroundColor = CAMERA_VIEW_BACKGROUND_COLOR;
         
-        GPButton *cancelButton = [[GPButton alloc] init];
-        [cancelButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [cancelButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [cancelButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
-        [cancelButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        [cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
-        cancelButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
-        cancelButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+        GPLine *line = [[GPLine alloc] init];
+        line.lineWidth = 0.25f;
+        line.linePosition = LinePositionTop;
+        line.lineStyle = LineStyleContinuous;
+        line.lineColor = CAMERA_TOOLBAR_LINE_COLOR;
+        [self insertSubview:line atIndex:0];
+        self.line = line;
+        
+        GPButton *cancelButton = [self createButtonWithTitle:@"Cancel"];
         [self addSubview:cancelButton];
         self.cancelButton = cancelButton;
         
-        GPButton *retakeButton = [[GPButton alloc] init];
-        [retakeButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [retakeButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [retakeButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
-        [retakeButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        [retakeButton setTitle:@"Retake" forState:UIControlStateNormal];
-        retakeButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
-        retakeButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+        GPButton *retakeButton = [self createButtonWithTitle:@"Retake"];
         [self addSubview:retakeButton];
         self.retakeButton = retakeButton;
         
-        GPButton *useButton = [[GPButton alloc] init];
-        [useButton setTitleColor:GPCOLOR_BLUE forState:UIControlStateNormal];
-        [useButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateHighlighted];
-        [useButton setTitleColor:GPCOLOR_BLUE_HIGHLIGHT forState:UIControlStateDisabled];
-        [useButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        [useButton setTitle:@"Use" forState:UIControlStateNormal];
-        useButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:kToolbarButtonFontSize];
-        useButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+        GPButton *useButton = [self createButtonWithTitle:@"Use"];
         [self addSubview:useButton];
         self.useButton = useButton;
         
-        GPButton *takeButton = [[GPButton alloc] init];
-        [takeButton setImage:[UIImage imageNamed:@"take-button.png"] forState:UIControlStateNormal];
-        [takeButton setImage:[UIImage imageNamed:@"take-button-highlight.png"] forState:UIControlStateHighlighted];
-        [takeButton setImage:[UIImage imageNamed:@"take-button-highlight.png"] forState:UIControlStateDisabled];
-        [takeButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        takeButton.isImageBased = YES;
+        GPButton *takeButton = [GPButton buttonWithImageName:@"take-button.png" target:self action:@selector(buttonTapped:)];
         [self addSubview:takeButton];
         self.takeButton = takeButton;
     }
     
     return self;
+}
+
+- (GPButton *)createButtonWithTitle:(NSString *)title
+{
+    GPButton *button = [GPButton buttonWithTitle:title target:self action:@selector(buttonTapped:)];
+    [button setTitleColor:CAMERA_VIEW_BUTTON_COLOR forState:UIControlStateNormal];
+    [button setTitleColor:CAMERA_VIEW_BUTTON_COLOR_PRESSED forState:UIControlStateHighlighted];
+    
+    return button;
 }
 
 - (void)updateUI
@@ -365,6 +353,9 @@ static const CGFloat kButtonsRotationAnimationDuration = 0.3f;
     self.takeButton.hitTestEdgeInsets = GPEdgeInsetsMake(kButtonHitTestEdgeInset);
     [self bringSubviewToFront:self.takeButton];
     [self.takeButton setNeedsDisplay];
+    
+    self.line.frame = self.bounds;
+    [self.line setNeedsDisplay];
     
     [self setNeedsDisplay];
     
