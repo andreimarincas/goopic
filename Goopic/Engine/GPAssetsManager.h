@@ -19,4 +19,7 @@
 
 + (GPAssetsManager *)sharedManager;
 
+- (void)addObserver;
+- (void)removeObserver;
+
 @end

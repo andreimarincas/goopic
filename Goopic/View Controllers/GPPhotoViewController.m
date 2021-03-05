@@ -202,7 +202,10 @@
 {
     GPLogIN();
     
-    [self toggleToolbarsVisibilityAnimated:YES];
+    if (!self.activityInProgress)
+    {
+        [self toggleToolbarsVisibilityAnimated:YES];
+    }
     
     GPLogOUT();
 }

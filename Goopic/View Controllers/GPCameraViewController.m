@@ -248,7 +248,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     if (self)
     {
         // Custom initialization
-        _deviceOrientation = [UIDevice currentDevice].orientation;
+        _deviceOrientation = (UIDeviceOrientation)GPInterfaceOrientation();
         _canUpdateButtons = YES;
     }
     
@@ -300,7 +300,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
     [self.view addSubview:bottomToolbar];
     self.bottomToolbar = bottomToolbar;
     
-    [self rotateControlsToOrientation:[[UIDevice currentDevice] orientation] animated:NO];
+    [self rotateControlsToOrientation:_deviceOrientation animated:NO];
     
     // Flash
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
@@ -883,11 +883,11 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 {
     GPLogIN();
     
-    ALAssetsLibrary *assetsLibrary = [[GPAssetsManager sharedManager] assetsLibrary];
-    
     UIDeviceOrientation orientation = [_imageMetadata[@"deviceOrientation"] integerValue];
     ALAssetOrientation assetOrientation = [GPCameraViewController assetOrientationForDeviceOrientation:orientation];
     GPLog(@"asset orientation: %ld", (long)assetOrientation);
+    
+    ALAssetsLibrary *assetsLibrary = [[GPAssetsManager sharedManager] assetsLibrary];
     
     [assetsLibrary writeImageToSavedPhotosAlbum:[self.capturedImage CGImage]
                                     orientation:assetOrientation
@@ -1131,7 +1131,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
 {
     UIDeviceOrientation deviceOrientation = [UIDevice currentDevice].orientation;
     
-    if (deviceOrientation != _deviceOrientation)
+    if ((deviceOrientation != _deviceOrientation) && [self isOrientationSupported:(UIInterfaceOrientation)deviceOrientation])
     {
         if (_canUpdateButtons)
         {
@@ -1381,7 +1381,7 @@ static void * SessionRunningAndDeviceAuthorizedContext = &SessionRunningAndDevic
                 if (jpegData && metadata)
                 {
                     self.capturedImage = [UIImage imageWithData:jpegData];
-                    metadata[@"deviceOrientation"] = @([[UIDevice currentDevice] orientation]);
+                    metadata[@"deviceOrientation"] = @(_deviceOrientation);
                     _imageMetadata = metadata;
                     
                     [self updateButtonsAnimated:YES];

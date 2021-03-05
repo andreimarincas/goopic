@@ -563,9 +563,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 - (void)reloadPhotosFromLibrary
 {
     GPLogIN();
-    
     GPLog(@"photos count before reload: %lu", (unsigned long)[self.photosSections[kPhotosSection] count]);
-//    [self performSelectorInBackground:@selector(doReloadPhotosFromLibrary) withObject:nil];
     
     dispatch_async(self.libraryQueue, ^{
         
@@ -640,6 +638,8 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     dispatch_async(dispatch_get_main_queue(), ^{
         
         self.photosSections = photosSections;
+        GPLog(@"photos count after reload: %lu", (unsigned long)[self.photosSections[kPhotosSection] count]);
+        
         [self updateUI];
     });
 }

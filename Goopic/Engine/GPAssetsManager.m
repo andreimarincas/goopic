@@ -27,13 +27,25 @@
     return _sharedManager;
 }
 
+- (instancetype)init
+{
+    GPLogIN();
+    self = [super init];
+    
+    if (self)
+    {
+        [self addObserver];
+    }
+    
+    return self;
+    GPLogOUT();
+}
+
 - (void)dealloc
 {
     GPLogIN();
     
-    [[NSNotificationCenter defaultCenter] removeObserver: self
-                                                    name: ALAssetsLibraryChangedNotification
-                                                  object: nil];
+    [self removeObserver];
     
     GPLogOUT();
 }
@@ -43,14 +55,24 @@
     if (!_assetsLibrary)
     {
         _assetsLibrary = [[ALAssetsLibrary alloc] init];
-        
-        [[NSNotificationCenter defaultCenter] addObserver: self
-                                                 selector: @selector(assetsLibraryChanged:)
-                                                     name: ALAssetsLibraryChangedNotification
-                                                   object: _assetsLibrary];
     }
     
     return _assetsLibrary;
+}
+
+- (void)addObserver
+{
+    [[NSNotificationCenter defaultCenter] addObserver: self
+                                             selector: @selector(assetsLibraryChanged:)
+                                                 name: ALAssetsLibraryChangedNotification
+                                               object: self.assetsLibrary];
+}
+
+- (void)removeObserver
+{
+    [[NSNotificationCenter defaultCenter] removeObserver: self
+                                                    name: ALAssetsLibraryChangedNotification
+                                                  object: nil];
 }
 
 - (void)assetsLibraryChanged:(NSNotification *)notification
@@ -58,10 +80,23 @@
     GPLogIN();
     GPLog(@"notification: %@", notification);
     
-    GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
-    GPPhotosTableViewController *photosTableViewController = (GPPhotosTableViewController *)[appDelegate rootViewController];
+    NSSet *groups = notification.userInfo[ALAssetLibraryUpdatedAssetGroupsKey];
     
-    [photosTableViewController reloadPhotosFromLibrary];
+    for (NSURL *groupURL in groups)
+    {
+        [_assetsLibrary groupForURL:groupURL
+                        resultBlock:^(ALAssetsGroup *group) {
+                            
+                            if ([[group valueForProperty:ALAssetsGroupPropertyType] intValue] == ALAssetsGroupSavedPhotos)
+                            {
+                                GPAppDelegate *appDelegate = (GPAppDelegate *)[[UIApplication sharedApplication] delegate];
+                                GPPhotosTableViewController *photosTableViewController = (GPPhotosTableViewController *)[appDelegate rootViewController];
+                                
+                                [photosTableViewController reloadPhotosFromLibrary];
+                            }
+                            
+                        } failureBlock:nil];
+    }
     
     GPLogOUT();
 }
