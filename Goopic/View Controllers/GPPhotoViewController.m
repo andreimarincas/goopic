@@ -139,6 +139,7 @@
     
     self.bottomToolbar.frame = CGRectMake(0, self.view.bounds.size.height - ToolbarHeight(),
                                           self.view.bounds.size.width, ToolbarHeight());
+    
     [self.view bringSubviewToFront:self.bottomToolbar];
     [self.bottomToolbar updateUI];
     

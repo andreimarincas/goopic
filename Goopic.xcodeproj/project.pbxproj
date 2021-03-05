@@ -24,6 +24,7 @@
 		7529CA2919B18DD200655FC1 /* GPPhotoViewToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7529CA2819B18DD200655FC1 /* GPPhotoViewToolbar.m */; };
 		757BEC2D19B53AB400043028 /* UIImageView+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 757BEC2C19B53AB400043028 /* UIImageView+Extension.m */; };
 		757BEC3019B67D5C00043028 /* NSArray+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 757BEC2F19B67D5C00043028 /* NSArray+Extension.m */; };
+		757BEC3B19B7D27200043028 /* Icon-60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 757BEC3A19B7D27200043028 /* Icon-60@2x.png */; };
 		757F72A219B1FC9000F59B8D /* GPCameraViewToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 757F72A119B1FC9000F59B8D /* GPCameraViewToolbar.m */; };
 		757F72AE19B25B5E00F59B8D /* flash-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 757F72A819B25B5E00F59B8D /* flash-icon.png */; };
 		757F72AF19B25B5E00F59B8D /* flash-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 757F72A919B25B5E00F59B8D /* flash-icon@2x.png */; };
@@ -141,6 +142,7 @@
 		757BEC2C19B53AB400043028 /* UIImageView+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImageView+Extension.m"; sourceTree = "<group>"; };
 		757BEC2E19B67D5C00043028 /* NSArray+Extension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+Extension.h"; sourceTree = "<group>"; };
 		757BEC2F19B67D5C00043028 /* NSArray+Extension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Extension.m"; sourceTree = "<group>"; };
+		757BEC3A19B7D27200043028 /* Icon-60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-60@2x.png"; sourceTree = "<group>"; };
 		757F72A019B1FC9000F59B8D /* GPCameraViewToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPCameraViewToolbar.h; sourceTree = "<group>"; };
 		757F72A119B1FC9000F59B8D /* GPCameraViewToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPCameraViewToolbar.m; sourceTree = "<group>"; };
 		757F72A819B25B5E00F59B8D /* flash-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "flash-icon.png"; sourceTree = "<group>"; };
@@ -377,6 +379,14 @@
 			path = Toolbar;
 			sourceTree = "<group>";
 		};
+		757BEC3119B7D0C500043028 /* Icons */ = {
+			isa = PBXGroup;
+			children = (
+				757BEC3A19B7D27200043028 /* Icon-60@2x.png */,
+			);
+			path = Icons;
+			sourceTree = "<group>";
+		};
 		757F72B419B27C8300F59B8D /* Engine */ = {
 			isa = PBXGroup;
 			children = (
@@ -548,6 +558,7 @@
 				757F72AB19B25B5E00F59B8D /* take-button-highlight@2x.png */,
 				757F72AC19B25B5E00F59B8D /* take-button.png */,
 				757F72AD19B25B5E00F59B8D /* take-button@2x.png */,
+				757BEC3119B7D0C500043028 /* Icons */,
 				7529C9F519AFFCEC00655FC1 /* Launch Images */,
 			);
 			path = Resources;
@@ -750,6 +761,7 @@
 				757F72AF19B25B5E00F59B8D /* flash-icon@2x.png in Resources */,
 				757F72B019B25B5E00F59B8D /* take-button-highlight.png in Resources */,
 				757F72B319B25B5E00F59B8D /* take-button@2x.png in Resources */,
+				757BEC3B19B7D27200043028 /* Icon-60@2x.png in Resources */,
 				75AE45F819B3AA3A00E419DD /* disclosure-button-highlight.png in Resources */,
 				75AE45F519B3A81100E419DD /* disclosure-button@2x.png in Resources */,
 				757F72B119B25B5E00F59B8D /* take-button-highlight@2x.png in Resources */,

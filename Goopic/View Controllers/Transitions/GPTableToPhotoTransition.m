@@ -62,14 +62,16 @@
     photoView.contentMode = UIViewContentModeScaleAspectFill;
     photoView.backgroundColor = [UIColor blackColor];
     photoView.image = [toViewController.photo largeImage];
-    photoView.frame = [fromViewController frameForPhotoAtIndexPath:fromViewController.selectedIndexPath];
+    photoView.frame = [fromViewController frameForPhotoAtIndexPath:fromViewController.selectedIndexPath
+                                                        photoIndex:fromViewController.selectedPhotoIndex];
     CGSize originalSize = CGSizeMake(toViewController.photo.width, toViewController.photo.height);
     [photoView sizeToFitImageSize:originalSize];
     
     UIView *transportedView = [[UIView alloc] init];
     transportedView.layer.masksToBounds = YES;
     transportedView.backgroundColor = [UIColor blackColor];
-    transportedView.frame = [fromViewController frameForPhotoAtIndexPath:fromViewController.selectedIndexPath];
+    transportedView.frame = [fromViewController frameForPhotoAtIndexPath:fromViewController.selectedIndexPath
+                                                              photoIndex:fromViewController.selectedPhotoIndex];
     [transportedView addSubview:photoView];
     photoView.center = CGPointMake(transportedView.bounds.size.width / 2, transportedView.bounds.size.height / 2);
     
@@ -158,14 +160,16 @@
     UIImageView *photoView = [[UIImageView alloc] init];
     photoView.contentMode = UIViewContentModeScaleAspectFill;
     photoView.backgroundColor = [UIColor blackColor];
-    photoView.frame = [toViewController frameForPhotoAtIndexPath:toViewController.selectedIndexPath];
+    photoView.frame = [toViewController frameForPhotoAtIndexPath:toViewController.selectedIndexPath
+                                                      photoIndex:toViewController.selectedPhotoIndex];
     CGSize originalSize = CGSizeMake(fromViewController.photo.width, fromViewController.photo.height);
     [photoView sizeToFitImageSize:originalSize];
     
     UIView *transportedView = [[UIView alloc] init];
     transportedView.layer.masksToBounds = YES;
     transportedView.backgroundColor = [UIColor blackColor];
-    transportedView.frame = [toViewController frameForPhotoAtIndexPath:toViewController.selectedIndexPath];
+    transportedView.frame = [toViewController frameForPhotoAtIndexPath:toViewController.selectedIndexPath
+                                                            photoIndex:toViewController.selectedPhotoIndex];
     [transportedView addSubview:photoView];
     photoView.center = CGPointMake(transportedView.bounds.size.width / 2, transportedView.bounds.size.height / 2);
     

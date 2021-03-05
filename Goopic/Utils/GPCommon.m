@@ -53,7 +53,7 @@ CGFloat StatusBarHeightForToolbar()
 
 CGFloat ToolbarHeight()
 {
-    return (GPInterfaceOrientationIsPortrait() ? kToolbarHeight_Portrait : kToolbarHeight_Landscape) + 20;
+    return (GPInterfaceOrientationIsPortrait() ? kToolbarHeight_Portrait : kToolbarHeight_Landscape);
 }
 
 NSString * NSStringFromBOOL(BOOL b)

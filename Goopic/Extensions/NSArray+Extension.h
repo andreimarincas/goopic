@@ -12,4 +12,6 @@
 
 - (id)middleObject;
 
+- (BOOL)containsViewWithTag:(NSInteger)tag;
+
 @end

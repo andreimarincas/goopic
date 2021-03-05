@@ -38,8 +38,11 @@ static const NSTimeInterval kPhotoImgurExpirationInterval = 30 * kDay; // actual
 
 
 /* Use ToolbarHeight() instead these constants! */
-static const CGFloat kToolbarHeight_Portrait  = 50.0f; // 43.6f;
-static const CGFloat kToolbarHeight_Landscape = 30.0f;
+//static const CGFloat kToolbarHeight_Portrait  = 50.0f; // 43.6f;
+//static const CGFloat kToolbarHeight_Landscape = 30.0f;
+
+static const CGFloat kToolbarHeight_Portrait  = 65.0f; // 43.6f;
+static const CGFloat kToolbarHeight_Landscape = 44.0f;
 
 static const CGFloat kToolbarButtonFontSize   = 19.0f;
 static const CGFloat kToolbarButtonsMargin    = 10.0f;

@@ -27,6 +27,8 @@
 
 - (CGRect)frameForPhotoAtIndex:(NSInteger)index;
 
+- (void)setThumbnailHidden:(BOOL)hidden atIndex:(NSInteger)index;
+
 @end
 
 
@@ -74,7 +76,8 @@
                                                                UIViewControllerTransitioningDelegate,
                                                                GPPhotosTableViewToolbarDelegate>
 {
-    NSInteger _lastPhotosCountPerCell;
+    NSInteger _photosCountPerCellOnViewWillDisappear;
+    NSMutableArray *_thumbnailViewsForInterfaceOrientation;
 }
 
 @property (nonatomic, strong) GPPhotosTableView *photosTableView;
@@ -91,6 +94,6 @@
 
 - (void)updateUI;
 
-- (CGRect)frameForPhotoAtIndexPath:(NSIndexPath *)indexPath;
+- (CGRect)frameForPhotoAtIndexPath:(NSIndexPath *)indexPath photoIndex:(NSInteger)photoIndex;
 
 @end

@@ -31,6 +31,8 @@ static NSString * const kThumbnailViewKey               = @"thumbnailView";
 static const CGFloat    kPhotosHeaderHeight             = 0.1; // 30.0f;
 static const CGFloat    kPhotosFooterHeight             = 0.1;
 
+static const NSInteger  kPhotosSection = 1;
+
 static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
 
 
@@ -130,6 +132,16 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     }
     
     return photoFrame;
+}
+
+- (void)setThumbnailHidden:(BOOL)hidden atIndex:(NSInteger)index
+{
+    if ((index >= 0) && (index < [_photos count]))
+    {
+        id photoData = _photos[index];
+        UIImageView *thumbnailView = photoData[kThumbnailViewKey];
+        thumbnailView.hidden = hidden;
+    }
 }
 
 @end
@@ -369,9 +381,9 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     
     if (self.selectedIndexPath)
     {
-        if ([GPPhotosTableViewController photosCountPerCell] != _lastPhotosCountPerCell)
+        if ([GPPhotosTableViewController photosCountPerCell] != _photosCountPerCellOnViewWillDisappear)
         {
-            NSInteger oldSelectedPhotoIndexInSection = self.selectedIndexPath.row * _lastPhotosCountPerCell + self.selectedPhotoIndex;
+            NSInteger oldSelectedPhotoIndexInSection = self.selectedIndexPath.row * _photosCountPerCellOnViewWillDisappear + self.selectedPhotoIndex;
             NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:oldSelectedPhotoIndexInSection / [GPPhotosTableViewController photosCountPerCell]
                                                            inSection:self.selectedIndexPath.section];
             self.selectedPhotoIndex = oldSelectedPhotoIndexInSection % [GPPhotosTableViewController photosCountPerCell];
@@ -402,7 +414,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     GPLogIN();
     [super viewWillDisappear:animated];
     
-    _lastPhotosCountPerCell = [GPPhotosTableViewController photosCountPerCell];
+    _photosCountPerCellOnViewWillDisappear = [GPPhotosTableViewController photosCountPerCell];
     
     GPLogOUT();
 }
@@ -425,45 +437,69 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
     
     NSArray *visibleIndexPaths = [self.photosTableView indexPathsForVisibleRows];
-    NSIndexPath *middleIndexPath = [visibleIndexPaths middleObject];
+    NSInteger photosCountPerCell = [GPPhotosTableViewController photosCountPerCell];
     
-    if (middleIndexPath)
+    _thumbnailViewsForInterfaceOrientation = [NSMutableArray array];
+    
+    for (NSIndexPath *indexPath in visibleIndexPaths)
     {
-        NSInteger photoIndex = [GPPhotosTableViewController photosCountPerCell] / 2;
-        NSInteger indexInSection = middleIndexPath.row * [GPPhotosTableViewController photosCountPerCell] + photoIndex;
-        
-        NSInteger photosCountPerCell = [GPPhotosTableViewController photosCountPerCellForOrientation:toInterfaceOrientation];
-        NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:indexInSection / photosCountPerCell inSection:middleIndexPath.section];
-        
-        middleIndexPath = newIndexPath;
+        if (indexPath.section == kPhotosSection)
+        {
+            GPPhotoCell *photoCell = (GPPhotoCell *)[self.photosTableView cellForRowAtIndexPath:indexPath];
+            
+            if (photoCell)
+            {
+                NSArray *photos = [photoCell photos];
+                
+                for (NSInteger i = 0; i < [photos count]; i++)
+                {
+                    GPPhoto *photo = photos[i];
+                    NSInteger indexInSection = indexPath.row * photosCountPerCell + i;
+                    
+                    CGRect thumbnailFrame = [self frameForPhotoAtIndexPath:indexPath photoIndex:i];
+                    
+                    if ((thumbnailFrame.origin.y + thumbnailFrame.size.height > 0) && (thumbnailFrame.origin.y < self.view.bounds.size.height))
+                    {
+                        UIImageView *thumbnailView = [[UIImageView alloc] init];
+                        thumbnailView.frame = thumbnailFrame;
+                        thumbnailView.image = [photo thumbnailImage];
+                        thumbnailView.userInteractionEnabled = NO;
+                        thumbnailView.tag = indexInSection;
+                        [self.view addSubview:thumbnailView];
+                        [_thumbnailViewsForInterfaceOrientation addObject:thumbnailView];
+                    }
+                }
+            }
+        }
     }
     
-    [UIView animateWithDuration:duration / 2
-                          delay:0
-                        options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseOut
-                     animations:^{
-                         
-                         self.photosTableView.alpha = 0;
-                         
-                     } completion:^(BOOL finished) {
-                         
-                         [self.photosTableView reloadData];
-                         
-                         if (middleIndexPath)
-                         {
-                             [self.photosTableView scrollToRowAtIndexPath:middleIndexPath
-                                                         atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
-                         }
-                         
-                         [UIView animateWithDuration:duration / 2
-                                               delay:0
-                                             options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseIn
-                                          animations:^{
-                                              
-                                              self.photosTableView.alpha = 1;
-                                              
-                                          } completion:nil];
-                     }];
+//    if ([_thumbnailViewsForInterfaceOrientation count] > 0)
+//    {
+//        [UIView animateWithDuration:duration / 2
+//                              delay:0
+//                            options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseOut
+//                         animations:^{
+//                             
+//                             for (UIImageView *thumbnailView in _thumbnailViewsForInterfaceOrientation)
+//                             {
+//                                 thumbnailView.alpha = 0.5;
+//                             }
+//                             
+//                         } completion:^(BOOL finished) {
+//                             
+//                             [UIView animateWithDuration:duration / 2
+//                                                   delay:0
+//                                                 options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseIn
+//                                              animations:^{
+//                                                  
+//                                                  for (UIImageView *thumbnailView in _thumbnailViewsForInterfaceOrientation)
+//                                                  {
+//                                                      thumbnailView.alpha = 1;
+//                                                  }
+//                                                  
+//                                              } completion:nil];
+//                         }];
+//    }
     
     GPLogOUT();
 }
@@ -473,8 +509,36 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     GPLogIN();
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
     
-    [self updateUI];
     [self setNeedsStatusBarAppearanceUpdate];
+    
+    GPLogOUT();
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
+    GPLogIN();
+    [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
+    
+    if ([_thumbnailViewsForInterfaceOrientation count] > 0)
+    {
+        NSInteger photosCountPerCell = [GPPhotosTableViewController photosCountPerCell];
+        
+        for (UIImageView *thumbnailView in _thumbnailViewsForInterfaceOrientation)
+        {
+            NSInteger indexInSection = thumbnailView.tag;
+            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:indexInSection / photosCountPerCell inSection:kPhotosSection];
+            NSInteger photoIndex = indexInSection % photosCountPerCell;
+            
+            GPPhotoCell *photoCell = (GPPhotoCell *)[self.photosTableView cellForRowAtIndexPath:indexPath];
+            [photoCell setThumbnailHidden:NO atIndex:photoIndex];
+            
+            [thumbnailView removeFromSuperview];
+        }
+        
+        [_thumbnailViewsForInterfaceOrientation removeAllObjects];
+    }
+    
+    self.photosTableView.hidden = NO;
     
     GPLogOUT();
 }
@@ -585,7 +649,26 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     
     GPLog(@"self view: %@", self.view);
     
+    self.toolbar.frame = CGRectMake(0, 0, self.view.bounds.size.width, ToolbarHeight());
+    [self.toolbar updateUI];
+    
+    static UIInterfaceOrientation _lastOrientation = (UIInterfaceOrientation)UIDeviceOrientationUnknown;
+    BOOL animateThumbnails = NO;
+    
+    if ((_lastOrientation != (UIInterfaceOrientation)UIDeviceOrientationUnknown) && (GPInterfaceOrientation() != _lastOrientation) &&
+        ([_thumbnailViewsForInterfaceOrientation count] > 0))
+    {
+        [UIView performWithoutAnimation:^{
+            
+            self.photosTableView.alpha = 0;
+            self.photosTableView.hidden = YES;
+        }];
+        
+        animateThumbnails = YES;
+    }
+    
     NSInteger photosCountPerCell = [GPPhotosTableViewController photosCountPerCell];
+    
     sThumbnailDimension = (self.view.bounds.size.width - (photosCountPerCell + 1) * kPhotosSpacing) / photosCountPerCell;
     GPLog(@"thumbnail dimension: %f", sThumbnailDimension);
     
@@ -594,18 +677,93 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     [self.photosTableView setNeedsDisplay];
     GPLog(@"photos table view: %@", self.photosTableView);
     
-    if (!self.isRotatingInterfaceOrientation)
+    [self.photosTableView reloadData];
+    
+    _lastOrientation = GPInterfaceOrientation();
+    
+    if (animateThumbnails)
     {
-        [self.photosTableView reloadData]; // TODO: Optimize this?
+        if ([_thumbnailViewsForInterfaceOrientation count] > 0)
+        {
+            UIImageView *middleThumbnail = [_thumbnailViewsForInterfaceOrientation middleObject];
+            NSInteger indexInSection = middleThumbnail.tag;
+            
+            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:indexInSection / photosCountPerCell inSection:kPhotosSection];
+            
+            [UIView performWithoutAnimation:^{
+                
+                [self.photosTableView scrollToRowAtIndexPath:indexPath
+                                            atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
+            }];
+            
+            NSArray *visibleIndexPaths = [self.photosTableView indexPathsForVisibleRows];
+            
+            for (NSIndexPath *indexPath in visibleIndexPaths)
+            {
+                if (indexPath.section == kPhotosSection)
+                {
+                    GPPhotoCell *photoCell = (GPPhotoCell *)[self.photosTableView cellForRowAtIndexPath:indexPath];
+                    
+                    if (photoCell)
+                    {
+                        NSArray *photos = [photoCell photos];
+                        
+                        for (NSInteger i = 0; i < [photos count]; i++)
+                        {
+                            GPPhoto *photo = photos[i];
+                            NSInteger indexInSection = indexPath.row * photosCountPerCell + i;
+                            
+                            if (![_thumbnailViewsForInterfaceOrientation containsViewWithTag:indexInSection])
+                            {
+                                CGRect thumbnailFrame = [self frameForPhotoAtIndexPath:indexPath photoIndex:i];
+                                
+                                if ((thumbnailFrame.origin.y + thumbnailFrame.size.height > 0) && (thumbnailFrame.origin.y < self.view.bounds.size.height))
+                                {
+                                    UIImageView *thumbnailView = [[UIImageView alloc] init];
+                                    
+                                    [UIView performWithoutAnimation:^{
+                                        
+                                        if (thumbnailFrame.origin.y + thumbnailFrame.size.height / 2 < self.view.bounds.size.height / 2)
+                                        {
+                                            thumbnailView.center = CGPointMake(thumbnailView.center.x, -thumbnailView.frame.size.height / 2);
+                                        }
+                                        else
+                                        {
+                                            thumbnailView.center = CGPointMake(thumbnailView.center.x, self.view.bounds.size.height + thumbnailView.frame.size.height / 2);
+                                        }
+                                    }];
+                                    
+                                    thumbnailView.frame = thumbnailFrame;
+                                    thumbnailView.image = [photo thumbnailImage];
+                                    thumbnailView.userInteractionEnabled = NO;
+                                    thumbnailView.tag = indexInSection;
+                                    [self.view addSubview:thumbnailView];
+                                    [_thumbnailViewsForInterfaceOrientation addObject:thumbnailView];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            for (UIImageView *thumbnailView in _thumbnailViewsForInterfaceOrientation)
+            {
+                NSInteger indexInSection = thumbnailView.tag;
+                NSIndexPath *indexPath = [NSIndexPath indexPathForRow:indexInSection / photosCountPerCell inSection:kPhotosSection];
+                NSInteger photoIndex = indexInSection % photosCountPerCell;
+                
+                GPPhotoCell *photoCell = (GPPhotoCell *)[self.photosTableView cellForRowAtIndexPath:indexPath];
+                [photoCell setThumbnailHidden:YES atIndex:photoIndex];
+                
+                thumbnailView.frame = [self frameForPhotoAtIndexPath:indexPath photoIndex:photoIndex];
+            }
+        }
+        
+        self.photosTableView.alpha = 1;
     }
     
-    self.toolbar.frame = CGRectMake(0, 0, self.view.bounds.size.width, ToolbarHeight());
     [self.view bringSubviewToFront:self.toolbar];
-    [self.toolbar updateUI];
-    
     [self updateDateTitle];
-    
-    [self.view setNeedsDisplay];
     
     GPLogOUT();
 }
@@ -630,7 +788,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
     return nil;
 }
 
-- (CGRect)frameForPhotoAtIndexPath:(NSIndexPath *)indexPath
+- (CGRect)frameForPhotoAtIndexPath:(NSIndexPath *)indexPath photoIndex:(NSInteger)photoIndex
 {
     CGRect photoFrame = CGRectZero;
     
@@ -641,7 +799,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         if ([selectedCell isKindOfClass:[GPPhotoCell class]])
         {
             GPPhotoCell *photoCell = (GPPhotoCell *)selectedCell;
-            photoFrame = [photoCell frameForPhotoAtIndex:self.selectedPhotoIndex];
+            photoFrame = [photoCell frameForPhotoAtIndex:photoIndex];
             photoFrame = [self.view convertRect:photoFrame fromView:photoCell.contentView];
         }
     }
@@ -744,7 +902,7 @@ static const NSTimeInterval kTitleVisibilityTimeout = 0.1f;
         return self.toolbar.frame.size.height;
     }
     
-    if (indexPath.section == [self.photosSections count] - 1)
+    if (indexPath.section == [self.photosSections count] - 1) // Table view footer
     {
         return (self.view.bounds.size.height - self.toolbar.frame.size.height - sThumbnailDimension - kPhotosSpacing);
     }

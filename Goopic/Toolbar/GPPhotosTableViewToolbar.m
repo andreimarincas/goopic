@@ -65,7 +65,7 @@ static const CGFloat kHitTestEdgeInset = 40.0f;
         
         UILabel *dateLabel = [[UILabel alloc] init];
         dateLabel.textAlignment = NSTextAlignmentCenter;
-        dateLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:14.0f];
+        dateLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:13.0f];
         dateLabel.textColor = GPCOLOR_WHITE_TITLE;
         dateLabel.backgroundColor = [UIColor clearColor];
         [self addSubview:dateLabel];

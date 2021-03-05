@@ -14,10 +14,23 @@
 {
     if ([self count] > 0)
     {
-        return [self objectAtIndex:[self count] / 2];
+        return self[[self count] / 2];
     }
     
     return nil;
+}
+
+- (BOOL)containsViewWithTag:(NSInteger)tag
+{
+    for (id obj in self)
+    {
+        if ([obj isKindOfClass:[UIView class]] && ([obj tag] == tag))
+        {
+            return YES;
+        }
+    }
+    
+    return NO;
 }
 
 @end
